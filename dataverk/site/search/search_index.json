@@ -1,0 +1,84 @@
+{
+    "docs": [
+        {
+            "location": "/nav_open/",
+            "text": "",
+            "title": "NAV \u00c5pne Data"
+        },
+        {
+            "location": "/nav_private/",
+            "text": "",
+            "title": "NAV Interne Data"
+        },
+        {
+            "location": "/nav/",
+            "text": "",
+            "title": "NSV"
+        },
+        {
+            "location": "/ssb/",
+            "text": "Fylker utdanningsniv\u00e5\n\n\nMetoder for \u00e5 hente og oppdatere datasett basert p\u00e5 \nSSB tabell 08921: Utdanningsniv\u00e5 pr fylke\n\n\n Hent datasett fra cache\n\n\n\nget_from_cache(format='pandas', cache='dvh')\n\n\n\n\ncache: 'dvh' | 'google storage' | 's3' \n\n\n Hent datasett fra kilde\n\n\n\nget_from_source(format='pandas')\n\n\n\n\nformat: 'none' | 'json' | 'pandas' | 'arrow' \n\n\neksempel: \n\n\nimport pandas as pd\nfrom data.datasets.ssb.fylker_utdanningsniv\u00e5 import FylkerUtdanning\n\ndf = FylkerUtdanning.get_from_source(format='pandas')\n\n\n\n\n Oppdater datasett i cache\n\n\n\nupdate_cache(format='pandas', cache='dvh')\n\n\n\n\ncache: 'dvh' | 'google storage' | 's3' | 'plasma'\n\n\nSysselsatte AKU\n\n\nMetoder for \u00e5 hente og oppdatere datasett basert p\u00e5 \nSSB tabell 04544: Antall sysselsatte AKU\n\n\n Hent datasett fra kilde\n\n\n\nget_sysselsatte_aku()\n\n\n\n\nformat: 'none' | 'csv' | 'excel' |\u00a0json' | 'pandas' | 'arrow' \n\n\nMerknader:\n\n\n\nSerien 2006 Gml er filtrert ut",
+            "title": "SSB"
+        },
+        {
+            "location": "/ssb/#fylker-utdanningsniva",
+            "text": "Metoder for \u00e5 hente og oppdatere datasett basert p\u00e5  SSB tabell 08921: Utdanningsniv\u00e5 pr fylke   Hent datasett fra cache  get_from_cache(format='pandas', cache='dvh')  cache: 'dvh' | 'google storage' | 's3'    Hent datasett fra kilde  get_from_source(format='pandas')  format: 'none' | 'json' | 'pandas' | 'arrow'   eksempel:   import pandas as pd\nfrom data.datasets.ssb.fylker_utdanningsniv\u00e5 import FylkerUtdanning\n\ndf = FylkerUtdanning.get_from_source(format='pandas')   Oppdater datasett i cache  update_cache(format='pandas', cache='dvh')  cache: 'dvh' | 'google storage' | 's3' | 'plasma'",
+            "title": "Fylker utdanningsniv\u00e5"
+        },
+        {
+            "location": "/ssb/#sysselsatte-aku",
+            "text": "Metoder for \u00e5 hente og oppdatere datasett basert p\u00e5  SSB tabell 04544: Antall sysselsatte AKU   Hent datasett fra kilde  get_sysselsatte_aku()  format: 'none' | 'csv' | 'excel' |\u00a0json' | 'pandas' | 'arrow'   Merknader:  Serien 2006 Gml er filtrert ut",
+            "title": "Sysselsatte AKU"
+        },
+        {
+            "location": "/",
+            "text": "AWS S3\n\n\nAmazon S3 Storage connection\n\n\n Init\n\n\n\n__init__(self, source)\n\n\n\n\nInit\n\n\n Upload\n\n\n\nupload(self, df)\n\n\n\n\nUpload\n\n\n Upload File\n\n\n\nupload_file(self, file)\n\n\n\n\nUpload file\n\n\nBase class\n\n\nCommon connection methods\n\n\n Init\n\n\n\n__init__(self)\n\n\n\n\nInitialize self.  See help(type(self)) for accurate signature.\n\n\n Is authorized\n\n\n\n_is_authorized(self)\n\n\n\n\nVerify authorization\n\n\n Get Arrow\n\n\n\nget_arrow(self, query, compression='snappy')\n\n\n\n\nGet Arrow formatted datasett\n\n\n Get connection\n\n\n\nget_conn(self)\n\n\n\n\nGet Conn\n\n\n Get pandas dataframe\n\n\n\nget_pandas_df(self, query)\n\n\n\n\nGet Pandas\n\n\n Get records (JSON)\n\n\n\nget_records(self, query, orient='records')\n\n\n\n\nGet JSON formatted datasett\n\n\nGet User\n\n\n\nget_user(self)\n\n\n\n\nGet currently logged in user\n\n\nIs Authenticated\n\n\n\nis_authorized(self, user=None)\n\n\n\n\nCheck if is user is authorized to access data source\n\n\n Log\n\n\n\nlog(self, message)\n\n\n\n\nLogging util\n\n\n Persist pandas dataframe\n\n\n\npersist_pandas_df(self, conn, table, df)\n\n\n\n\nPersist Pandas dataframe\n\n\nElasticsearch\n\n\nElasticsearch connection\n\n\ninit\n\n\n__init__(self, source)\n\n\n\n\nInit\n\n\ncreate_index\n\n\ncreate_index(self, file)\n\n\n\n\nCreate index\n\n\nupload\n\n\nupload(self, file)\n\n\n\n\nAdd ddocument\n\n\nGoogle storage\n\n\nGoogle Storage connection\n\n\ninit\n\n\n__init__(self, source)\n\n\n\n\nInit\n\n\nupload_file\n\n\nupload_file(self, file)\n\n\n\n\nUpload file\n\n\nJSONStat\n\n\nJSONStat based connections\n\n\ninit\n\n\n__init__(self)\n\n\n\n\nInitialize self.  See help(type(self)) for accurate signature.\n\n\n_get_table\n\n\n_get_table(table)\n\n\n\n\nGet table from jsonstat api url\n\n\n Is authorized\n\n\n\n_is_authorized(self)\n\n\n\n\nVerify authorization\n\n\n Get Arrow\n\n\n\nget_arrow(self, query, compression='snappy')\n\n\n\n\nGet Arrow formatted datasett\n\n\n Get connection\n\n\n\nget_conn(self)\n\n\n\n\nGet Conn\n\n\nget_pandas_df\n\n\nget_pandas_df(self, query)\n\n\n\n\nGet Pandas dataframe\n\n\n Get records (JSON)\n\n\n\nget_records(self, query, orient='records')\n\n\n\n\nGet JSON formatted datasett\n\n\nGet User\n\n\n\nget_user(self)\n\n\n\n\nGet currently logged in user\n\n\nIs Authenticated\n\n\n\nis_authorized(self, user=None)\n\n\n\n\nCheck if is user is authorized to access data source\n\n\n Log\n\n\n\nlog(self, message)\n\n\n\n\nLogging util\n\n\n Persist pandas dataframe\n\n\n\npersist_pandas_df(self, conn, table, df)\n\n\n\n\nPersist Pandas dataframe\n\n\nOracle\n\n\nCommon connection methods\n\n\ninit\n\n\n__init__(self, source)\n\n\n\n\nInit\n\n\n Is authorized\n\n\n\n_is_authorized(self)\n\n\n\n\nVerify authorization\n\n\n Get Arrow\n\n\n\nget_arrow(self, query, compression='snappy')\n\n\n\n\nGet Arrow formatted datasett\n\n\n Get connection\n\n\n\nget_conn(self)\n\n\n\n\nGet Conn\n\n\n Get dataframe\n\n\n\nget_pandas_df(self, query)\n\n\n\n\nGet Pandas dataframe\n\n\n Get records (JSON)\n\n\n\nget_records(self, query, orient='records')\n\n\n\n\nGet JSON formatted datasett\n\n\nGet User\n\n\n\nget_user(self)\n\n\n\n\nGet currently logged in user\n\n\nIs Authenticated\n\n\n\nis_authorized(self, user=None)\n\n\n\n\nCheck if is user is authorized to access data source\n\n\n Log\n\n\n\nlog(self, message)\n\n\n\n\nLogging util\n\n\n Persist pandas dataframe\n\n\n\npersist_pandas_df(self, conn, table, df)\n\n\n\n\nPersist Pandas dataframe\n\n\nupload\n\n\nupload(self, df)\n\n\n\n\nUpload\n\n\nAbstract SQL database Connector\n\n\nDB  based connections\n\n\n Init\n\n\n\n__init__(self)\n\n\n\n\nInit\n\n\n Is authorized\n\n\n\n_is_authorized(self)\n\n\n\n\nVerify authorization\n\n\n Get Arrow\n\n\n\nget_arrow(self, query, compression='snappy')\n\n\n\n\nGet Arrow formatted datasett\n\n\n Get connection\n\n\n\nget_conn(self)\n\n\n\n\nGet Conn\n\n\n Get dataframe\n\n\n\nget_pandas_df(self, query)\n\n\n\n\nGet Pandas dataframe\n\n\n Get records (JSON)\n\n\n\nget_records(self, query, orient='records')\n\n\n\n\nGet JSON formatted datasett\n\n\nGet User\n\n\n\nget_user(self)\n\n\n\n\nGet currently logged in user\n\n\nIs Authenticated\n\n\n\nis_authorized(self, user=None)\n\n\n\n\nCheck if is user is authorized to access data source\n\n\n Log\n\n\n\nlog(self, message)\n\n\n\n\nLogging util\n\n\n Persist pandas dataframe\n\n\n\npersist_pandas_df(self, conn, table, df)\n\n\n\n\nPersist Pandas dataframe\n\n\nSSB API\n\n\nSSB JSONStat API Connection\n\n\n Init\n\n\n\n__init__(self, source='https://data.ssb.no/api/v0/no')\n\n\n\n\nInit\n\n\n_get_table\n\n\n_get_table(table)\n\n\n\n\nGet table from jsonstat api url\n\n\n Is authorized\n\n\n\n_is_authorized(self)\n\n\n\n\nVerify authorization\n\n\n Get Arrow\n\n\n\nget_arrow(self, query, compression='snappy')\n\n\n\n\nGet Arrow formatted datasett\n\n\n Get connection\n\n\n\nget_conn(self)\n\n\n\n\nGet Conn\n\n\nget_pandas_df\n\n\nget_pandas_df(self, query)\n\n\n\n\nGet Pandas dataframe\n\n\n Get records (JSON)\n\n\n\nget_records(self, query, orient='records')\n\n\n\n\nGet JSON formatted datasett\n\n\nGet User\n\n\n\nget_user(self)\n\n\n\n\nGet currently logged in user\n\n\nIs Authenticated\n\n\n\nis_authorized(self, user=None)\n\n\n\n\nCheck if is user is authorized to access data source\n\n\n Log\n\n\n\nlog(self, message)\n\n\n\n\nLogging util\n\n\n Persist pandas dataframe\n\n\n\npersist_pandas_df(self, conn, table, df)\n\n\n\n\nPersist Pandas dataframe\n\n\nStorage base\n\n\nCommon connection methods\n\n\n Init\n\n\n\n__init__(self, source)\n\n\n\n\nInit\n\n\n Upload\n\n\n\nupload(self, df)\n\n\n\n\nUpload",
+            "title": "Connectors"
+        },
+        {
+            "location": "/#aws-s3",
+            "text": "Amazon S3 Storage connection   Init  __init__(self, source)  Init   Upload  upload(self, df)  Upload   Upload File  upload_file(self, file)  Upload file",
+            "title": "AWS S3"
+        },
+        {
+            "location": "/#base-class",
+            "text": "Common connection methods   Init  __init__(self)  Initialize self.  See help(type(self)) for accurate signature.   Is authorized  _is_authorized(self)  Verify authorization   Get Arrow  get_arrow(self, query, compression='snappy')  Get Arrow formatted datasett   Get connection  get_conn(self)  Get Conn   Get pandas dataframe  get_pandas_df(self, query)  Get Pandas   Get records (JSON)  get_records(self, query, orient='records')  Get JSON formatted datasett  Get User  get_user(self)  Get currently logged in user  Is Authenticated  is_authorized(self, user=None)  Check if is user is authorized to access data source   Log  log(self, message)  Logging util   Persist pandas dataframe  persist_pandas_df(self, conn, table, df)  Persist Pandas dataframe",
+            "title": "Base class"
+        },
+        {
+            "location": "/#elasticsearch",
+            "text": "Elasticsearch connection  init  __init__(self, source)  Init  create_index  create_index(self, file)  Create index  upload  upload(self, file)  Add ddocument",
+            "title": "Elasticsearch"
+        },
+        {
+            "location": "/#google-storage",
+            "text": "Google Storage connection  init  __init__(self, source)  Init  upload_file  upload_file(self, file)  Upload file",
+            "title": "Google storage"
+        },
+        {
+            "location": "/#jsonstat",
+            "text": "JSONStat based connections  init  __init__(self)  Initialize self.  See help(type(self)) for accurate signature.  _get_table  _get_table(table)  Get table from jsonstat api url   Is authorized  _is_authorized(self)  Verify authorization   Get Arrow  get_arrow(self, query, compression='snappy')  Get Arrow formatted datasett   Get connection  get_conn(self)  Get Conn  get_pandas_df  get_pandas_df(self, query)  Get Pandas dataframe   Get records (JSON)  get_records(self, query, orient='records')  Get JSON formatted datasett  Get User  get_user(self)  Get currently logged in user  Is Authenticated  is_authorized(self, user=None)  Check if is user is authorized to access data source   Log  log(self, message)  Logging util   Persist pandas dataframe  persist_pandas_df(self, conn, table, df)  Persist Pandas dataframe",
+            "title": "JSONStat"
+        },
+        {
+            "location": "/#oracle",
+            "text": "Common connection methods  init  __init__(self, source)  Init   Is authorized  _is_authorized(self)  Verify authorization   Get Arrow  get_arrow(self, query, compression='snappy')  Get Arrow formatted datasett   Get connection  get_conn(self)  Get Conn   Get dataframe  get_pandas_df(self, query)  Get Pandas dataframe   Get records (JSON)  get_records(self, query, orient='records')  Get JSON formatted datasett  Get User  get_user(self)  Get currently logged in user  Is Authenticated  is_authorized(self, user=None)  Check if is user is authorized to access data source   Log  log(self, message)  Logging util   Persist pandas dataframe  persist_pandas_df(self, conn, table, df)  Persist Pandas dataframe  upload  upload(self, df)  Upload",
+            "title": "Oracle"
+        },
+        {
+            "location": "/#abstract-sql-database-connector",
+            "text": "DB  based connections   Init  __init__(self)  Init   Is authorized  _is_authorized(self)  Verify authorization   Get Arrow  get_arrow(self, query, compression='snappy')  Get Arrow formatted datasett   Get connection  get_conn(self)  Get Conn   Get dataframe  get_pandas_df(self, query)  Get Pandas dataframe   Get records (JSON)  get_records(self, query, orient='records')  Get JSON formatted datasett  Get User  get_user(self)  Get currently logged in user  Is Authenticated  is_authorized(self, user=None)  Check if is user is authorized to access data source   Log  log(self, message)  Logging util   Persist pandas dataframe  persist_pandas_df(self, conn, table, df)  Persist Pandas dataframe",
+            "title": "Abstract SQL database Connector"
+        },
+        {
+            "location": "/#ssb-api",
+            "text": "SSB JSONStat API Connection   Init  __init__(self, source='https://data.ssb.no/api/v0/no')  Init  _get_table  _get_table(table)  Get table from jsonstat api url   Is authorized  _is_authorized(self)  Verify authorization   Get Arrow  get_arrow(self, query, compression='snappy')  Get Arrow formatted datasett   Get connection  get_conn(self)  Get Conn  get_pandas_df  get_pandas_df(self, query)  Get Pandas dataframe   Get records (JSON)  get_records(self, query, orient='records')  Get JSON formatted datasett  Get User  get_user(self)  Get currently logged in user  Is Authenticated  is_authorized(self, user=None)  Check if is user is authorized to access data source   Log  log(self, message)  Logging util   Persist pandas dataframe  persist_pandas_df(self, conn, table, df)  Persist Pandas dataframe",
+            "title": "SSB API"
+        },
+        {
+            "location": "/#storage-base",
+            "text": "Common connection methods   Init  __init__(self, source)  Init   Upload  upload(self, df)  Upload",
+            "title": "Storage base"
+        }
+    ]
+}
