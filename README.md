@@ -19,10 +19,6 @@
 * Semiotic
 * ...
 
-### Datasett
-* NAV
-* SSB
-* ...
 
 ### Dashboards
 

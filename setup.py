@@ -9,7 +9,7 @@ setup(
     name='dataverk',
     version='0.0.1',
     packages=['dataverk', 'dataverk.connectors', 'dataverk.utils'],
-    python_requires='==3.6',
+    python_requires='~=3.6',
     install_requires=[
         'cryptography==2.2.2',
         'requests==2.19.1',
@@ -40,9 +40,10 @@ setup(
     author_email="paul.bencze@nav.no",
     description="NAV Dataverk",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     license="MIT",
     keywords="åpne data datasett",
-    url="hhttps://github.com/navikt",
+    url="https://github.com/navikt",
     project_urls={
         "Bug Tracker": "https://github.com/navikt",
         "Documentation": "https://github.com/navikt",
