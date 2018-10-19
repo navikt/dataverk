@@ -6,9 +6,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='nada',
+    name='dataverk',
     version='0.0.1',
-    packages=['nada', 'nada.connectors', 'nada.utils'],
+    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils'],
     install_requires=[
         'cryptography==2.2.2',
         'requests==2.19.1',
@@ -31,7 +31,7 @@ setup(
         'google-cloud-core==0.28.1',
         'google-cloud-storage==1.10.0',
         'google-resumable-media==0.3.1',
-        'googleapis-common-protos==1.5.3',
+        'googleapis-common-protos==1.5.3'
     ],
 
      # metadata to display on PyPI
