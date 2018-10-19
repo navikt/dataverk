@@ -9,6 +9,7 @@ setup(
     name='dataverk',
     version='0.0.1',
     packages=['dataverk', 'dataverk.connectors', 'dataverk.utils'],
+    python_requires='==3.6',
     install_requires=[
         'cryptography==2.2.2',
         'requests==2.19.1',
@@ -35,9 +36,9 @@ setup(
     ],
 
      # metadata to display on PyPI
-    author="NAV",
+    author="NAV IKT",
     author_email="paul.bencze@nav.no",
-    description="NAV Åpne Datasett",
+    description="NAV Dataverk",
     long_description=long_description,
     license="MIT",
     keywords="åpne data datasett",
@@ -46,5 +47,11 @@ setup(
         "Bug Tracker": "https://github.com/navikt",
         "Documentation": "https://github.com/navikt",
         "Source Code": "https://github.com/navikt",
-    }
+    },
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.6'
+    ],
+
 )
