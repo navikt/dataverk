@@ -127,7 +127,8 @@ def _create_datapackage(datasets):
             'sources': metadata.get('Kilder',''),
             'last_updated': today,
             'resources': resources,
-            'bucket_name': metadata.get('Bucket_navn', 'default-bucket-nav')
+            'bucket_name': metadata.get('Bucket_navn', 'default-bucket-nav'),
+            'datapackage_name': metadata.get('Datapakke_navn', 'default-pakke-nav')
             }
 
         
@@ -150,20 +151,30 @@ def write_datapackage(datasets):
                 
         for filename, df in datasets.items():
             df.to_csv(dir_path + '/data/' + filename + '.csv', index=False, sep=';')
-    return dp["bucket_name"]
+    return [dp["bucket_name"], dp["datapackage_name"]]
+
+
+def _datapackage_key_prefix(datapackage_name):
+    return datapackage_name + '/'
+
 
 def publish_datapackage_google_cloud(datasets):
     dir_path = get_path()
-    bucket_name = write_datapackage(datasets)
+    bucket_name, datapackage_name = write_datapackage(datasets)
 
-    publish_data.publish_google_cloud(dir_path, bucket_name)
+    publish_data.publish_google_cloud(dir_path=dir_path,
+                                      bucket_name=bucket_name,
+                                      datapackage_key_prefix=_datapackage_key_prefix(datapackage_name))
     # TODO: write to elastic index
     pass
 
+
 def publish_datapackage_s3_nais(datasets):
     dir_path = get_path()
-    bucket_name = write_datapackage(datasets)
+    bucket_name, datapackage_name = write_datapackage(datasets)
 
-    publish_data.publish_s3_nais(dir_path, bucket_name)
+    publish_data.publish_s3_nais(dir_path=dir_path,
+                                 bucket_name=bucket_name,
+                                 datapackage_key_prefix=_datapackage_key_prefix(datapackage_name))
     # TODO: write to elastic index
     pass
