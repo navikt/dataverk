@@ -72,7 +72,8 @@ class OracleConnector(BaseConnector):
             conn = cx_Oracle.connect(
                 user=self.db['user'], 
                 password=self.db['password'],
-                dsn = self.dsn
+                dsn = self.dsn,
+                encoding = 'utf-8'
             ) 
 
             cur = conn.cursor()
