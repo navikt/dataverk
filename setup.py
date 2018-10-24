@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 setup(
     name='dataverk',
     version='0.0.1',
-    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils'],
+    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'entrypoints'],
     python_requires='~=3.6',
     install_requires=[
         'cryptography==2.2.2',
@@ -25,6 +25,7 @@ setup(
         'Flask==1.0.2',
         'protobuf==3.6.1',
         'pyarrow>=0.10.0',
+        'python-jenkins==1.3.0',
         'python-snappy==0.5.3',
         'elasticsearch==6.3.0',
         'google-api-core==0.1.4',
@@ -34,6 +35,11 @@ setup(
         'google-resumable-media==0.3.1',
         'googleapis-common-protos==1.5.3'
     ],
+    entry_points={
+        'console_scripts': [
+            'dataverk_create = entrypoints:dataverk_create'
+        ]
+    },
 
      # metadata to display on PyPI
     author="NAV IKT",
