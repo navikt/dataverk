@@ -92,6 +92,7 @@ def _create_datapackage(datasets):
     metadata  = {}
         
     try:
+        # DCAT deprected use METADATA
         with open(os.path.join(dir_path, 'DCAT.json'), encoding="utf-8") as f:
             metadata = json.loads(f.read())
     except:
@@ -101,7 +102,8 @@ def _create_datapackage(datasets):
         except:
             pass
 
-    try:    
+    try:
+        # DCAT deprected use METADATA    
         with open(os.path.join(dir_path, 'DCAT.json'),'w', encoding="utf-8") as f:
             metadata ['Sist oppdatert'] = today
             metadata ['Lisens'] = licence
@@ -120,7 +122,7 @@ def _create_datapackage(datasets):
             'title':  metadata.get('Tittel',''),
             'author':  metadata.get('Opphav',''),
             'status':  metadata.get('Tilgangsrettigheter',''),
-             # TODO: unødvendig med lisens her siden lisensen ligger i dcat?
+             # TODO: unødvendig med lisens her siden lisensen ligger i metadata?
             'license': licence, 
             'readme': readme,
             'metadata': json.dumps( metadata ), 

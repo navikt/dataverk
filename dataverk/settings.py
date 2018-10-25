@@ -61,6 +61,8 @@ bucket_storage_connections["google_cloud"]["credentials"]["auth_provider_x509_ce
 bucket_storage_connections["google_cloud"]["credentials"]["client_x509_cert_url"] = "https://www.googleapis.com/robot/v1/metadata/x509/credentials%40nav-datalab.iam.gserviceaccount.com"
 
 if environ.get('DEPLOY_TO_NAIS') is not None:
+    # TODO Erik: kan vi det som en streng fra VAULT
+    # 'oracle://odata_les:password@dm08db03-vip.adeo.no:1521/datalab
     db_connections["dvh"]["password"] = open(os.getenv('VAULT_SECRETS') + '/DVH_KEY', 'r').read()
     db_connections["datalab"]["password"] = open(os.getenv('VAULT_SECRETS') + '/DATALAB_ODATA_LES', 'r').read()
     bucket_storage_connections["AWS_S3"]["access_key"] = open(os.getenv('VAULT_SECRETS') + '/S3_ACCESS_KEY', 'r').read()
@@ -91,6 +93,19 @@ elif environ.get("RUN_FROM_VDI") is not None:
     bucket_storage_connections["AWS_S3"]["access_key"] = secrets["data"]["S3_ACCESS_KEY"]
     bucket_storage_connections["AWS_S3"]["secret_key"] = secrets["data"]["S3_SECRET_KEY"]
     bucket_storage_connections["google_cloud"]["credentials"]["private_key"] = secrets["data"]["GCLOUD_PRIVATE_KEY"]
+
+elif environ.get("RUN_ON_DESKTOP") is not None:
+    config_path = environ.get("CONFIG_PATH")
+
+    import importlib.util
+
+    try:
+        spec = importlib.util.spec_from_file_location("config", config_path)
+        config = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(config)
+    except:
+        raise ValueError(f'Error loading config from file: {config_path}')
+
 else:
     # Locally or Travis ci
     with open(os.path.join(os.path.dirname(os.getcwd()), 'client-secret.json')) as gcloud_credentials:

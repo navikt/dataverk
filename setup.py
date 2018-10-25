@@ -1,6 +1,5 @@
 from setuptools import setup
 
-
 #Gjør README.md om til den lange beskrivelsen på PiPy
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -22,11 +21,11 @@ setup(
         'numpy==1.15.2',
         'fire==0.1.3',
         'cx_Oracle==7.0.0',
-        'Flask==1.0.2',
+         #'Flask==1.0.2',
         'protobuf==3.6.1',
         'pyarrow>=0.10.0',
         'python-jenkins==1.3.0',
-        'python-snappy==0.5.3',
+         #'python-snappy==0.5.3',
         'elasticsearch==6.3.0',
         'google-api-core==0.1.4',
         'google-auth==1.5.0',
@@ -48,7 +47,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="MIT",
-    keywords="åpne data datasett",
+    keywords="datapackage datasett etl open-data",
     url="https://github.com/navikt",
     project_urls={
         "Bug Tracker": "https://github.com/navikt",

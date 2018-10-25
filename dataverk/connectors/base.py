@@ -1,7 +1,3 @@
-import json
-import pyarrow as pa
-import snappy
-
 from dataverk.utils.logger_mixin import LoggerMixin
 from dataverk.utils.auth_mixin import AuthMixin, AuthError
 from prometheus_client import Summary

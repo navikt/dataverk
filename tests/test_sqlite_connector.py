@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from nada.connectors import SQLiteConnector
+from ..connectors import SQLiteConnector
 
 class TestSQLiteConnector:
     
