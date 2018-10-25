@@ -10,9 +10,7 @@ import dataverk.settings as settings
 
 
 class FileStorageConnector(BaseConnector):
-    """File Storage connector
-    
-    """
+    """File Storage connector"""
     
     def __init__(self, encrypted=True, bucket=None):
 

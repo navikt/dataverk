@@ -39,30 +39,44 @@ db_connections["datalab"]["port"] = 1521
 db_connections["datalab"]["service_name"] = "datalab"
 db_connections["datalab"]["user"] = "odata_les"
 
+# Index connections
+index_connections = {
+    "elastic_local": "http://localhost:9200"
+}
+
+# File storage
+file_storage_connections = {
+    "local": {
+        "path": ".",
+        "bucket": ""
+    }
+}
+
 #Bucket storage connections
-bucket_storage_connections = {}
-
-bucket_storage_connections["AWS_S3"] = {}
-bucket_storage_connections["AWS_S3"]["host"] = "https://s3.nais.preprod.local"
-bucket_storage_connections["AWS_S3"]["bucket"] = "default-bucket-nav"
-
-bucket_storage_connections["google_cloud"] = {}
-bucket_storage_connections["google_cloud"]["client"] = "nav-datalab"
-bucket_storage_connections["google_cloud"]["bucket"] = "default-bucket-nav"
-bucket_storage_connections["google_cloud"]["credentials"] = {}
-bucket_storage_connections["google_cloud"]["credentials"]["type"] = "service_account"
-bucket_storage_connections["google_cloud"]["credentials"]["project_id"] = "nav-datalab"
-bucket_storage_connections["google_cloud"]["credentials"]["private_key_id"] = "dde5f22788c09a8736979b4beedd6cf9af962441"
-bucket_storage_connections["google_cloud"]["credentials"]["client_email"] = "credentials@nav-datalab.iam.gserviceaccount.com"
-bucket_storage_connections["google_cloud"]["credentials"]["client_id"] = "112379116389045910216"
-bucket_storage_connections["google_cloud"]["credentials"]["auth_uri"] = "https://accounts.google.com/o/oauth2/auth"
-bucket_storage_connections["google_cloud"]["credentials"]["token_uri"] = "https://oauth2.googleapis.com/token"
-bucket_storage_connections["google_cloud"]["credentials"]["auth_provider_x509_cert_url"] = "https://www.googleapis.com/oauth2/v1/certs"
-bucket_storage_connections["google_cloud"]["credentials"]["client_x509_cert_url"] = "https://www.googleapis.com/robot/v1/metadata/x509/credentials%40nav-datalab.iam.gserviceaccount.com"
+bucket_storage_connections = {
+    "AWS_S3": {
+        "host": "https://s3.nais.preprod.local",
+        "bucket": "default-bucket-nav"
+    },
+    "google_cloud": {
+        "client": "nav-datalab",
+        "bucket": "default-bucket-nav",
+        "credentials": {
+            "type": "service_account",
+            "project_id": "nav-datalab",
+            "private_key_id": "dde5f22788c09a8736979b4beedd6cf9af962441",
+            "client_email": "credentials@nav-datalab.iam.gserviceaccount.com",
+            "client_id": "112379116389045910216",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
+        }
+    }
+}
 
 if environ.get('DEPLOY_TO_NAIS') is not None:
-    # TODO Erik: kan vi det som en streng fra VAULT
-    # 'oracle://odata_les:password@dm08db03-vip.adeo.no:1521/datalab
+    index_connections["elastic_cloud"] = "http://localhost:9200" # TODO lagre i vault
+
     db_connections["dvh"]["password"] = open(os.getenv('VAULT_SECRETS') + '/DVH_KEY', 'r').read()
     db_connections["datalab"]["password"] = open(os.getenv('VAULT_SECRETS') + '/DATALAB_ODATA_LES', 'r').read()
     bucket_storage_connections["AWS_S3"]["access_key"] = open(os.getenv('VAULT_SECRETS') + '/S3_ACCESS_KEY', 'r').read()
@@ -94,19 +108,33 @@ elif environ.get("RUN_FROM_VDI") is not None:
     bucket_storage_connections["AWS_S3"]["secret_key"] = secrets["data"]["S3_SECRET_KEY"]
     bucket_storage_connections["google_cloud"]["credentials"]["private_key"] = secrets["data"]["GCLOUD_PRIVATE_KEY"]
 
-elif environ.get("RUN_ON_DESKTOP") is not None:
+elif environ.get("CONFIG_PATH") is not None:
+    # For testing and running locally
     config_path = environ.get("CONFIG_PATH")
+    config = {}
 
-    import importlib.util
+    with open(os.path.join(config_path, 'dataverk-secrets.json')) as secrets:
+        try:
+            config = json.load(secrets)
+        except:
+            raise ValueError(f'Error loading config from file: {config_path}dataverk-secret.json')
 
-    try:
-        spec = importlib.util.spec_from_file_location("config", config_path)
-        config = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(config)
-    except:
-        raise ValueError(f'Error loading config from file: {config_path}')
+    if 'db_connections' in config:
+        db_connections = {**db_connections, **config['db_connections']}
 
+    if 'index_connections' in config:
+        index_connections = {**index_connections, **config['index_connections']}
+
+    if 'bucket_storage_connections' in config:
+        bucket_storage_connections = {**bucket_storage_connections, **config['bucket_storage_connections']}
+
+    if 'file_storage_connections' in config:
+        file_storage_connections = {**file_storage_connections, **config['file_storage_connections']}
+ 
 else:
     # Locally or Travis ci
-    with open(os.path.join(os.path.dirname(os.getcwd()), 'client-secret.json')) as gcloud_credentials:
-        bucket_storage_connections["google_cloud"]["credentials"] = json.load(gcloud_credentials)
+    try: 
+        with open(os.path.join(os.path.dirname(os.getcwd()), 'client-secret.json')) as gcloud_credentials:
+            bucket_storage_connections["google_cloud"]["credentials"] = json.load(gcloud_credentials)
+    except:
+        pass
