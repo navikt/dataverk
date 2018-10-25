@@ -25,19 +25,7 @@ if os.path.isfile(env_path):
         os.environ[var[0]] = var[1]
 
 # Database connections
-db_connections = {}
-
-db_connections["dvh"] = {}
-db_connections["dvh"]["host"] = "dm06-scan.adeo.no"
-db_connections["dvh"]["port"] = 1521
-db_connections["dvh"]["service_name"] = "dwh"
-db_connections["dvh"]["user"] = "odata_les"
-
-db_connections["datalab"] = {}
-db_connections["datalab"]["host"] = "dm08db03-vip.adeo.no"
-db_connections["datalab"]["port"] = 1521
-db_connections["datalab"]["service_name"] = "datalab"
-db_connections["datalab"]["user"] = "odata_les"
+db_connection_strings = {}
 
 #Bucket storage connections
 bucket_storage_connections = {}
@@ -61,10 +49,8 @@ bucket_storage_connections["google_cloud"]["credentials"]["auth_provider_x509_ce
 bucket_storage_connections["google_cloud"]["credentials"]["client_x509_cert_url"] = "https://www.googleapis.com/robot/v1/metadata/x509/credentials%40nav-datalab.iam.gserviceaccount.com"
 
 if environ.get('DEPLOY_TO_NAIS') is not None:
-    # TODO Erik: kan vi det som en streng fra VAULT
-    # 'oracle://odata_les:password@dm08db03-vip.adeo.no:1521/datalab
-    db_connections["dvh"]["password"] = open(os.getenv('VAULT_SECRETS') + '/DVH_KEY', 'r').read()
-    db_connections["datalab"]["password"] = open(os.getenv('VAULT_SECRETS') + '/DATALAB_ODATA_LES', 'r').read()
+    db_connection_strings["dvh"] = open(os.getenv('VAULT_SECRETS') + '/DVH_CONNECTION_STRING', 'r').read()
+    db_connection_strings["datalab"] = open(os.getenv('VAULT_SECRETS') + '/DATALAB_CONNECTION_STRING', 'r').read()
     bucket_storage_connections["AWS_S3"]["access_key"] = open(os.getenv('VAULT_SECRETS') + '/S3_ACCESS_KEY', 'r').read()
     bucket_storage_connections["AWS_S3"]["secret_key"] = open(os.getenv('VAULT_SECRETS') + '/S3_SECRET_KEY', 'r').read()
     bucket_storage_connections["google_cloud"]["credentials"]["private_key"] = open(os.getenv('VAULT_SECRETS') +
@@ -81,15 +67,15 @@ elif environ.get("RUN_FROM_VDI") is not None:
 
     auth = json.loads(auth_response.text)
 
-    secrets_response = requests.get(url="https://vault.adeo.no:8200/v1/kv/prod/fss/datasett/default",
+    secrets_response = requests.get(url="https://vault.adeo.no:8200/v1/kv/prod/fss/datasett/opendata",
                                     headers={"X-Vault-Token": auth["auth"]["client_token"]})
     if secrets_response.status_code != 200:
         secrets_response.raise_for_status()
 
     secrets = json.loads(secrets_response.text)
 
-    db_connections["dvh"]["password"] = secrets["data"]["DVH_KEY"]
-    db_connections["datalab"]["password"] = secrets["data"]["DATALAB_ODATA_LES"]
+    db_connection_strings["dvh"] = secrets["data"]["DVH_CONNECTION_STRING"]
+    db_connection_strings["datalab"] = secrets["data"]["DATALAB_CONNECTION_STRING"]
     bucket_storage_connections["AWS_S3"]["access_key"] = secrets["data"]["S3_ACCESS_KEY"]
     bucket_storage_connections["AWS_S3"]["secret_key"] = secrets["data"]["S3_SECRET_KEY"]
     bucket_storage_connections["google_cloud"]["credentials"]["private_key"] = secrets["data"]["GCLOUD_PRIVATE_KEY"]

@@ -33,13 +33,13 @@ class OracleConnector(BaseConnector):
         self.df = None
         self.dsn = None
     
-        if source not in settings.db_connections:
+        if source not in settings.db_connection_strings:
             raise ValueError(f'Database connection string not found in settings file.\
              Unable to establish connection to database: {source}')
 
-        db = settings.db_connections[source]
+        db = self._parse_connection_string(settings.db_connection_strings[source])
         self.db = db
-  
+
         if 'service_name' in db:
             self.dsn = cx_Oracle.makedsn(
                 host = db['host'],
@@ -56,6 +56,16 @@ class OracleConnector(BaseConnector):
 
         assert self.dsn is not None, f'Invalid connection description. Neither "service name" nor "sid" specified for {self.source}'
 
+    def _parse_connection_string(self, connection_string):
+        conn_string_list = connection_string.replace('://', ',').replace(':', ',').replace('@', ',').replace('/', ',').split(',')
+
+        return {
+                    'user': conn_string_list[1],
+                    'password': conn_string_list[2],
+                    'host': conn_string_list[3],
+                    'port': conn_string_list[4],
+                    'service_name': conn_string_list[5]
+               }
 
 
     def get_pandas_df(self, sql, arraysize=100000):
@@ -119,6 +129,4 @@ class OracleConnector(BaseConnector):
         self.log(f'Persisting {len(df)} records to table: {table} in schema: {schema} in Oracle database: {self.source}')
         df.to_sql(table, engine, schema=schema, if_exists='replace', chunksize=chunksize)
 
-
         return len(df)
-        
