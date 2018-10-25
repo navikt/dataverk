@@ -1,7 +1,6 @@
 from dataverk.connectors import BaseConnector
 import os
 import boto3
-
 import dataverk.settings as settings
 
 # AWS S3

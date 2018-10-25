@@ -5,7 +5,7 @@ from datetime import timedelta
 from dataverk.connectors.base import BaseConnector
 import dataverk.settings as settings
 
-# Azure storage
+
 class AzureStorageConnector(BaseConnector):
     """Azure Storage connector"""
     

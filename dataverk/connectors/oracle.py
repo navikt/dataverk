@@ -6,7 +6,6 @@ import pandas as pd
 from sqlalchemy import types, create_engine
 
 from dataverk.connectors import BaseConnector
-
 import dataverk.settings as settings
 
 # Oracle
@@ -73,7 +72,7 @@ class OracleConnector(BaseConnector):
         start_time = time.time()
 
         if self.df:
-            self.log(f'{len(df)} records returned from cached dataframe. Query: {sql}')
+            self.log(f'{len(self.df)} records returned from cached dataframe. Query: {sql}')
             return self.df
 
         self.log(f'Establishing connection to Oracle database: {self.source}')
