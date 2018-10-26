@@ -92,18 +92,18 @@ class NewRepoCreator:
         with filepath.open("w+") as writer:
             writer.write(string)
 
-def set_licence(self, licence_index: str):
-    index = int(licence_index)
+    def set_licence(self, licence_index: str):
+        index = int(licence_index)
 
-    if index in self.valid_licences:
-        self.add_config_file("LICENCE.md", self.valid_licences[index])
+        if index in self.valid_licences:
+            self.add_config_file("LICENCE.md", self.valid_licences[index])
 
-def _load_licences(self) -> dict:
-    loaded_licences = dict()
-    path = Path().resolve().parent
+    def _load_licences(self) -> dict:
+        loaded_licences = dict()
+        path = Path().resolve().parent
 
-    loaded_licences[1] = path.joinpath("LICENSE.md")
-    return loaded_licences
+        loaded_licences[1] = path.joinpath("LICENSE.md")
+        return loaded_licences
 
 
 def main():
