@@ -1,19 +1,15 @@
+
 # -*- coding: utf-8 -*-
 # Import statements
 # =================
 import unittest
-from unittest import mock
-from entrypoints import dataverk_init
-
+from dataverk.settings_loader import GitSettingsLoader
 # Common input parameters
 # =======================
-test_repo_name = "testrespo"
-bad_repo_name_inputs = (2, "", False, [], ())
+local_temp_dir = "/Users/sondre/Development/dataverk_dev_temp"
 
 # Base classes
 # ============
-
-
 class Base(unittest.TestCase):
     """
     Base class for tests
@@ -21,8 +17,7 @@ class Base(unittest.TestCase):
     This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
     def setUp(self):
-        self.test_repo_name = test_repo_name
-        self.bad_repo_name_inputs = bad_repo_name_inputs
+        pass
 
 
 # Test classes
@@ -34,22 +29,13 @@ class Instantiation(Base):
     Tests include: instantiation with args of wrong type, instantiation with input values outside constraints, etc.
     """
 
+    def test_init_normal_case(self):
+        loader = GitSettingsLoader("https://github.com/navikt/dataverk_settings.git")
+        print(loader.download_to(local_temp_dir))
+
+
     # Input arguments wrong type
     # ==========================
-
-    def test_init_normal_case(self):
-        new_rep = dataverk_init.NewRepoCreator("testrep")
-        self.assertEqual(new_rep.name, "testrep")
-
-    def test_init_bad_input_type(self):
-        for _input in self.bad_repo_name_inputs:
-            with self.subTest(_input=_input):
-                with self.assertRaises(Exception) as cm:
-                    res = dataverk_init.NewRepoCreator(_input)
-
-
-
-
 
     # Input arguments outside constraints
     # ===================================
@@ -97,3 +83,4 @@ class MethodsReturnValues(Base):
     """
     Tests values of methods against known values
     """
+    pass

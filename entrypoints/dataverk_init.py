@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import requests
 
 """
 TODO
@@ -15,6 +16,17 @@ N. Installer alle mapper og filer i det nye repoet
 
 """
 CODEOWNERS_FILE_CONTENT = "*       {}"
+GITHUB_CREATE_REPO_PARAMS = {
+  "name": "Hello-World_tester",
+  "description": "This is your first repository",
+  "homepage": "https://github.com",
+  "private": True,
+  "has_issues": True,
+  "has_projects": True,
+  "has_wiki": True
+}
+
+GITHUB_ENDPOINT = "/user/repos"
 
 
 class NewRepoCreator:
@@ -22,6 +34,8 @@ class NewRepoCreator:
     """
 
     def __init__(self, new_repository_name: str):
+
+        self._check_input(new_repository_name)
         # [TODO] skal vi sjekke for unike repo navn?
         self.name = new_repository_name
 
@@ -31,10 +45,13 @@ class NewRepoCreator:
 
     def create(self):
         """Konfigurasjon er ferdig, bygg repo med alle filene inkludert"""
+
         new_path = self.create_repository()
         self.create_config_files(new_path)
 
     def create_repository(self):
+        """ Oppretter det nye repositoriet """
+
         new_repo_dir_path = Path(self.name)
         if new_repo_dir_path.exists():
             raise IsADirectoryError("Directory already exisits")
@@ -99,12 +116,24 @@ class NewRepoCreator:
             self.add_config_file("LICENCE.md", self.valid_licences[index])
 
     def _load_licences(self) -> dict:
+        """Laster inn lisensene som brukeren kan velge mellom"""
+
         loaded_licences = dict()
         path = Path().resolve().parent
 
         loaded_licences[1] = path.joinpath("LICENSE.md")
         return loaded_licences
 
+    def _check_input(self, input):
+        if not isinstance(input, str):
+            raise ValueError("Repository name cannot be a list")
+        if len(input) < 1:
+            raise ValueError("Repository name cannot be empty")
+
+    def create_github_repository(self):
+        """Lager et nytt repository på Github for prosjektet"""
+
+        result = requests.post()
 
 def main():
     print("Lag et nytt dataverk prosjekt")
