@@ -82,6 +82,8 @@ class CreateDataPackage:
             - cronjob.xml
             - Dockerfile
             - METADATA.json
+            - LICENSE.md
+            - README.md
             - etl.ipynb
         '''
 
@@ -89,6 +91,9 @@ class CreateDataPackage:
         copyfile(os.path.join('file_templates', 'Jenkinsfile'), os.path.join(self.package_name, 'Jenkinsfile'))
         copyfile(os.path.join('file_templates', 'cronjob.yaml'), os.path.join(self.package_name, 'cronjob.yaml'))
         copyfile(os.path.join('file_templates', 'Dockerfile'), os.path.join(self.package_name, 'Dockerfile'))
+        copyfile(os.path.join('file_templates', 'METADATA.json'), os.path.join(self.package_name, 'METADATA.json'))
+        copyfile(os.path.join('file_templates', 'LICENSE.md'), os.path.join(self.package_name, 'LICENSE.md'))
+        copyfile(os.path.join('file_templates', 'README.md'), os.path.join(self.package_name, 'README.md'))
         copyfile(os.path.join('file_templates', 'METADATA.json'), os.path.join(self.package_name, 'METADATA.json'))
         copyfile(os.path.join('file_templates', 'etl.ipynb'), os.path.join(self.package_name, 'scripts', 'etl.ipynb'))
 
@@ -116,13 +121,14 @@ class CreateDataPackage:
 
         cronjob_config['metadata']['name'] = self.package_name
         cronjob_config['metadata']['namespace'] = self.namespace
-        cronjob_config['spec']['schedule'] = "\"0 8 * * *\""
+
+        cronjob_config['spec']['schedule'] = "0 8 * * *"
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self.package_name + '-cronjob'
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = 'repo.adeo.no:5443/' + self.package_name
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0]['env'][2]['value'] = '/kv/prod/fss/' + self.package_name + '/' + self.namespace
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0]['env'][3]['value'] = self.package_name
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccount'] = self.package_name
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccountName'] = self.package_name
+        #cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0]['env'][2]['value'] = '/kv/prod/fss/' + self.package_name + '/' + self.namespace
+        #cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0]['env'][3]['value'] = self.package_name
+        #cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccount'] = self.package_name
+        #cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccountName'] = self.package_name
 
         with open(os.path.join(self.package_name, 'cronjob.yaml'), 'w') as yamlfile:
             yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
@@ -136,9 +142,9 @@ class CreateDataPackage:
             jenkins_config = jenkinsfile.read()
 
         template = Template(jenkins_config)
-        jenkins_config = template.safe_substitute(package_name="\'" + self.package_name + "\'",
-                                                  package_repo="\'" + self.github_project + "\'",
-                                                  package_path="\'" + self.package_name + "\'")
+        jenkins_config = template.safe_substitute(package_name=self.package_name,
+                                                  package_repo=self.github_project,
+                                                  package_path=self.package_name)
 
         with open(os.path.join(self.package_name, 'Jenkinsfile'), 'w') as jenkinsfile:
             jenkinsfile.write(jenkins_config)
@@ -184,7 +190,6 @@ class CreateDataPackage:
 
         print("Datapakken " + self.package_name + " er opprettet")
 
-        # TODO: Push til remote origin
         # TODO: Add more error handling
 
 
