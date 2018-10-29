@@ -74,7 +74,7 @@ class CreateDataPackage:
         day_list = days.split(',')
 
         for day in day_list:
-            if int(day) not in range(0, 6):
+            if int(day) not in range(0, 7):
                 raise Exception("'" + day + "' er ikke en gyldig dag. Gyldige dager er 0-6 (man-søn)")
 
         print("\nTime på dagen(e) - 0-23")
@@ -160,7 +160,7 @@ class CreateDataPackage:
         cronjob_config['metadata']['name'] = self.package_name
         cronjob_config['metadata']['namespace'] = self.namespace
 
-        cronjob_config['spec']['schedule'] = "0 8 * * *"
+        cronjob_config['spec']['schedule'] = self.cronjob_schedule
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self.package_name + '-cronjob'
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = 'repo.adeo.no:5443/' + self.package_name
         #cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0]['env'][2]['value'] = '/kv/prod/fss/' + self.package_name + '/' + self.namespace
