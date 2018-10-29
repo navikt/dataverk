@@ -30,6 +30,8 @@ class CreateDataPackage:
         if self._is_package_name_in_use():
             raise NameError("Datapakkenavn må være unikt.")
 
+        self.cronjob_schedule = self.set_cronjob_schedule()
+
     def _is_in_repo_root(self):
         ''' Sjekk på om create_dataverk kjøres fra toppnivå i repo.
 
@@ -49,7 +51,7 @@ class CreateDataPackage:
 
         for filename in os.listdir(os.getcwd()):
             if self.package_name == filename:
-                print("Datapakken " + self.package_name + " eksisterer allerede i repo " + self.github_project)
+                print("En mappe med navn " + self.package_name + " eksisterer allerede i repo " + self.github_project)
                 return True
 
         if self.jenkins_server.job_exists(self.package_name):
@@ -58,17 +60,53 @@ class CreateDataPackage:
 
         return False
 
+    def set_cronjob_schedule(self):
+        ''' Kontrollerer bruker input og setter cronjob schedule
+
+        :return: String: cronjob-schedule for .yaml fil
+        '''
+
+        print("------------------------------------------------Oppdateringsschedule------------------------------------------")
+        print("Ukedager - man-søn (0-6)")
+        print("MERK: For flere dager, adskill med komma. F.eks. ønsker du at datapakken skal oppdateres mandag,tirsdag og fredag blir dette: \"0,1,4\"")
+        days = input("Skriv inn hvilke(n) ukedag(er) datapakken skal oppdateres: ")
+
+        day_list = days.split(',')
+
+        for day in day_list:
+            if int(day) not in range(0, 6):
+                raise Exception("'" + day + "' er ikke en gyldig dag. Gyldige dager er 0-6 (man-søn)")
+
+        print("\nTime på dagen(e) - 0-23")
+        print("MERK: Time oppgis i UTC")
+        hour = int(input("Skriv inn hvilken time på dagen(e) du vil at datapakken skal oppdateres (UTC tid): "))
+
+        if hour not in range(0, 23):
+            raise Exception("'" + str(hour) + "' er ikke en gyldig time. Gyldig time er 0-23")
+
+        print("\nMinutt innenfor time - 0-59")
+        minute = int(input("Skriv inn hvilket minutt innenfor time datapakken skal oppdateres: "))
+
+        if minute not in range(0, 59):
+            raise Exception("'" + str(minute) + "' er ikke gyldig minutt innnenfor time. Gyldig minutt er 0-59")
+
+        print("--------------------------------------------------------------------------------------------------------------")
+
+        return str(minute) + " " + str(hour) + " " + "* " + "* " + days
+
+
     def get_datapackage_config(self):
         print("\n-------------Ny datapakke------------------------" +
               "\nDatapakkenavn: " + self.package_name +
               "\ngithub repo: " + self.github_project +
+              "\ncronjob schedule: " + self.cronjob_schedule +
               "\nNAIS namespace: " + self.namespace +
               "\n-------------------------------------------------\n")
 
     def create_folder_structure(self):
         ''' Lager mappestrukturen for datapakken. Oppretter mappene:
-            {repo_root}/package_name/scripts
-            {repo_root}/package_name/data
+            {repo_root}/{pakkenavn}/scripts
+            {repo_root}/{pakkenavn}/data
         '''
 
         os.mkdir(self.package_name)
