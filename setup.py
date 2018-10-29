@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 setup(
     name='dataverk',
     version='0.0.1',
-    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'entrypoints'],
+    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_setup_scripts'],
     python_requires='~=3.6',
     install_requires=[
         'cryptography==2.2.2',
@@ -36,8 +36,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'dataverk_create = entrypoints.dataverk_create:main',
-            'dataverk_init = entrypoints.dataverk_init:main'
+            'dataverk_create = dataverk_setup_scripts.dataverk_create:main',
+            'dataverk_init = dataverk_setup_scripts.dataverk_init:main'
         ]
     },
 
