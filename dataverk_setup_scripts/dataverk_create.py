@@ -7,6 +7,7 @@ import yaml
 from string import Template
 from shutil import copyfile, rmtree
 from xml.etree import ElementTree
+from . import settings_loader
 
 
 class CreateDataPackage:
@@ -22,15 +23,20 @@ class CreateDataPackage:
         self.namespace = 'opendata' # TODO: Konfigurerbart?
         self.jenkins_server = jenkins.Jenkins('http://a34apvl00117.devillo.no:8080', username=user, password=password)
 
-        # TODO: kanskje en sjekk på om jenkins forbindelsen er oppe (merkes ikke om brukernavn/passord er feil før senere sånn som det er nå)
-
         if not self._is_in_repo_root():
             raise Exception("dataverk_create må kjøres fra topp-nivået i git repoet")
 
         if self._is_package_name_in_use():
             raise NameError("Datapakkenavn må være unikt.")
 
-        self.cronjob_schedule = self.set_cronjob_schedule()
+        self._create_folder_structure()
+
+        settings_repo_url = input("Lim inn url til settings repo: ")
+        settings = settings_loader.GitSettingsLoader(url=settings_repo_url)
+
+        self.settings_folder_name = settings.download_to(self.package_name)
+
+        self.cronjob_schedule = self._set_cronjob_schedule()
 
     def _is_in_repo_root(self):
         ''' Sjekk på om create_dataverk kjøres fra toppnivå i repo.
@@ -60,8 +66,8 @@ class CreateDataPackage:
 
         return False
 
-    def set_cronjob_schedule(self):
-        ''' Kontrollerer bruker input og setter cronjob schedule
+    def _set_cronjob_schedule(self):
+        ''' Kontrollerer brukerinput og setter cronjob schedule
 
         :return: String: cronjob-schedule for .yaml fil
         '''
@@ -95,7 +101,7 @@ class CreateDataPackage:
         return str(minute) + " " + str(hour) + " " + "* " + "* " + days
 
 
-    def get_datapackage_config(self):
+    def print_datapackage_config(self):
         print("\n-------------Ny datapakke------------------------" +
               "\nDatapakkenavn: " + self.package_name +
               "\ngithub repo: " + self.github_project +
@@ -103,7 +109,7 @@ class CreateDataPackage:
               "\nNAIS namespace: " + self.namespace +
               "\n-------------------------------------------------\n")
 
-    def create_folder_structure(self):
+    def _create_folder_structure(self):
         ''' Lager mappestrukturen for datapakken. Oppretter mappene:
             {repo_root}/{pakkenavn}/scripts
             {repo_root}/{pakkenavn}/data
@@ -112,6 +118,13 @@ class CreateDataPackage:
         os.mkdir(self.package_name)
         os.mkdir(os.path.join(self.package_name, 'scripts'))
         os.mkdir(os.path.join(self.package_name, 'data'))
+
+    def copy_setup_file(self):
+        '''
+        '''
+
+        copyfile(os.path.join(str(self.settings_folder_name), 'settings.py'),
+                 os.path.join(self.package_name, 'settings.py'))
 
     def copy_template_files(self):
         ''' Kopierer følgende template filer til datapakken:
@@ -125,15 +138,14 @@ class CreateDataPackage:
             - etl.ipynb
         '''
 
-        copyfile(os.path.join('file_templates', 'jenkins_config.xml'), os.path.join(self.package_name, 'jenkins_config.xml'))
-        copyfile(os.path.join('file_templates', 'Jenkinsfile'), os.path.join(self.package_name, 'Jenkinsfile'))
-        copyfile(os.path.join('file_templates', 'cronjob.yaml'), os.path.join(self.package_name, 'cronjob.yaml'))
-        copyfile(os.path.join('file_templates', 'Dockerfile'), os.path.join(self.package_name, 'Dockerfile'))
-        copyfile(os.path.join('file_templates', 'METADATA.json'), os.path.join(self.package_name, 'METADATA.json'))
-        copyfile(os.path.join('file_templates', 'LICENSE.md'), os.path.join(self.package_name, 'LICENSE.md'))
-        copyfile(os.path.join('file_templates', 'README.md'), os.path.join(self.package_name, 'README.md'))
-        copyfile(os.path.join('file_templates', 'METADATA.json'), os.path.join(self.package_name, 'METADATA.json'))
-        copyfile(os.path.join('file_templates', 'etl.ipynb'), os.path.join(self.package_name, 'scripts', 'etl.ipynb'))
+        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'jenkins_config.xml'), os.path.join(self.package_name, 'jenkins_config.xml'))
+        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'Jenkinsfile'), os.path.join(self.package_name, 'Jenkinsfile'))
+        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'cronjob.yaml'), os.path.join(self.package_name, 'cronjob.yaml'))
+        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'Dockerfile'), os.path.join(self.package_name, 'Dockerfile'))
+        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'LICENSE.md'), os.path.join(self.package_name, 'LICENSE.md'))
+        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'README.md'), os.path.join(self.package_name, 'README.md'))
+        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'METADATA.json'), os.path.join(self.package_name, 'METADATA.json'))
+        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'etl.ipynb'), os.path.join(self.package_name, 'scripts', 'etl.ipynb'))
 
     def edit_package_metadata(self):
         '''  Tilpasser metadata fil til datapakken
@@ -163,10 +175,6 @@ class CreateDataPackage:
         cronjob_config['spec']['schedule'] = self.cronjob_schedule
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self.package_name + '-cronjob'
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = 'repo.adeo.no:5443/' + self.package_name
-        #cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0]['env'][2]['value'] = '/kv/prod/fss/' + self.package_name + '/' + self.namespace
-        #cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0]['env'][3]['value'] = self.package_name
-        #cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccount'] = self.package_name
-        #cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccountName'] = self.package_name
 
         with open(os.path.join(self.package_name, 'cronjob.yaml'), 'w') as yamlfile:
             yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
@@ -218,7 +226,7 @@ class CreateDataPackage:
 
         '''
 
-        self.create_folder_structure()
+        self.copy_setup_file()
         self.copy_template_files()
         self.edit_package_metadata()
         self.edit_cronjob_config()
@@ -232,17 +240,13 @@ class CreateDataPackage:
 
 
 def get_github_url():
+    if not os.popen('git rev-parse --is-inside-work-tree').read().strip():
+        raise Exception("dataverk_create må kjøres fra et git repository")
+
     return os.popen('git config --get remote.origin.url').read().strip()
 
 
-def _is_in_git_repo():
-    return os.popen('git rev-parse --is-inside-work-tree').read().strip()
-
-
 def main():
-    if not _is_in_git_repo():
-        raise Exception("dataverk_create må kjøres fra et git repository")
-
     github_project = get_github_url()
 
     print("Opprettelse av ny datapakke i " + github_project)
@@ -250,7 +254,7 @@ def main():
 
     new_datapackage = CreateDataPackage(datapackage, github_project)
 
-    new_datapackage.get_datapackage_config()
+    new_datapackage.print_datapackage_config()
 
     res = input("Vil du opprette datapakken med konfigurasjonen over? [j/n] ")
 
