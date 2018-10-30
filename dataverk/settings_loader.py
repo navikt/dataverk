@@ -39,14 +39,11 @@ class SettingsLoader:
 
         return self._get_url_suffix(settings_file_location) == "git"
 
-
     def _is_location_a_json_file(self, settings_file_location: str):
         """ Returner True om URLen går til en JSON fil
         """
 
         return self._get_url_suffix(settings_file_location) == "json"
-
-
 
     def _get_url_suffix(self, url:str):
         return url.split(".")[-1]
@@ -54,10 +51,8 @@ class SettingsLoader:
 
 class FileSettingsLoader(SettingsLoader):
 
-
     def __init__(self, url: str):
         super().__init__(url)
-
 
     def download_to(self, save_location: str) -> Path:
         save_path = Path(save_location)
@@ -68,7 +63,6 @@ class FileSettingsLoader(SettingsLoader):
                 self._copy_file(Path(self.setting_file_location), save_path)
         else:
             raise NotADirectoryError("Path is not a Directory or does not exist")
-
 
     def _is_online_resource(self, url: str):
         result = parse_url(url)
