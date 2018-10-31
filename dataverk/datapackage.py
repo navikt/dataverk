@@ -17,8 +17,9 @@ class Datapackage:
     def write_notebook(self):
         notebook2script()
 
-    def add_resource(self, df: pd.DataFrame, dataset_name: str):
+    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description=''):
         self.resources[dataset_name] = df
+        self.datapackage_metadata['Datasett'][dataset_name] = dataset_description
 
     def update_metadata(self, key: str, value: str):
         self.datapackage_metadata[key] = value
@@ -130,6 +131,7 @@ class Datapackage:
             'title': metadata.get('Tittel', ''),
             'author': metadata.get('Opphav', ''),
             'status': metadata.get('Tilgangsrettigheter', ''),
+            'Datasett': metadata.get('Datasett', {}),
             # TODO: unødvendig med lisens her siden lisensen ligger i metadata?
             'license': licence,
             'readme': readme,
