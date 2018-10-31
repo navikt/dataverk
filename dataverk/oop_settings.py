@@ -87,6 +87,8 @@ class Settings:
             self._set_vdi_fields()
         elif environ.get("CONFIG_PATH") is not None:
             self._set_config_path_fields()
+        else:
+            self._set_travis_fields()
 
 
     def _set_vks_fields(self):
@@ -156,6 +158,10 @@ class Settings:
         config_path = environ.get("CONFIG_PATH")
         config = {}
 
+        bucket_storage_connections = self._settings_store["bucket_storage_connections"]
+
+        db_connections = self._settings_store["db_connection_strings"]
+
         with open(os.path.join(config_path, 'dataverk-secrets.json')) as secrets:
             try:
                 config = json.load(secrets)
@@ -173,6 +179,16 @@ class Settings:
 
         if 'file_storage_connections' in config:
             file_storage_connections = {**file_storage_connections, **config['file_storage_connections']}
+
+    def _set_travis_fields(self):
+        # Locally or Travis ci
+
+        bucket_storage_connections = self._settings_store["bucket_storage_connections"]
+        try:
+            with open(os.path.join(os.path.dirname(os.getcwd()), 'client-secret.json')) as gcloud_credentials:
+                bucket_storage_connections["google_cloud"]["credentials"] = json.load(gcloud_credentials)
+        except:
+            pass
 
 
 
