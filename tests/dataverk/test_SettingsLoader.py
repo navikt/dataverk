@@ -17,7 +17,7 @@ wrong_type_url_inputs = (2, [], (), object(), object)
 bad_urls = ("sa", ",", "", "asdasd.nav.no", "nrk.no")
 
 dataverk_settings_project_name = "dataverk_settings"
-local_temp_dir = "/Users/sondre/Development/dataverk_dev_temp"
+
 test_json_api = "https://jsonplaceholder.typicode.com/todos/1"
 
 # Base classes

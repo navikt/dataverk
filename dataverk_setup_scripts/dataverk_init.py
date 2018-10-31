@@ -26,7 +26,7 @@ GITHUB_CREATE_REPO_PARAMS = {
   "has_wiki": True
 }
 
-GITHUB_ENDPOINT = "/user/repos"
+GITHUB_USER_ENDPOINT = "/user/repos"
 
 
 class NewRepoCreator:
