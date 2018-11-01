@@ -17,7 +17,7 @@ class Datapackage:
     def write_notebook(self):
         notebook2script()
 
-    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description=''):
+    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description=""):
         self.resources[dataset_name] = df
         self.datapackage_metadata['Datasett'][dataset_name] = dataset_description
 
@@ -54,7 +54,7 @@ class Datapackage:
 
             return conn.get_pandas_df(query)
 
-    def _read_sql_append_to_resources(self, source, sql, dataset_name, connector='Oracle'):
+    def _read_sql_append_to_resources(self, source, sql, dataset_name, connector='Oracle', dataset_description=""):
         """
         Read pandas dataframe from SQL database
         """
@@ -69,9 +69,11 @@ class Datapackage:
             with open(os.path.join(path, sql)) as f:
                 query = f.read()
 
-            self.resources[dataset_name] = conn.get_pandas_df(query)
+            self.add_resource(df=conn.get_pandas_df(query),
+                              dataset_name=dataset_name,
+                              dataset_description=dataset_description)
 
-    def read_sql(self, source, sql, dataset_name=None, connector='Oracle'):
+    def read_sql(self, source, sql, dataset_name=None, connector='Oracle', dataset_description=""):
         if dataset_name is None:
             return self._read_sql_return_pandas_frame(source=source,
                                                       sql=sql,
@@ -80,7 +82,8 @@ class Datapackage:
             self._read_sql_append_to_resources(source=source,
                                                sql=sql,
                                                connector=connector,
-                                               dataset_name=dataset_name)
+                                               dataset_name=dataset_name,
+                                               dataset_description=dataset_description)
 
     def to_sql(self, df, table, schema, sink, connector='Oracle'):
         """Write records in dataframe to a SQL database table"""
