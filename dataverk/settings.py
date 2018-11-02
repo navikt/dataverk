@@ -103,10 +103,10 @@ elif environ.get("CONFIG_PATH") is not None:
         try:
             config = json.load(secrets)
         except:
-            raise ValueError(f'Error loading config from file: {config_path}dataverk-secret.json')
+            raise IOError(f'Error loading config from file: {config_path}dataverk-secret.json')
 
     if 'db_connections' in config:
-        db_connections = {**db_connections, **config['db_connections']}
+        db_connection_strings = {**db_connection_strings, **config['db_connection_strings']}
 
     if 'index_connections' in config:
         index_connections = {**index_connections, **config['index_connections']}

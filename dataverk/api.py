@@ -82,40 +82,41 @@ def _create_datapackage(datasets):
     for filename, df in datasets.items():
         # TODO bruk Parquet i stedet for csv?
         resources.append(_get_csv_schema(df,filename))
-        
-    with open(os.path.join(dir_path, 'LICENSE.md'), encoding="utf-8") as f:
-        licence = f.read()
-        
-    with open(os.path.join(dir_path, 'README.md'), encoding="utf-8") as f:
-        readme = f.read()
+
+    try:
+        with open(os.path.join(dir_path, 'LICENSE.md'), encoding="utf-8") as f:
+            licence = f.read()
+    except:
+        licence="No LICENCE file available"
+        pass
+
+    try:   
+        with open(os.path.join(dir_path, 'README.md'), encoding="utf-8") as f:
+            readme = f.read()
+    except:
+        readme="No README file available"
+        pass
 
     metadata  = {}
         
     try:
-        # DCAT deprected use METADATA
-        with open(os.path.join(dir_path, 'DCAT.json'), encoding="utf-8") as f:
+        with open(os.path.join(dir_path, 'METADATA.json'), encoding="utf-8") as f:
             metadata = json.loads(f.read())
     except:
+        # DCAT deprected use METADATA
         try:
-            with open(os.path.join(dir_path, 'METADATA.json'), encoding="utf-8") as f:
+            with open(os.path.join(dir_path, 'DCAT.json'), encoding="utf-8") as f:
                 metadata = json.loads(f.read())
         except:
             pass
 
     try:
-        # DCAT deprected use METADATA    
-        with open(os.path.join(dir_path, 'DCAT.json'),'w', encoding="utf-8") as f:
+        with open(os.path.join(dir_path, 'METADATA.json'),'w', encoding="utf-8") as f:
             metadata ['Sist oppdatert'] = today
             metadata ['Lisens'] = licence
             f.write(json.dumps( metadata , indent=2))
     except:
-        try:
-            with open(os.path.join(dir_path, 'METADATA.json'),'w', encoding="utf-8") as f:
-                metadata ['Sist oppdatert'] = today
-                metadata ['Lisens'] = licence
-                f.write(json.dumps( metadata , indent=2))
-        except:
-            pass
+        pass
     
     return {
             'name':  metadata.get('Id',''),
@@ -158,6 +159,16 @@ def write_datapackage(datasets):
 
 def _datapackage_key_prefix(datapackage_name):
     return datapackage_name + '/'
+
+def publish_datapackage(datasets, destination='nais'):
+    # TODO Get destination from metadata instead?
+    if destination == 'nais':
+        return publish_datapackage_s3_nais(datasets)
+
+    if destination == 'gcs':
+        return publish_datapackage_google_cloud(datasets)
+
+    raise ValueError('destination not valid')
 
 
 def publish_datapackage_google_cloud(datasets):
