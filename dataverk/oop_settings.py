@@ -38,7 +38,18 @@ class Settings:
             raise FileNotFoundError("The provided url does not resolve to a json file")
 
     def _set_env_data_store(self, path: Path):
-        self._env_store = self._json_to_dict(path)
+        tmp_dict = {}
+        with path.open("r") as reader:
+            envs = reader.readlines()
+
+            for env in envs:
+                env = env.strip()
+                if env[0] == '#':
+                    continue
+
+                var = env.split('=')
+                tmp_dict[str(var[0])] = str(var[1])
+        self._env_store = tmp_dict
 
     def _get_env_field(self, field: str):
         if not isinstance(field, str):
@@ -70,6 +81,7 @@ class Settings:
     def get_field(self, field: str):
         if not isinstance(field, str):
             raise ValueError("field should be a str")
+        self._assert_fields_exist(field)
         return self._settings_store[field]
 
     def _assert_fields_exist(self, field, *fields):
@@ -92,7 +104,7 @@ class Settings:
 
 
     def _set_vks_fields(self):
-        """ Sets fields for VKS
+        """ Setter nødvendige felt for VKS
 
         :return:
         """
@@ -116,6 +128,10 @@ class Settings:
             '/GCLOUD_PRIVATE_KEY', 'r').read()
 
     def _set_vdi_fields(self):
+        """ Setter nødvendige felt for kjøring i VDI miljø
+
+        :return: Void
+        """
         # Get secrets from vault
 
         # asserts that the vault url is set in settings as it is needed to get secrets response
@@ -152,15 +168,16 @@ class Settings:
         bucket_storage_connections["google_cloud"]["credentials"]["private_key"] = secrets["data"][
             "GCLOUD_PRIVATE_KEY"]
 
-
     def _set_config_path_fields(self):
         # For testing and running locally
         config_path = environ.get("CONFIG_PATH")
         config = {}
 
+        # Hent ut connections dicts, NB: hvis de ikke har blitt lagt til i gjennom __init__() så vil det feile
         bucket_storage_connections = self._settings_store["bucket_storage_connections"]
-
         db_connections = self._settings_store["db_connection_strings"]
+        index_connections = self.get_field("index_connections")
+        file_storage_connections = self.get_field("file_storage_connections")
 
         with open(os.path.join(config_path, 'dataverk-secrets.json')) as secrets:
             try:
@@ -179,6 +196,8 @@ class Settings:
 
         if 'file_storage_connections' in config:
             file_storage_connections = {**file_storage_connections, **config['file_storage_connections']}
+
+        self._settings_store["config"] = config
 
     def _set_travis_fields(self):
         # Locally or Travis ci
