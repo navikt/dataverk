@@ -136,21 +136,22 @@ class Settings:
 
         # asserts that the vault url is set in settings as it is needed to get secrets response
         self._assert_fields_exist("vault")
-        secrets_response_url = self.get_field("vault")["url"]
+        secrets_response_uri = self.get_field("vault")["secrets_uri"]
+        authentication_response_uri = self.get_field("vault")["auth_uri"]
 
         # Make sure .env file is created, passed to _inint__ and contains fields below
         user_ident = self._get_env_field("USER_IDENT")
         password = self._get_env_field("PASSWORD")
 
-
-        auth_response = requests.post(url='https://vault.adeo.no:8200/v1/auth/ldap/login/' + user_ident,
+        auth_response = requests.post(url=authentication_response_uri + user_ident,
                                       data=json.dumps({"password": password}))
+
         if auth_response.status_code != 200:
             auth_response.raise_for_status()
 
         auth = json.loads(auth_response.text)
 
-        secrets_response = requests.get(url=secrets_response_url,
+        secrets_response = requests.get(url=secrets_response_uri,
                                         headers={"X-Vault-Token": auth["auth"]["client_token"]})
         if secrets_response.status_code != 200:
             secrets_response.raise_for_status()

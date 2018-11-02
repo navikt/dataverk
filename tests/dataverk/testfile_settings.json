@@ -33,7 +33,8 @@
   },
 
   "vault": {
-    "url": "https://test.test.no:1010/v12/test/test/test/test/test"
+    "auth_uri": "https://test.test.no:1010/v12/test/test/test/",
+    "secrets_uri": "https://test.test.no:1010/v12/test/test/test/test/test"
   }
 
 }

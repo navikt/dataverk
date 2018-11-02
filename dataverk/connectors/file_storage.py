@@ -5,21 +5,22 @@ from io import BytesIO
 from datetime import timedelta
 from dataverk.connectors.base import BaseConnector
 from dataverk.utils import write_file, read_file
-import dataverk.settings as settings
+from dataverk.oop_settings import Settings
 
 
 
 class FileStorageConnector(BaseConnector):
     """File Storage connector"""
     
-    def __init__(self, encrypted=True, bucket=None):
+    def __init__(self, settings: Settings, encrypted=True, bucket=None):
 
         super(self.__class__, self).__init__(encrypted=encrypted)
 
         self.bucket = bucket
+        self.settings = settings
 
         try: 
-            self.path = settings.file_storage_path
+            self.path = self.settings.get_field("file_storage_path")
         except Exception as ex:
             print(ex)
 

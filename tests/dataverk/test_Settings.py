@@ -8,6 +8,7 @@ from pathlib import Path
 from pprint import pprint as pp
 import os
 import json
+import requests
 
 # Common input parameters
 # =======================
@@ -25,17 +26,17 @@ class Base(TestCase):
     """
     def setUp(self):
         self.bad_url_inputs = bad_url_inputs
-        self.testObject = oop_settings.Settings(Path("testfile_settings.json"))
+        self.testObject = oop_settings.Settings(Path("testfile_settings.json"), Path(".env_test"))
         self.bad_get_field_inputs = bad_get_field_inputs
         self.dataverk_secrets_dict = json.loads(self._read_file(Path("dataverk-secrets.json")))
         self.test_file_settings_dict = json.loads(self._read_file(Path("testfile_settings.json")))
 
     def tearDown(self):
         # Clean up env variables after testing
-        if os.environ["CONFIG_PATH"]:
+        if "CONFIG_PATH" in os.environ:
             del os.environ["CONFIG_PATH"]
 
-        if os.environ["RUN_FROM_VDI"]:
+        if "RUN_FROM_VDI" in os.environ:
             del os.environ["RUN_FROM_VDI"]
 
 
@@ -123,15 +124,15 @@ class MethodsReturnValues(Base):
         os.environ["CONFIG_PATH"] = str(path.absolute()) + "/"
         expected_dict = self.dataverk_secrets_dict
 
-        self.testObject = oop_settings.Settings(Path("testfile_settings.json"))
-        result = self.testObject.get_field("config")
+        testObject = oop_settings.Settings(Path("testfile_settings.json"), Path(".env_test"))
+        result = testObject.get_field("config")
         self.assertEqual(expected_dict, result, "The dictionaries should contain the same keys and values")
 
     def test_get_field__RUN_FROM_VDI_normal_case(self):
-        path = Path()
-        os.environ["RUN_FROM_VDI"] = str(path.absolute()) + "/"
-        expected_dict = self.dataverk_secrets_dict
 
-        self.testObject = oop_settings.Settings(Path("testfile_settings.json"))
-        result = self.testObject.get_field("config")
-        self.assertEqual(expected_dict, result, "The dictionaries should contain the same keys and values")
+        os.environ["RUN_FROM_VDI"] = "True"
+        # Should raise exception when trying to connect to the mock url endpoint
+        # [TODO] Can we make the VDI settings setup more testable?
+        with self.assertRaises(requests.exceptions.ConnectionError) as cm:
+            testObject = oop_settings.Settings(Path("testfile_settings.json"), Path(".env_test"))
+
