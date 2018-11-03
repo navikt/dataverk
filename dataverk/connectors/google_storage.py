@@ -163,10 +163,12 @@ class GoogleStorageConnector(BaseConnector):
             return bucket
         except exceptions.NotFound:
             try:
-                bucket = storage_client.create_bucket(bucket_name)
-                self.log(f'{self.__class__}: Bucket {bucket_name} created in Google Cloud Storage')
-                return bucket
+              bucket = storage_client.bucket(bucket_name)
+              bucket.location = "europe-north1"
+              bucket.storage_class = "REGIONAL"
+              bucket.create()
+              self.log(f'{self.__class__}: Bucket {bucket_name} created in Google Cloud Storage')
+              return bucket
             except:
                 # TODO custom errors?
                 raise IOError('GCS bucket not available and could not be created')
-

@@ -57,17 +57,18 @@ bucket_storage_connections = {
             "client_id": "112379116389045910216",
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
+
             "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
         }
     }
 }
 
-if environ.get('DEPLOY_TO_NAIS') is not None:
-    db_connection_strings["dvh"] = open(os.getenv('VAULT_SECRETS') + '/DVH_CONNECTION_STRING', 'r').read()
-    db_connection_strings["datalab"] = open(os.getenv('VAULT_SECRETS') + '/DATALAB_CONNECTION_STRING', 'r').read()
-    bucket_storage_connections["AWS_S3"]["access_key"] = open(os.getenv('VAULT_SECRETS') + '/S3_ACCESS_KEY', 'r').read()
-    bucket_storage_connections["AWS_S3"]["secret_key"] = open(os.getenv('VAULT_SECRETS') + '/S3_SECRET_KEY', 'r').read()
-    bucket_storage_connections["google_cloud"]["credentials"]["private_key"] = open(os.getenv('VAULT_SECRETS') +
+if environ.get('VKS_SECRET_DEST_PATH') is not None:
+    db_connection_strings["dvh"] = open(os.getenv('VKS_SECRET_DEST_PATH') + '/DVH_CONNECTION_STRING', 'r').read()
+    db_connection_strings["datalab"] = open(os.getenv('VKS_SECRET_DEST_PATH') + '/DATALAB_CONNECTION_STRING', 'r').read()
+    bucket_storage_connections["AWS_S3"]["access_key"] = open(os.getenv('VKS_SECRET_DEST_PATH') + '/S3_ACCESS_KEY', 'r').read()
+    bucket_storage_connections["AWS_S3"]["secret_key"] = open(os.getenv('VKS_SECRET_DEST_PATH') + '/S3_SECRET_KEY', 'r').read()
+    bucket_storage_connections["google_cloud"]["credentials"]["private_key"] = open(os.getenv('VKS_SECRET_DEST_PATH') +
                                                                                     '/GCLOUD_PRIVATE_KEY', 'r').read()
 elif environ.get("RUN_FROM_VDI") is not None:
     # Get secrets from vault

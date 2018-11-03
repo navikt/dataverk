@@ -5,6 +5,7 @@ import cx_Oracle
 import pandas as pd
 from sqlalchemy import types, create_engine
 
+from urllib import parse
 from dataverk.connectors import BaseConnector
 import dataverk.settings as settings
 
@@ -56,14 +57,14 @@ class OracleConnector(BaseConnector):
         assert self.dsn is not None, f'Invalid connection description. Neither "service name" nor "sid" specified for {self.source}'
 
     def _parse_connection_string(self, connection_string):
-        conn_string_list = connection_string.replace('://', ',').replace(':', ',').replace('@', ',').replace('/', ',').split(',')
+        res = parse.urlparse(connection_string)
 
         return {
-                    'user': conn_string_list[1],
-                    'password': conn_string_list[2],
-                    'host': conn_string_list[3],
-                    'port': conn_string_list[4],
-                    'service_name': conn_string_list[5]
+                    'user': res.username,
+                    'password': res.password,
+                    'host': res.hostname,
+                    'port': res.port,
+                    'service_name': res.path[1:]
                }
 
 
