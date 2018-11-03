@@ -4,8 +4,9 @@ import os
 import json
 import datetime
 import errno
+import uuid
 
-from .connectors import OracleConnector
+from .connectors import OracleConnector, ElasticsearchConnector
 from .utils import notebook2script, publish_data
 
 def write_notebook():
@@ -77,45 +78,48 @@ def _get_csv_schema(df, filename):
 
 def _create_datapackage(datasets):
     today = datetime.date.today().strftime('%Y-%m-%d')
+    guid = uuid.uuid4().hex
     resources = []
     dir_path = get_path()
     for filename, df in datasets.items():
         # TODO bruk Parquet i stedet for csv?
         resources.append(_get_csv_schema(df,filename))
-        
-    with open(os.path.join(dir_path, 'LICENSE.md'), encoding="utf-8") as f:
-        licence = f.read()
-        
-    with open(os.path.join(dir_path, 'README.md'), encoding="utf-8") as f:
-        readme = f.read()
+
+    try:
+        with open(os.path.join(dir_path, 'LICENSE.md'), encoding="utf-8") as f:
+            licence = f.read()
+    except:
+        licence="No LICENCE file available"
+        pass
+
+    try:   
+        with open(os.path.join(dir_path, 'README.md'), encoding="utf-8") as f:
+            readme = f.read()
+    except:
+        readme="No README file available"
+        pass
 
     metadata  = {}
         
     try:
-        # DCAT deprected use METADATA
-        with open(os.path.join(dir_path, 'DCAT.json'), encoding="utf-8") as f:
+        with open(os.path.join(dir_path, 'METADATA.json'), encoding="utf-8") as f:
             metadata = json.loads(f.read())
     except:
+        # DCAT deprected use METADATA
         try:
-            with open(os.path.join(dir_path, 'METADATA.json'), encoding="utf-8") as f:
+            with open(os.path.join(dir_path, 'DCAT.json'), encoding="utf-8") as f:
                 metadata = json.loads(f.read())
         except:
             pass
 
     try:
-        # DCAT deprected use METADATA    
-        with open(os.path.join(dir_path, 'DCAT.json'),'w', encoding="utf-8") as f:
+        with open(os.path.join(dir_path, 'METADATA.json'),'w', encoding="utf-8") as f:
             metadata ['Sist oppdatert'] = today
             metadata ['Lisens'] = licence
+            metadata['Datapakke_navn'] = metadata.get('Datapakke_navn', guid)
             f.write(json.dumps( metadata , indent=2))
     except:
-        try:
-            with open(os.path.join(dir_path, 'METADATA.json'),'w', encoding="utf-8") as f:
-                metadata ['Sist oppdatert'] = today
-                metadata ['Lisens'] = licence
-                f.write(json.dumps( metadata , indent=2))
-        except:
-            pass
+        pass
     
     return {
             'name':  metadata.get('Id',''),
@@ -130,7 +134,7 @@ def _create_datapackage(datasets):
             'last_updated': today,
             'resources': resources,
             'bucket_name': metadata.get('Bucket_navn', 'default-bucket-nav'),
-            'datapackage_name': metadata.get('Datapakke_navn', 'default-pakke-nav')
+            'datapackage_name': metadata.get('Datapakke_navn', guid)
             }
 
         
@@ -147,8 +151,8 @@ def write_datapackage(datasets):
         if not os.path.exists(data_path):
             try:
                 os.makedirs(data_path)
-            except OSError as exc: # Guard against race condition
-                if exc.errno != errno.EEXIST:
+            except OSError as ex: # Guard against race condition
+                if ex.errno != errno.EEXIST:
                     raise
                 
         for filename, df in datasets.items():
@@ -159,6 +163,16 @@ def write_datapackage(datasets):
 def _datapackage_key_prefix(datapackage_name):
     return datapackage_name + '/'
 
+def publish_datapackage(datasets, destination='nais'):
+    # TODO Get destination from metadata instead?
+    if destination == 'nais':
+        return publish_datapackage_s3_nais(datasets)
+
+
+    if destination == 'gcs':
+        return publish_datapackage_google_cloud(datasets)
+
+    return ValueError('destination not valid')
 
 def publish_datapackage_google_cloud(datasets):
     dir_path = get_path()
@@ -167,7 +181,10 @@ def publish_datapackage_google_cloud(datasets):
     publish_data.publish_google_cloud(dir_path=dir_path,
                                       bucket_name=bucket_name,
                                       datapackage_key_prefix=_datapackage_key_prefix(datapackage_name))
-    # TODO: write to elastic index
+    
+    # index datapackage
+    index = ElasticsearchConnector('public')
+    test = index
     pass
 
 

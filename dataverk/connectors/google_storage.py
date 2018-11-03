@@ -33,7 +33,7 @@ class GoogleStorageConnector(BaseConnector):
 
 
     def write(self, source_string, destination_blob_name, fmt, metadata={}):
-        """Write json to a bucket."""
+        """Write string to a bucket."""
         try:
 
             name = f'{destination_blob_name}.{fmt}'
@@ -44,14 +44,13 @@ class GoogleStorageConnector(BaseConnector):
             except:
                 pass
             """
-            #blob.contentType=f'application/{fmt}'
-            #blob.content_type = 'text/plain'
+     
+            #blob.content_type = f'application/{fmt}'
             #blob.content_language = 'en-US'
+            #blob.content_encoding='utf-8'
             blob.cache_control = 'no-cache'
             blob.content_type='text/plain'
             blob.metadata = metadata
-            #blob.content_encoding='utf-8'
-            #blob.Metadata = 'blob metadata'
             blob.upload_from_string(source_string)
             blob.make_public()
          
@@ -60,7 +59,7 @@ class GoogleStorageConnector(BaseConnector):
 
         except Exception as ex:
             print(ex)
-            self.log(f'{self.__class__}: Error writing json file {name} to google storage')
+            self.log(f'{self.__class__}: Error writing file {name} to google storage')
 
 
     def read(self, blob_name):
@@ -161,12 +160,15 @@ class GoogleStorageConnector(BaseConnector):
     def _get_bucket(self, storage_client, bucket_name):
         try:
             bucket = storage_client.get_bucket(bucket_name)
+            return bucket
         except exceptions.NotFound:
-            bucket = storage_client.bucket(bucket_name)
-            bucket.location = "europe-north1"
-            bucket.storage_class = "REGIONAL"
-            bucket.create()
-            self.log(f'{self.__class__}: Bucket {bucket_name} created in Google Cloud Storage')
-
-        return bucket
-
+            try:
+              bucket = storage_client.bucket(bucket_name)
+              bucket.location = "europe-north1"
+              bucket.storage_class = "REGIONAL"
+              bucket.create()
+              self.log(f'{self.__class__}: Bucket {bucket_name} created in Google Cloud Storage')
+              return bucket
+            except:
+                # TODO custom errors?
+                raise IOError('GCS bucket not available and could not be created')
