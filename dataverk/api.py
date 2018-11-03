@@ -8,6 +8,10 @@ import uuid
 
 from .connectors import OracleConnector, ElasticsearchConnector
 from .utils import notebook2script, publish_data
+from .datapackage import Datapackage
+
+def Datapackage():
+    return Datapackage
 
 def write_notebook():
     notebook2script()

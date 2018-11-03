@@ -1,10 +1,12 @@
+
 import pandas as pd
 import os
 import json
 import errno
 import datetime
 import re
-from dataverk.connectors import OracleConnector
+import uuid
+from dataverk.connectors import OracleConnector, ElasticsearchConnector
 from dataverk.utils import notebook2script, publish_data
 
 
@@ -14,12 +16,14 @@ class Datapackage:
         if not isinstance(public, bool):
             raise TypeError("public parameter must be boolean")
 
-        self.publish_publically = public # TODO: Foreløpig løsning. Hvordan skal dette håndteres?
+        self.is_public = public
+        self.resources = {}
         self.resources = {}
         self.dir_path = self._get_path()
         self.datapackage_metadata = self._create_datapackage()
 
     def write_notebook(self):
+        # TODO: Hører dette hjemme her? Slett? 
         notebook2script()
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
@@ -74,6 +78,8 @@ class Datapackage:
                 query = f.read()
 
             return conn.get_pandas_df(query)
+
+        # TODO raise error is not oracle and/or add more options
 
     def _read_sql_append_to_resources(self, source, sql, dataset_name, connector='Oracle', dataset_description=""):
         """
@@ -133,18 +139,21 @@ class Datapackage:
         }
 
     def _verify_bucket_and_datapackage_names(self, metadata):
-        valid_name_pattern = '(^[a-z])([a-z\-])+([a-z])$'
+        # TODO Erik: Krever S3 at det kun benyttes bokstaver?
+        # valid_name_pattern = '(^[a-z])([a-z\-])+([a-z])$'
+        valid_name_pattern = '(^[a-z0-9])([a-z0-9\-])+([a-z0-9])$'
         if not re.match(pattern=valid_name_pattern, string=metadata["Bucket_navn"]):
-            raise NameError("Invalid bucket name: Must be lowercase letters, words separated by '-', and cannot "
+            raise NameError("Invalid bucket name: Must be lowercase letters or numbers, words separated by '-', and cannot "
                             "start or end with '-'")
         if not re.match(pattern=valid_name_pattern, string=metadata["Datapakke_navn"]):
-            raise NameError("Invalid datapackage name: Must be lowercase letters, words separated by '-', and cannot "
+            raise NameError("Invalid datapackage name: Must be lowercase letters or numbers, words separated by '-', and cannot "
                             "start or end with '-'")
 
     def _create_datapackage(self):
         today = datetime.date.today().strftime('%Y-%m-%d')
+        guid = uuid.uuid4().hex
 
-        with open(os.path.join(self.dir_path, 'LICENSE.md'), encoding="utf-8") as f:
+        with open(os.path.join(self.dir_path, 'LICENCE.md'), encoding="utf-8") as f:
             licence = f.read()
 
         with open(os.path.join(self.dir_path, 'README.md'), encoding="utf-8") as f:
@@ -153,9 +162,18 @@ class Datapackage:
         with open(os.path.join(self.dir_path, 'METADATA.json'), encoding="utf-8") as f:
             metadata = json.loads(f.read())
 
+        if metadata.get('Offentlig', False) == True:
+            self.is_public = True
+        
+        if metadata.get('Public', False) == True:
+            self.is_public = True
+     
+        metadata['Sist oppdatert'] = today
+        metadata['Lisens'] = licence
+        metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav')   
+        metadata['Datapakke_navn'] = metadata.get('Datapakke_navn', guid)   
+
         with open(os.path.join(self.dir_path, 'METADATA.json'), 'w', encoding="utf-8") as f:
-            metadata['Sist oppdatert'] = today
-            metadata['Lisens'] = licence
             f.write(json.dumps(metadata, indent=2))
 
         self._verify_bucket_and_datapackage_names(metadata)
@@ -171,8 +189,8 @@ class Datapackage:
             'metadata': json.dumps(metadata),
             'sources': metadata.get('Kilder', ''),
             'last_updated': today,
-            'bucket_name': metadata.get('Bucket_navn', 'default-bucket-nav'),
-            'datapackage_name': metadata.get('Datapakke_navn', 'default-pakke-nav')
+            'bucket_name': metadata['Bucket_navn'],
+            'datapackage_name': metadata['Datapakke_navn']
         }
 
     def write_datapackage(self, datasets):
@@ -200,13 +218,17 @@ class Datapackage:
     def _datapackage_key_prefix(self, datapackage_name):
         return datapackage_name + '/'
 
-    def publish(self):
+    def publish(self, destination=['nais', 'gcs']):
         self.write_datapackage(self.resources)
+        # TODO: add views
 
-        publish_data.publish_s3_nais(dir_path=self.dir_path,
-                                     bucket_name=self.datapackage_metadata["bucket_name"],
-                                     datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]))
-        if self.publish_publically:
+        if 'nais' in destination:
+            publish_data.publish_s3_nais(dir_path=self.dir_path,
+                bucket_name=self.datapackage_metadata["bucket_name"],
+                datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]))
+    
+        if self.is_public and 'gcs' in destination:
             publish_data.publish_google_cloud(dir_path=self.dir_path,
-                                              bucket_name=self.datapackage_metadata["bucket_name"],
-                                              datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]))
+                bucket_name=self.datapackage_metadata["bucket_name"],
+                datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]))
+

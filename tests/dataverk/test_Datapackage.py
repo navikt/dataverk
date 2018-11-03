@@ -49,7 +49,7 @@ class Instantiation(Base):
     """
     def test_class_instantiation_normal(self):
         datapackage = Datapackage(public=False)
-        self.assertEqual(datapackage.publish_publically, False)
+        self.assertEqual(datapackage.is_public, False)
 
     # Input arguments wrong type
     # ==========================
