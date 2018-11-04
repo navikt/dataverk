@@ -23,7 +23,7 @@ class Datapackage:
         self.datapackage_metadata = self._create_datapackage()
 
     def write_notebook(self):
-        # TODO: Hører dette hjemme her? Slett? 
+        # TODO: Hører dette hjemme her eller er det mer naturlig å beholde det på dv nivå? 
         notebook2script()
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
@@ -153,14 +153,27 @@ class Datapackage:
         today = datetime.date.today().strftime('%Y-%m-%d')
         guid = uuid.uuid4().hex
 
-        with open(os.path.join(self.dir_path, 'LICENCE.md'), encoding="utf-8") as f:
-            licence = f.read()
+        try:
+            with open(os.path.join(self.dir_path, 'LICENSE.md'), encoding="utf-8") as f:
+                license = f.read()
+        except:
+            license="No LICENSE file available"
+            pass
 
-        with open(os.path.join(self.dir_path, 'README.md'), encoding="utf-8") as f:
-            readme = f.read()
+        try:   
+            with open(os.path.join(self.dir_path, 'README.md'), encoding="utf-8") as f:
+                readme = f.read()
+        except:
+            readme="No README file available"
+            pass
 
-        with open(os.path.join(self.dir_path, 'METADATA.json'), encoding="utf-8") as f:
-            metadata = json.loads(f.read())
+        metadata = {}
+
+        try:
+            with open(os.path.join(self.dir_path, 'METADATA.json'), encoding="utf-8") as f:
+                metadata = json.loads(f.read())
+        except:
+            pass
 
         if metadata.get('Offentlig', False) == True:
             self.is_public = True
@@ -169,7 +182,7 @@ class Datapackage:
             self.is_public = True
      
         metadata['Sist oppdatert'] = today
-        metadata['Lisens'] = licence
+        metadata['Lisens'] = license
         metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav')   
         metadata['Datapakke_navn'] = metadata.get('Datapakke_navn', guid)   
 
@@ -184,9 +197,9 @@ class Datapackage:
             'author': metadata.get('Opphav', ''),
             'status': metadata.get('Tilgangsrettigheter', ''),
             'Datasett': metadata.get('Datasett', {}),
-            'license': licence,
+            'license': license,
             'readme': readme,
-            'metadata': json.dumps(metadata),
+            'metadata': metadata,
             'sources': metadata.get('Kilder', ''),
             'last_updated': today,
             'bucket_name': metadata['Bucket_navn'],
@@ -231,4 +244,12 @@ class Datapackage:
             publish_data.publish_google_cloud(dir_path=self.dir_path,
                 bucket_name=self.datapackage_metadata["bucket_name"],
                 datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]))
+
+            try: 
+                es = ElasticsearchConnector('public')
+                id = self.datapackage_metadata['datapackage_name']
+                js = json.dumps(self.datapackage_metadata)
+                es.write(id, js)
+            except:
+                pass 
 

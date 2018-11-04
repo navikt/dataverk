@@ -91,9 +91,9 @@ def _create_datapackage(datasets):
 
     try:
         with open(os.path.join(dir_path, 'LICENSE.md'), encoding="utf-8") as f:
-            licence = f.read()
+            license = f.read()
     except:
-        licence="No LICENCE file available"
+        license="No LICENSE file available"
         pass
 
     try:   
@@ -119,7 +119,7 @@ def _create_datapackage(datasets):
     try:
         with open(os.path.join(dir_path, 'METADATA.json'),'w', encoding="utf-8") as f:
             metadata ['Sist oppdatert'] = today
-            metadata ['Lisens'] = licence
+            metadata ['Lisens'] = license
             metadata['Datapakke_navn'] = metadata.get('Datapakke_navn', guid)
             f.write(json.dumps( metadata , indent=2))
     except:
@@ -131,7 +131,7 @@ def _create_datapackage(datasets):
             'author':  metadata.get('Opphav',''),
             'status':  metadata.get('Tilgangsrettigheter',''),
              # TODO: unødvendig med lisens her siden lisensen ligger i metadata?
-            'license': licence, 
+            'license': license, 
             'readme': readme,
             'metadata': json.dumps( metadata ), 
             'sources': metadata.get('Kilder',''),

@@ -7,17 +7,17 @@ import dataverk.settings as settings
 # Elasticsearch
 class ElasticsearchConnector(BaseConnector):
     """Elasticsearch connection"""
-    def __init__(self, host='private', index='metadata'):
+    def __init__(self, host='private'):
 
         host_uri = settings.index_connections[host]
 
         if host_uri is None:
             raise ValueError('Connection settings are not avilable for the host: {host}')
 
-        self.es = Elasticsearch(host_uri)
-        self.index = index
+        self.es = Elasticsearch([host_uri])
+        self.index = settings.index_connections["index"]
 
-    def create_index(self):
+    def _create_index(self):
         """Create index
         
         """
@@ -79,7 +79,7 @@ class ElasticsearchConnector(BaseConnector):
                         }
                     }
                     },
-                    "DatasettEier": {
+                    "Readme": {
                     "type": "text"
                     }
                 }
@@ -92,37 +92,32 @@ class ElasticsearchConnector(BaseConnector):
 
 
     def write(self, id, doc):
-        """Add or update ddocument
-        
-        """
+        """Add or update ddocument"""
 
-        res = self.es.index(index=self.index, doc_type='metadata', id=id, body=doc)
-        self.es.indices.refresh(index="metadata")
+        res = self.es.index(index=self.index, doc_type=self.index, id=id, body=doc)
+        self.es.indices.refresh(index=self.index)
+        self.log(f'{self.__class__}: Document {id} of type {self.index} indexed to elastic index: {self.index}.')
         return res
 
     def get(self, id):
-        """Retrieve document by id from elastic index
-        
-        """
+        """Retrieve document by id from elastic index"""
 
         try:
             self.log(f'Get document {id} from, elastic {self.index}')
             doc = self.es.get(index=self.index, id=id)
             return doc
         except:
-            raise ValueError(f'Error retrieving document {id} from elastic index {self.index}')
+            self.log(f'{self.__class__}: Unable to retrieve document: {id} by id from elastic index: {self.index}.')
 
     def search(self, query):
-        """Search elastic index
-        
-        """
+        """Search elastic index"""
 
         try:
             self.log(f'Search elastic {self.index} with query {query}')
             hits = self.es.search(index=self.index, query=query)
             return hits
         except:
-            raise ValueError(f'Error retrieving document {id} from elastic index {self.query}')
+            self.log(f'{self.__class__}: Unable to retrieve document with query: {query} from elastic index: {self.index}.')
         
       
 
