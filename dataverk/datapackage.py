@@ -18,7 +18,6 @@ class Datapackage:
 
         self.is_public = public
         self.resources = {}
-        self.resources = {}
         self.dir_path = self._get_path()
         self.datapackage_metadata = self._create_datapackage()
 
@@ -62,55 +61,32 @@ class Datapackage:
             return True
         return False
 
-    def _read_sql_return_pandas_frame(self, source, sql, connector='Oracle'):
+    def read_sql(self, source, sql, dataset_name=None, connector='Oracle', dataset_description=""):
         """
         Read pandas dataframe from SQL database
         """
 
-        if (connector == 'Oracle'):
+        if connector == 'Oracle':
             conn = OracleConnector(source=source)
 
             if self._is_sql_file(source):
-                return conn.get_pandas_df(source)
+                df = conn.get_pandas_df(source)
+            else:
+                path = self._get_path()
+                with open(os.path.join(path, sql)) as f:
+                    query = f.read()
+                df = conn.get_pandas_df(query)
+        else:
+            raise TypeError("Connector type '" + connector + "' is not supported")
 
-            path = self._get_path()
-            with open(os.path.join(path, sql)) as f:
-                query = f.read()
+        # TODO add more connector options
 
-            return conn.get_pandas_df(query)
-
-        # TODO raise error is not oracle and/or add more options
-
-    def _read_sql_append_to_resources(self, source, sql, dataset_name, connector='Oracle', dataset_description=""):
-        """
-        Read pandas dataframe from SQL database
-        """
-
-        if (connector == 'Oracle'):
-            conn = OracleConnector(source=source)
-
-            if self._is_sql_file(source):
-                return conn.get_pandas_df(source)
-
-            path = self._get_path()
-            with open(os.path.join(path, sql)) as f:
-                query = f.read()
-
-            self.add_resource(df=conn.get_pandas_df(query),
+        if dataset_name is None:
+            return df
+        else:
+            self.add_resource(df=df,
                               dataset_name=dataset_name,
                               dataset_description=dataset_description)
-
-    def read_sql(self, source, sql, dataset_name=None, connector='Oracle', dataset_description=""):
-        if dataset_name is None:
-            return self._read_sql_return_pandas_frame(source=source,
-                                                      sql=sql,
-                                                      connector=connector)
-        else:
-            self._read_sql_append_to_resources(source=source,
-                                               sql=sql,
-                                               connector=connector,
-                                               dataset_name=dataset_name,
-                                               dataset_description=dataset_description)
 
     def to_sql(self, df, table, schema, sink, connector='Oracle'):
         """Write records in dataframe to a SQL database table"""
@@ -139,15 +115,13 @@ class Datapackage:
         }
 
     def _verify_bucket_and_datapackage_names(self, metadata):
-        # TODO Erik: Krever S3 at det kun benyttes bokstaver?
-        # valid_name_pattern = '(^[a-z])([a-z\-])+([a-z])$'
         valid_name_pattern = '(^[a-z0-9])([a-z0-9\-])+([a-z0-9])$'
         if not re.match(pattern=valid_name_pattern, string=metadata["Bucket_navn"]):
-            raise NameError("Invalid bucket name: Must be lowercase letters or numbers, words separated by '-', and cannot "
-                            "start or end with '-'")
+            raise NameError("Invalid bucket name (" + metadata["Bucket_navn"] + "): "
+                            "Must be lowercase letters or numbers, words separated by '-', and cannot start or end with '-'")
         if not re.match(pattern=valid_name_pattern, string=metadata["Datapakke_navn"]):
-            raise NameError("Invalid datapackage name: Must be lowercase letters or numbers, words separated by '-', and cannot "
-                            "start or end with '-'")
+            raise NameError("Invalid datapackage name (" + metadata["Datapakke_navn"] +"): "
+                            "Must be lowercase letters or numbers, words separated by '-', and cannot start or end with '-'")
 
     def _create_datapackage(self):
         today = datetime.date.today().strftime('%Y-%m-%d')
@@ -175,16 +149,16 @@ class Datapackage:
         except:
             pass
 
-        if metadata.get('Offentlig', False) == True:
+        if metadata.get('Offentlig', False) is True:
             self.is_public = True
         
-        if metadata.get('Public', False) == True:
+        if metadata.get('Public', False) is True:
             self.is_public = True
      
         metadata['Sist oppdatert'] = today
         metadata['Lisens'] = license
-        metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav')   
-        metadata['Datapakke_navn'] = metadata.get('Datapakke_navn', guid)   
+        metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav')
+        metadata['Datapakke_navn'] = metadata.get('Datapakke_navn', guid)
 
         with open(os.path.join(self.dir_path, 'METADATA.json'), 'w', encoding="utf-8") as f:
             f.write(json.dumps(metadata, indent=2))
@@ -237,13 +211,13 @@ class Datapackage:
 
         if 'nais' in destination:
             publish_data.publish_s3_nais(dir_path=self.dir_path,
-                bucket_name=self.datapackage_metadata["bucket_name"],
-                datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]))
+                                         bucket_name=self.datapackage_metadata["bucket_name"],
+                                         datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]))
     
         if self.is_public and 'gcs' in destination:
             publish_data.publish_google_cloud(dir_path=self.dir_path,
-                bucket_name=self.datapackage_metadata["bucket_name"],
-                datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]))
+                                              bucket_name=self.datapackage_metadata["bucket_name"],
+                                              datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]))
 
             try: 
                 es = ElasticsearchConnector('public')

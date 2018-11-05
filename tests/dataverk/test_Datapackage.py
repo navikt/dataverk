@@ -11,8 +11,8 @@ from dataverk import Datapackage
 # =======================
 metadata_file_template = {
   "Sist oppdatert": "today",
-  "Bucket_navn": "nav-bucket",
-  "Datapakke_navn": "nav-datapakke",
+  "Bucket_navn": "nav-bucket123",
+  "Datapakke_navn": "nav-datapakke123",
   "Lisens": "Test license"
 }
 
@@ -26,17 +26,13 @@ class Base(TestCase):
     This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
     def setUp(self):
-        with open(os.path.abspath(os.path.join(os.pardir, 'LICENSE.md')), 'w+') as license_file:
-            license_file.write("test license")
-        with open(os.path.abspath(os.path.join(os.pardir, 'README.md')), 'w+') as readme_file:
-            readme_file.write("test readme")
-        with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'w+') as metadata_file:
-            json.dump(metadata_file_template, metadata_file)
+        self.datapackage = Datapackage(public=False)
 
     def tearDown(self):
-        os.remove(os.path.abspath(os.path.join(os.pardir, 'LICENSE.md')))
-        os.remove(os.path.abspath(os.path.join(os.pardir, 'README.md')))
-        os.remove(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')))
+        try:
+            os.remove(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')))
+        except OSError:
+            pass
 
 
 # Test classes
@@ -47,6 +43,10 @@ class Instantiation(Base):
 
     Tests include: instantiation with args of wrong type, instantiation with input values outside constraints, etc.
     """
+    def setUp(self):
+        with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'w+') as metadata_file:
+            json.dump(metadata_file_template, metadata_file)
+
     def test_class_instantiation_normal(self):
         datapackage = Datapackage(public=False)
         self.assertEqual(datapackage.is_public, False)
@@ -63,7 +63,7 @@ class Instantiation(Base):
     # Input arguments outside constraints
     # ===================================
     def test_invalid_bucket_or_datapackage_names(self):
-        invalid_names = ["_name", "-name", "name with spaces", "name_", "name-", "Name", "name2", "name;"]
+        invalid_names = ["_name", "-name", "name with spaces", "name_", "name-", "Name", "name;"]
 
         for datapackage_name in invalid_names:
             with self.subTest(msg="Invalid data package name", _input=datapackage_name):
@@ -109,41 +109,55 @@ class MethodsInput(Base):
 
     # Test normal method inputs
     def test_add_resource_normal(self):
-        datapackage = Datapackage(public=False)
         df = pd.DataFrame()
         dataset_name = "dataset"
         dataset_description = "dataset beskrivelse"
 
-        datapackage.add_resource(df=df, dataset_name=dataset_name, dataset_description=dataset_description)
-        self.assertIsInstance(datapackage.resources[dataset_name], pd.DataFrame)
-        self.assertEqual(datapackage.datapackage_metadata['Datasett'][dataset_name], dataset_description)
+        self.datapackage.add_resource(df=df, dataset_name=dataset_name, dataset_description=dataset_description)
+        self.assertIsInstance(self.datapackage.resources[dataset_name], pd.DataFrame)
+        self.assertEqual(self.datapackage.datapackage_metadata['Datasett'][dataset_name], dataset_description)
 
     def test_update_metadata_normal(self):
-        datapackage = Datapackage(public=False)
-        datapackage.update_metadata("test_key", "test_value")
-        self.assertEqual(datapackage.datapackage_metadata["test_key"], "test_value")
+        self.datapackage.update_metadata("test_key", "test_value")
+        self.assertEqual(self.datapackage.datapackage_metadata["test_key"], "test_value")
 
     # Test wrong input types
     def test_add_resource_wrong_input_types(self):
-        datapackage = Datapackage(public=False)
-
         wrong_df_input_types = [0, "string", False, object(), list()]
         for input_type in wrong_df_input_types:
             with self.subTest(msg="add_resource: Wrong input parameter type for df parameter", _input=input_type):
                 with self.assertRaises(TypeError):
-                    datapackage.add_resource(df=input_type, dataset_name="dataset", dataset_description="")
+                    self.datapackage.add_resource(df=input_type, dataset_name="dataset", dataset_description="")
 
         wrong_dataset_name_input_types = [0, pd.DataFrame(), False, object(), list()]
         for input_type in wrong_dataset_name_input_types:
             with self.subTest(msg="add_resource: Wrong input parameter type for dataset_name parameter", _input=input_type):
                 with self.assertRaises(TypeError):
-                    datapackage.add_resource(df=pd.DataFrame(), dataset_name=input_type, dataset_description="")
+                    self.datapackage.add_resource(df=pd.DataFrame(), dataset_name=input_type, dataset_description="")
 
         wrong_dataset_desc_input_types = [0, pd.DataFrame(), False, object(), list()]
         for input_type in wrong_dataset_desc_input_types:
             with self.subTest(msg="add_resource: Wrong input parameter type for dataset_description parameter", _input=input_type):
                 with self.assertRaises(TypeError):
-                    datapackage.add_resource(df=pd.DataFrame(), dataset_name="dataset", dataset_description=input_type)
+                    self.datapackage.add_resource(df=pd.DataFrame(), dataset_name="dataset", dataset_description=input_type)
+
+    def test_update_metadata_wrong_input_types(self):
+        wrong_input_types = [0, pd.DataFrame(), False, object(), list()]
+
+        for input_type in wrong_input_types:
+            with self.subTest(msg="update_metadata: Wrong input parameter type for key parameter", _input=input_type):
+                with self.assertRaises(TypeError):
+                    self.datapackage.update_metadata(key=input_type, value="test_value")
+
+        for input_type in wrong_input_types:
+            with self.subTest(msg="update_metadata: Wrong input parameter type for value parameter", _input=input_type):
+                with self.assertRaises(TypeError):
+                    self.datapackage.update_metadata(key="test_key", value=input_type)
+
+    def test_wrong_sql_connector_input(self):
+        with self.assertRaises(TypeError):
+            self.datapackage.read_sql(source='datalab', sql="SELECT * FROM test", connector="non_existant_connector")
+
 
 class MethodsReturnType(Base):
     """
