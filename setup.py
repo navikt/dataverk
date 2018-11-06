@@ -36,8 +36,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'dataverk_create = dataverk_setup_scripts.dataverk_create:main',
-            'dataverk_init = dataverk_setup_scripts.dataverk_init:main'
+            'dataverk = dataverk_setup_scripts.dataverk:main'
         ]
     },
 
