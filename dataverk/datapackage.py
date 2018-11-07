@@ -1,4 +1,3 @@
-
 import pandas as pd
 import os
 import json
@@ -8,11 +7,13 @@ import re
 import uuid
 from dataverk.connectors import OracleConnector, ElasticsearchConnector
 from dataverk.utils import notebook2script, publish_data
+from .oop_settings import Settings
+from pathlib import Path
 
 
 class Datapackage:
 
-    def __init__(self, public=False):
+    def __init__(self, settings_file_path: str, public=False, env_file_path: str=None):
         if not isinstance(public, bool):
             raise TypeError("public parameter must be boolean")
 
@@ -20,6 +21,8 @@ class Datapackage:
         self.resources = {}
         self.dir_path = self._get_path()
         self.datapackage_metadata = self._create_datapackage()
+
+        self.settings = Settings(settings_json_url=Path(settings_file_path), env_file_path=Path(env_file_path))
 
     def write_notebook(self):
         # TODO: Hører dette hjemme her eller er det mer naturlig å beholde det på dv nivå? 
@@ -67,7 +70,7 @@ class Datapackage:
         """
 
         if connector == 'Oracle':
-            conn = OracleConnector(source=source)
+            conn = OracleConnector(source=source, settings=self.settings)
 
             if self._is_sql_file(source):
                 df = conn.get_pandas_df(source)
@@ -92,7 +95,7 @@ class Datapackage:
         """Write records in dataframe to a SQL database table"""
 
         if (connector == 'Oracle'):
-            conn = OracleConnector(source=sink)
+            conn = OracleConnector(source=sink, settings=self.settings)
             return conn.persist_pandas_df(table, schema, df)
 
     def _get_csv_schema(self, df, filename):
@@ -211,13 +214,13 @@ class Datapackage:
 
         if 'nais' in destination:
             publish_data.publish_s3_nais(dir_path=self.dir_path,
-                                         bucket_name=self.datapackage_metadata["bucket_name"],
-                                         datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]))
+                                         datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]),
+                                         settings=self.settings)
     
         if self.is_public and 'gcs' in destination:
             publish_data.publish_google_cloud(dir_path=self.dir_path,
-                                              bucket_name=self.datapackage_metadata["bucket_name"],
-                                              datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]))
+                                              datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]),
+                                              settings=self.settings)
 
             try: 
                 es = ElasticsearchConnector('public')

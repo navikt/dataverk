@@ -3,7 +3,6 @@ import os
 from io import BytesIO
 from datetime import timedelta
 from dataverk.connectors.base import BaseConnector
-import dataverk.settings as settings
 
 
 class AzureStorageConnector(BaseConnector):
