@@ -6,27 +6,25 @@ from datetime import timedelta
 from dataverk.connectors.base import BaseConnector
 from google.cloud import exceptions
 from google.oauth2 import service_account
-from dataverk.oop_settings import Settings
+import dataverk.settings as settings
 
 # Google storage
 class GoogleStorageConnector(BaseConnector):
     """Google Storage connector"""
     
-    def __init__(self, settings: Settings, encrypted=True):
+    def __init__(self, encrypted=True, bucket=settings.bucket_storage_connections["google_cloud"]["bucket"]):
         """Init"""
 
         super(self.__class__, self).__init__(encrypted=encrypted)
-        self.settings = settings
 
         try: 
             # Instantiate a client
             gcloud_credentials = service_account.Credentials.from_service_account_info(
-                self.settings.get_field("bucket_storage_connections")["google_cloud"]["credentials"])
-            storage_client = storage.Client(project=settings.get_field("bucket_storage_connections")["google_cloud"]["client"],
+                settings.bucket_storage_connections["google_cloud"]["credentials"])
+            storage_client = storage.Client(project=settings.bucket_storage_connections["google_cloud"]["client"],
                                             credentials=gcloud_credentials)
 
-            self.bucket = self._get_bucket(storage_client,
-                                           self.settings.get_field("bucket_storage_connections")["google_cloud"]["bucket"])
+            self.bucket = self._get_bucket(storage_client, bucket)
 
             # Reload fetches the current ACL from Cloud Storage.
             self.bucket.acl.reload()
