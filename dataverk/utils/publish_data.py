@@ -1,15 +1,15 @@
 import os
-
 from dataverk.connectors import GoogleStorageConnector, AWSS3Connector
+from dataverk import Settings
 
-def publish_google_cloud(dir_path, bucket_name, datapackage_key_prefix):
-    conn = GoogleStorageConnector(encrypted=False, bucket=bucket_name)
+def publish_google_cloud(dir_path, datapackage_key_prefix, settings: Settings):
+    conn = GoogleStorageConnector(encrypted=False, settings=settings)
     conn.upload_blob(os.path.join(dir_path, 'datapackage.json'), datapackage_key_prefix + 'datapackage.json')
     for f in os.listdir(os.path.join(dir_path, 'data')):
         conn.upload_blob(os.path.join(dir_path, 'data', f), datapackage_key_prefix + f)
 
-def publish_s3_nais(dir_path, bucket_name, datapackage_key_prefix):
-    conn = AWSS3Connector(encrypted=False, bucket_name=bucket_name)
+def publish_s3_nais(dir_path, datapackage_key_prefix, settings: Settings):
+    conn = AWSS3Connector(encrypted=False, settings=settings)
     conn.upload_from_file(os.path.join(dir_path, 'datapackage.json'), datapackage_key_prefix + 'datapackage.json')
     for f in os.listdir(os.path.join(dir_path, 'data')):
         conn.upload_from_file(os.path.join(dir_path, 'data', f), datapackage_key_prefix + f)
