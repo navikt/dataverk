@@ -36,7 +36,10 @@ def main():
     if args.command == 'init':
         pass
     elif args.command == 'create':
-        dataverk_create.run()
+        dataverk_create.run(package_name_in=args.package_name,
+                            update_schedule_in=args.update_schedule,
+                            nais_namespace_in=args.nais_namespace,
+                            settings_repo_in=args.settings_repo)
 
 
 if __name__ == "__main__":
