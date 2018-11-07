@@ -1,23 +1,25 @@
 from dataverk.connectors import BaseConnector
 import os
 import boto3
-import dataverk.settings as settings
+from dataverk.oop_settings import Settings
 
 # AWS S3
 class AWSS3Connector(BaseConnector):
     """Amazon S3 Storage compatible connection"""
 
     # Init
-    def __init__(self, encrypted=True, bucket_name=settings.bucket_storage_connections["AWS_S3"]["bucket"]):
+    def __init__(self, settings: Settings, encrypted=True):
 
         super(self.__class__, self).__init__(encrypted=encrypted)
 
+        bucket_name = settings.get_field("bucket_storage_connections")["AWS_S3"]["bucket"]
+
         self.s3 = boto3.resource(
             service_name='s3',
-            aws_access_key_id=settings.bucket_storage_connections["AWS_S3"]["access_key"],
-            aws_secret_access_key=settings.bucket_storage_connections["AWS_S3"]["secret_key"],
+            aws_access_key_id=settings.get_field("bucket_storage_connections")["AWS_S3"]["access_key"],
+            aws_secret_access_key=settings.get_field("bucket_storage_connections")["AWS_S3"]["secret_key"],
             verify=False,
-            endpoint_url=settings.bucket_storage_connections["AWS_S3"]["host"]
+            endpoint_url=settings.get_field("bucket_storage_connections")["AWS_S3"]["host"]
         )
 
         if not self.s3.Bucket(bucket_name) in self.s3.buckets.all():
