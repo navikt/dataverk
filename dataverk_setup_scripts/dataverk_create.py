@@ -14,29 +14,35 @@ class CreateDataPackage:
     ''' Klasse for å opprette ny datapakke i et eksisterende repository for datapakker/datasett
     '''
 
-    def __init__(self, name: str, github_project: str):
-        user = input("Brukerident: ")
-        password = getpass.getpass("Passord: ")
+    def __init__(self, name: str,
+                 github_project: str, update_schedule: str,
+                 namespace: str, settings_repo: str,
+                 user: str, password: str):
 
-        self.package_name = name
-        self.github_project = github_project
-        self.namespace = 'opendata' # TODO: Konfigurerbart?
         self.jenkins_server = jenkins.Jenkins('http://a34apvl00117.devillo.no:8080', username=user, password=password)
 
         if not self._is_in_repo_root():
             raise Exception("dataverk_create må kjøres fra topp-nivået i git repoet")
 
-        if self._is_package_name_in_use():
+        if self._is_package_name_in_use(name):
             raise NameError("Datapakkenavn må være unikt.")
+
+        self.package_name = name
+        self.github_project = github_project
+        self.namespace = namespace
 
         self._create_folder_structure()
 
-        settings_repo_url = input("Lim inn url til settings repo: ")
-        settings = settings_loader.GitSettingsLoader(url=settings_repo_url)
+        settings = settings_loader.GitSettingsLoader(url=settings_repo)
 
         self.settings_folder_name = settings.download_to(self.package_name)
 
-        self.cronjob_schedule = self._set_cronjob_schedule()
+        if update_schedule is None:
+            self.cronjob_schedule = self._set_cronjob_schedule()
+        else:
+            self.cronjob_schedule = update_schedule
+
+        # TODO: verify cronjob_schedule string
 
     def _is_in_repo_root(self):
         ''' Sjekk på om create_dataverk kjøres fra toppnivå i repo.
@@ -49,19 +55,19 @@ class CreateDataPackage:
 
         return os.path.samefile(current_dir, git_root)
 
-    def _is_package_name_in_use(self):
+    def _is_package_name_in_use(self, name: str):
         ''' Sjekk på om pakkenavnet er i bruk enten i repo eller på jenkinsserver
 
         :return: boolean: "True" hvis pakkenavn allerede er tatt i bruk, "False" ellers
         '''
 
         for filename in os.listdir(os.getcwd()):
-            if self.package_name == filename:
-                print("En mappe med navn " + self.package_name + " eksisterer allerede i repo " + self.github_project)
+            if name == filename:
+                print("En mappe med navn " + name + " eksisterer allerede i repo " + self.github_project)
                 return True
 
-        if self.jenkins_server.job_exists(self.package_name):
-            print("En jobb med navn " + self.package_name + " eksisterer allerede på jenkins serveren")
+        if self.jenkins_server.job_exists(name):
+            print("En jobb med navn " + name + " eksisterer allerede på jenkins serveren")
             return True
 
         return False
@@ -246,13 +252,32 @@ def get_github_url():
     return os.popen('git config --get remote.origin.url').read().strip()
 
 
-def main():
+def run(package_name_in: str=None, update_schedule_in: str=None, nais_namespace_in: str=None, settings_repo_in: str=None):
     github_project = get_github_url()
 
     print("Opprettelse av ny datapakke i " + github_project)
-    datapackage = input('Skriv inn ønsket navn på ny datapakke: ')
 
-    new_datapackage = CreateDataPackage(datapackage, github_project)
+    if package_name_in is None:
+        datapackage = input("Skriv inn ønsket navn på ny datapakke: ")
+    else:
+        datapackage = package_name_in
+
+    if settings_repo_in is None:
+        settings_repo_url = input("Lim inn url til settings repo: ")
+    else:
+        settings_repo_url = settings_repo_in
+
+    if nais_namespace_in is None:
+        namespace = input("Skriv inn ønsket NAIS namespace: ")
+    else:
+        namespace = nais_namespace_in
+
+    user = input("Brukerident: ")
+    password = getpass.getpass("Passord: ")
+
+    new_datapackage = CreateDataPackage(name=datapackage, github_project=github_project,
+                                        update_schedule=update_schedule_in, settings_repo=settings_repo_url,
+                                        namespace=namespace, user=user, password=password)
 
     new_datapackage.print_datapackage_config()
 
@@ -262,7 +287,3 @@ def main():
         new_datapackage.create()
     else:
         print("Datapakken ble ikke opprettet")
-
-
-if __name__ == "__main__":
-    main()
