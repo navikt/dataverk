@@ -92,7 +92,7 @@ class GitSettingsLoader(SettingsLoader):
             if self._is_location_git_repo(self.setting_file_location):
                 return self._clone_git_repo_return_path_to_settings_file(self.setting_file_location, save_path)
             else:
-                raise  ValueError("Url does not resolve to a git repository")
+                raise ValueError("Url does not resolve to a git repository")
         else:
             raise NotADirectoryError("Path is not a Directory or does not exist")
 

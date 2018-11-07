@@ -12,7 +12,7 @@ from dataverk.oop_settings import Settings
 class GoogleStorageConnector(BaseConnector):
     """Google Storage connector"""
     
-    def __init__(self,settings: Settings, encrypted=True):
+    def __init__(self, settings: Settings, encrypted=True):
         """Init"""
 
         super(self.__class__, self).__init__(encrypted=encrypted)

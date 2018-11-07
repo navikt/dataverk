@@ -16,8 +16,11 @@ import requests
 bad_url_inputs = ("", "testfile_settings.json", 1, object(), [], None)
 bad_get_field_inputs = (None, 1, object(), [])
 
+
 # Base classes
 # ============
+
+
 class Base(TestCase):
     """
     Base class for tests
@@ -117,7 +120,8 @@ class MethodsReturnValues(Base):
     """
 
     def test_json_to_dict__normal_case(self):
-        pp(self.testObject._json_to_dict())
+        self.assertEqual(self.test_file_settings_dict,
+                         self.testObject._json_to_dict(path=Path("testfile_settings.json")), "The Dicts should be equal")
 
     def test_get_field__CONFIG_PATH_SET_normal_case(self):
         path = Path()
