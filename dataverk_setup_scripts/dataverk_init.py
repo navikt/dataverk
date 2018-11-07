@@ -113,7 +113,7 @@ class NewRepoCreator:
         index = int(licence_index)
 
         if index in self.valid_licences:
-            self.add_config_file("LICENCE.md", self.valid_licences[index])
+            self.add_config_file("LICENSE.md", self.valid_licences[index])
 
     def _load_licences(self) -> dict:
         """Laster inn lisensene som brukeren kan velge mellom"""
