@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from setuptools import setup
 
 #Gjør README.md om til den lange beskrivelsen på PiPy
