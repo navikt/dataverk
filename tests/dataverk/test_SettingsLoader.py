@@ -78,9 +78,6 @@ class MethodsInput(Base):
     Tests include: passing invalid input, etc.
     """
 
-    def test__copy_file__normal_case(self):
-        self.settings_loader._copy_file(Path(testfile_settings), Path(self.local_test_dir))
-
     def test__is_valid_url_string(self):
         self.assertTrue(self.settings_loader._is_valid_url_string("test.no"))
 
