@@ -14,5 +14,6 @@ __all__ = [
     'AuthMixin',
     'LoggerMixin',
     'notebook2script',
-    'get_notebook_name'
+    'get_notebook_name',
+    'pathfinder'
     ]
