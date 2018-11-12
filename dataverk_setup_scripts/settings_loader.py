@@ -31,7 +31,8 @@ class SettingsLoader:
         return True
 
     def _copy_file(self, file_location: Path, to_dir: Path):
-        copyfile(str(file_location), str(to_dir.absolute()))
+        filename = file_location.parts[-1]
+        copyfile(str(file_location), str(to_dir.absolute()) + filename)
 
     def _is_location_git_repo(self, settings_file_location: str):
         """Returner True om URLen går til en .git fil
