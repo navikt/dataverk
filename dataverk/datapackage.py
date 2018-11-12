@@ -22,11 +22,7 @@ class Datapackage:
         self.dir_path = self._get_path()
         self.datapackage_metadata = self._create_datapackage()
 
-        self.settings = Settings(settings_json_url=Path(settings_file_path), env_file_path=Path(env_file_path))
-
-    def write_notebook(self):
-        # TODO: Hører dette hjemme her eller er det mer naturlig å beholde det på dv nivå? 
-        notebook2script()
+        self.settings = Settings(settings_json_url=Path(settings_file_path), env_file_path=env_file_path)
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
@@ -183,10 +179,10 @@ class Datapackage:
             'datapackage_name': metadata['Datapakke_navn']
         }
 
-    def write_datapackage(self, datasets):
+    def write_datapackage(self):
         resources = []
         with open(self.dir_path + '/datapackage.json', 'w') as outfile:
-            for filename, df in datasets.items():
+            for filename, df in self.resources.items():
                 # TODO bruk Parquet i stedet for csv?
                 resources.append(self._get_csv_schema(df, filename))
 
@@ -202,14 +198,14 @@ class Datapackage:
                     if exc.errno != errno.EEXIST:
                         raise
 
-            for filename, df in datasets.items():
-                df.to_csv(self.dir_path + '/data/' + filename + '.csv', index=False, sep=';')
+            for filename, df in self.resources.items():
+                df.to_csv(data_path + filename + '.csv', index=False, sep=';')
 
     def _datapackage_key_prefix(self, datapackage_name):
         return datapackage_name + '/'
 
     def publish(self, destination=['nais', 'gcs']):
-        self.write_datapackage(self.resources)
+        self.write_datapackage()
         # TODO: add views
 
         if 'nais' in destination:
