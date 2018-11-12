@@ -1,9 +1,9 @@
 import sys
 
 
-def get_project_root():
+def get_calling_script_root():
     return sys.path[0]
 
 
 if __name__ == "__main__":
-    print(get_project_root())
+    print(get_calling_script_root())
