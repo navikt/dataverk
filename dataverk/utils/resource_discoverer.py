@@ -11,10 +11,10 @@ def search_for_files_from_working_dir(file_names: tuple, levels: int):
     :return: dictionary with key: filename, value: Path to file
     """
     start_path = Path(pathfinder.get_project_root())
-    return search(start_path, file_names, levels)
+    return search_for_files(start_path, file_names, levels)
 
 
-def search(start_path: Path, file_names: tuple, levels: int) -> dict:
+def search_for_files(start_path: Path, file_names: tuple, levels: int) -> dict:
     """
     Searches from the current path and up the path hierarchy
 
