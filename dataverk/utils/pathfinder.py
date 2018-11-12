@@ -1,9 +1,8 @@
 import sys
-import os
 
 
 def get_project_root():
-    return os.path.dirname(__file__)
+    return sys.path[0]
 
 
 if __name__ == "__main__":

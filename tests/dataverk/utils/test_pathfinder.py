@@ -4,6 +4,7 @@
 # =================
 import unittest
 from dataverk.utils import pathfinder
+import sys
 
 
 # Common input parameters
@@ -37,4 +38,6 @@ class MethodsReturnValues(Base):
     """
     Tests values of methods against known values
     """
-    print(pathfinder.get_project_root())
+
+    def test_get_project_root__normal_case(self):
+        self.assertEqual(sys.path[0], pathfinder.get_project_root())

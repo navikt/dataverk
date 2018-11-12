@@ -48,9 +48,13 @@ class MethodsReturnValues(Base):
     """
 
     def test_search(self):
-        pp(resource_discoverer.search(Path("."), ("__init__.py", "dataverk-secrets.json"), 4))
+        ret_dict = resource_discoverer.search(Path("."), ("__init__.py", "dataverk-secrets.json"), 2)
+        self.assertTrue("__init__.py" in ret_dict)
+        self.assertTrue("dataverk-secrets.json" in ret_dict)
 
     def test_search_for_files_from_working_dir(self):
-        pp(resource_discoverer.search_for_files_from_working_dir(("__init__.py", "dataverk-secrets.json"), 4))
+        ret_dict = resource_discoverer.search_for_files_from_working_dir(("__init__.py", "dataverk-secrets.json"), 2)
+        self.assertTrue("__init__.py" in ret_dict)
+        self.assertTrue("dataverk-secrets.json" in ret_dict)
 
 
