@@ -7,6 +7,7 @@ import pandas as pd
 from unittest import TestCase
 from dataverk import Datapackage
 from pathlib import Path
+from dataverk.utils import resource_discoverer
 
 # Common input parameters
 # =======================
@@ -27,11 +28,14 @@ class Base(TestCase):
     This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
     def setUp(self):
-        print("Current dir" + str(os.getcwd()))
         if "RUN_FROM_VDI" in os.environ:
             del os.environ["RUN_FROM_VDI"]
 
-        self.datapackage = Datapackage(settings_file_path=Path("testfile_settings.json"), public=False, env_file_path=Path(".env_test"))
+        self.files = resource_discoverer.search_for_files(start_path=Path(os.path.dirname(os.path.realpath(__file__))),
+                                          file_names=('testfile_settings.json', '.env_test'), levels=3)
+
+        self.datapackage = Datapackage(settings_file_path=Path(self.files["testfile_settings.json"]), public=False,
+                                       env_file_path=Path(self.files[".env_test"]))
 
     def tearDown(self):
         try:
@@ -52,11 +56,15 @@ class Instantiation(Base):
         if "RUN_FROM_VDI" in os.environ:
             del os.environ["RUN_FROM_VDI"]
 
+        self.files = resource_discoverer.search_for_files(start_path=Path(os.path.dirname(os.path.realpath(__file__))),
+                                          file_names=('testfile_settings.json', '.env_test'), levels=3)
+
         with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'w+') as metadata_file:
             json.dump(metadata_file_template, metadata_file)
 
     def test_class_instantiation_normal(self):
-        datapackage = Datapackage(settings_file_path=Path("testfile_settings.json"), public=False, env_file_path=Path(".env_test"))
+        datapackage = Datapackage(settings_file_path=Path(self.files["testfile_settings.json"]), public=False,
+                                  env_file_path=Path(self.files[".env_test"]))
         self.assertEqual(datapackage.is_public, False)
 
     # Input arguments wrong type
@@ -66,7 +74,13 @@ class Instantiation(Base):
         for input_type in wrong_input_param_types:
             with self.subTest(msg="Wrong input parameter type in Datapackage class instantiation", _input=input_type):
                 with self.assertRaises(TypeError):
-                    Datapackage(settings_file_path=Path("testfile_settings.json"), public=input_type, env_file_path=Path(".env_test"))
+                    Datapackage(settings_file_path=Path(self.files["testfile_settings.json"]), public=input_type,
+                                env_file_path=Path(self.files[".env_test"]))
+
+    def test_class_instantiation_with_invalid_settings_file(self):
+        with self.assertRaises(FileNotFoundError):
+            Datapackage(settings_file_path=Path("settings_file_that_does_not_exist.json"), public=False,
+                        env_file_path=Path(self.files[".env_test"]))
 
     # Input arguments outside constraints
     # ===================================
@@ -81,7 +95,8 @@ class Instantiation(Base):
                     metadata["Datapakke_navn"] = datapackage_name
                     json.dump(metadata, metadata_file)
                 with self.assertRaises(NameError):
-                    Datapackage(settings_file_path=Path("testfile_settings.json"), public=False, env_file_path=Path(".env_test"))
+                    Datapackage(settings_file_path=Path(self.files["testfile_settings.json"]), public=False,
+                                env_file_path=Path(self.files[".env_test"]))
 
         for bucket_name in invalid_names:
             with self.subTest(msg="Invalid data package name", _input=bucket_name):
@@ -91,7 +106,8 @@ class Instantiation(Base):
                     metadata["Bucket_navn"] = bucket_name
                     json.dump(metadata, metadata_file)
                 with self.assertRaises(NameError):
-                    Datapackage(settings_file_path=Path("testfile_settings.json"), public=False, env_file_path=Path(".env_test"))
+                    Datapackage(settings_file_path=Path(self.files["testfile_settings.json"]), public=False,
+                                env_file_path=Path(self.files[".env_test"]))
 
 
 class Set(Base):

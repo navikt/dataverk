@@ -28,10 +28,10 @@ class Instantiation(Base):
 
     Tests include: instantiation with args of wrong type, instantiation with input values outside constraints, etc.
     """
-
-    def test_init_normal_case(self):
-        loader = GitSettingsLoader("https://github.com/navikt/dataverk_settings.git")
-        print(loader.download_to(local_temp_dir))
+    pass
+    # def test_init_normal_case(self): # Todo: skal vi pulle repoet i en unittest?
+    #     loader = GitSettingsLoader("https://github.com/navikt/dataverk_settings.git")
+    #     print(loader.download_to(local_temp_dir))
 
 
     # Input arguments wrong type

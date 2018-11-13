@@ -6,6 +6,7 @@ from unittest import TestCase
 from dataverk import oop_settings
 from pathlib import Path
 from pprint import pprint as pp
+from dataverk.utils import resource_discoverer
 import os
 import json
 import requests
@@ -28,11 +29,14 @@ class Base(TestCase):
     This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
     def setUp(self):
+        self.files = resource_discoverer.search_for_files(start_path=Path(os.path.dirname(os.path.realpath(__file__))),
+                                                              file_names=('testfile_settings.json', '.env_test', 'dataverk-secrets.json'),
+                                                              levels=3)
         self.bad_url_inputs = bad_url_inputs
-        self.testObject = oop_settings.Settings(Path("testfile_settings.json"), Path(".env_test"))
+        self.testObject = oop_settings.Settings(Path(self.files["testfile_settings.json"]), self.files[".env_test"])
         self.bad_get_field_inputs = bad_get_field_inputs
-        self.dataverk_secrets_dict = json.loads(self._read_file(Path("dataverk-secrets.json")))
-        self.test_file_settings_dict = json.loads(self._read_file(Path("testfile_settings.json")))
+        self.dataverk_secrets_dict = json.loads(self._read_file(Path(self.files["dataverk-secrets.json"])))
+        self.test_file_settings_dict = json.loads(self._read_file(Path(self.files["testfile_settings.json"])))
 
     def tearDown(self):
         # Clean up env variables after testing
@@ -62,7 +66,7 @@ class Instantiation(Base):
     # ==========================
 
     def test_init__normal_case(self):
-        settings = oop_settings.Settings(Path("testfile_settings.json"))
+        settings = oop_settings.Settings(Path(self.files["testfile_settings.json"]))
         self.assertIsNotNone(settings)
 
     # Input arguments outside constraints
@@ -121,14 +125,14 @@ class MethodsReturnValues(Base):
 
     def test_json_to_dict__normal_case(self):
         self.assertEqual(self.test_file_settings_dict,
-                         self.testObject._json_to_dict(path=Path("testfile_settings.json")), "The Dicts should be equal")
+                         self.testObject._json_to_dict(path=self.files["testfile_settings.json"]), "The Dicts should be equal")
 
     def test_get_field__CONFIG_PATH_SET_normal_case(self):
         path = Path()
-        os.environ["CONFIG_PATH"] = str(path.absolute()) + "/"
+        os.environ["CONFIG_PATH"] = str(self.files["testfile_settings.json"].parents[0]) #str(path.absolute()) + "/"
         expected_dict = self.dataverk_secrets_dict
 
-        testObject = oop_settings.Settings(Path("testfile_settings.json"), Path(".env_test"))
+        testObject = oop_settings.Settings(Path(self.files["testfile_settings.json"]), Path(self.files[".env_test"]))
         result = testObject.get_field("config")
         self.assertEqual(expected_dict, result, "The dictionaries should contain the same keys and values")
 
@@ -138,5 +142,5 @@ class MethodsReturnValues(Base):
         # Should raise exception when trying to connect to the mock url endpoint
         # [TODO] Can we make the VDI settings setup more testable?
         with self.assertRaises(requests.exceptions.ConnectionError) as cm:
-            testObject = oop_settings.Settings(Path("testfile_settings.json"), Path(".env_test"))
+            testObject = oop_settings.Settings(Path(self.files["testfile_settings.json"]), Path(self.files[".env_test"]))
 
