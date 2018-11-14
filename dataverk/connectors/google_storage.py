@@ -19,12 +19,12 @@ class GoogleStorageConnector(BaseConnector):
         try: 
             # Instantiate a client
             gcloud_credentials = service_account.Credentials.from_service_account_info(
-                self.settings.get_field("bucket_storage_connections")["google_cloud"]["credentials"])
-            storage_client = storage.Client(project=settings.get_field("bucket_storage_connections")["google_cloud"]["client"],
+                self.settings["bucket_storage_connections"]["google_cloud"]["credentials"])
+            storage_client = storage.Client(project=settings["bucket_storage_connections"]["google_cloud"]["client"],
                                             credentials=gcloud_credentials)
 
             self.bucket = self._get_bucket(storage_client,
-                                           self.settings.get_field("bucket_storage_connections")["google_cloud"]["bucket"])
+                                           self.settings["bucket_storage_connections"]["google_cloud"]["bucket"])
 
             # Reload fetches the current ACL from Cloud Storage.
             self.bucket.acl.reload()

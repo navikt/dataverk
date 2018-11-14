@@ -11,14 +11,14 @@ class AWSS3Connector(BaseConnector):
 
         super(self.__class__, self).__init__(encrypted=encrypted)
 
-        bucket_name = settings.get_field("bucket_storage_connections")["AWS_S3"]["bucket"]
+        bucket_name = settings["bucket_storage_connections"]["AWS_S3"]["bucket"]
 
         self.s3 = boto3.resource(
             service_name='s3',
-            aws_access_key_id=settings.get_field("bucket_storage_connections")["AWS_S3"]["access_key"],
-            aws_secret_access_key=settings.get_field("bucket_storage_connections")["AWS_S3"]["secret_key"],
+            aws_access_key_id=settings["bucket_storage_connections"]["AWS_S3"]["access_key"],
+            aws_secret_access_key=settings["bucket_storage_connections"]["AWS_S3"]["secret_key"],
             verify=False,
-            endpoint_url=settings.get_field("bucket_storage_connections")["AWS_S3"]["host"]
+            endpoint_url=settings["bucket_storage_connections"]["AWS_S3"]["host"]
         )
 
         if not self.s3.Bucket(bucket_name) in self.s3.buckets.all():

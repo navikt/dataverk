@@ -32,11 +32,11 @@ class OracleConnector(BaseConnector):
         self.df = None
         self.dsn = None
     
-        if source not in settings.get_field("db_connection_strings"):
+        if source not in settings["db_connection_strings"]:
             raise ValueError(f'Database connection string not found in settings file.\
              Unable to establish connection to database: {source}')
 
-        db = self._parse_connection_string(settings.get_field("db_connection_strings")[source])
+        db = self._parse_connection_string(settings["db_connection_strings"][source])
         self.db = db
 
         if 'service_name' in db:

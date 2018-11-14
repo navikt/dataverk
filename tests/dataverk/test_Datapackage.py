@@ -31,11 +31,14 @@ class Base(TestCase):
         if "RUN_FROM_VDI" in os.environ:
             del os.environ["RUN_FROM_VDI"]
 
-        self.files = resource_discoverer.search_for_files(start_path=Path(os.path.dirname(os.path.realpath(__file__))),
+        self.files = resource_discoverer.search_for_files(start_path=Path(__file__).parent.joinpath("static"),
                                           file_names=('testfile_settings.json', '.env_test'), levels=3)
 
         self.datapackage = Datapackage(settings_file_path=Path(self.files["testfile_settings.json"]), public=False,
                                        env_file_path=Path(self.files[".env_test"]))
+
+        with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'w+') as metadata_file:
+            json.dump(metadata_file_template, metadata_file)
 
     def tearDown(self):
         try:
@@ -52,15 +55,6 @@ class Instantiation(Base):
 
     Tests include: instantiation with args of wrong type, instantiation with input values outside constraints, etc.
     """
-    def setUp(self):
-        if "RUN_FROM_VDI" in os.environ:
-            del os.environ["RUN_FROM_VDI"]
-
-        self.files = resource_discoverer.search_for_files(start_path=Path(os.path.dirname(os.path.realpath(__file__))),
-                                          file_names=('testfile_settings.json', '.env_test'), levels=3)
-
-        with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'w+') as metadata_file:
-            json.dump(metadata_file_template, metadata_file)
 
     def test_class_instantiation_normal(self):
         datapackage = Datapackage(settings_file_path=Path(self.files["testfile_settings.json"]), public=False,

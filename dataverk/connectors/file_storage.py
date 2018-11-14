@@ -17,11 +17,10 @@ class FileStorageConnector(BaseConnector):
         self.settings = settings
 
         try: 
-            self.path = self.settings.get_field("file_storage_path")
+            self.path = self.settings["file_storage_path"]
         except Exception as ex:
             print(ex)
 
-    
     def write(self, source_string, destination_blob_name, fmt, metadata=None):
 
         if not isinstance(source_string, str):

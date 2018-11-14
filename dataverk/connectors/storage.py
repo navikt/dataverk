@@ -5,6 +5,7 @@ from dataverk.connectors.file_storage import FileStorageConnector
 from dataverk.connectors.base import BaseConnector
 from dataverk.utils.settings_store import SettingsStore
 
+
 class StorageConnector(BaseConnector):
     """Storage connection
     
@@ -42,7 +43,7 @@ class StorageConnector(BaseConnector):
         if self.conn is not None:
 
             if self.encrypted: 
-                key = self.settings.get_field("encryption_key")
+                key = self.settings["encryption_key"]
                 f = Fernet(key)
                 encypted_source_string = f.encrypt(source_string.encode('utf-8'))
                 self.log(f'Writing encrypted string to {destination_blob_name}')
@@ -73,7 +74,7 @@ class StorageConnector(BaseConnector):
                     blob = blob.encode("utf-8") 
 
                 try:
-                    key = self.settings.get_field("encryption_key")
+                    key = self.settings["encryption_key"]
             
                     f = Fernet(key)
                     plain_text = f.decrypt(blob)
