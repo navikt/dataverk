@@ -6,6 +6,7 @@ from .notebook2script import notebook2script
 from .notebookname import get_notebook_name
 from .resource_discoverer import search_for_files, search_for_files_from_working_dir
 from .pathfinder import get_calling_script_root
+from .env_store import EnvStore
 
 __all__ = [
     'get_fylke_from_region',
@@ -18,5 +19,6 @@ __all__ = [
     'get_notebook_name',
     'get_calling_script_root',
     'search_for_files_from_working_dir',
-    'search_for_files'
+    'search_for_files',
+    'EnvStore'
     ]

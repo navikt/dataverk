@@ -26,6 +26,7 @@ setup(
         'protobuf==3.6.1',
         'pyarrow>=0.10.0',
         'python-jenkins==1.3.0',
+        'PyYAML==3.13',
          #'python-snappy==0.5.3',
         'elasticsearch==6.3.0',
         'google-api-core==0.1.4',
