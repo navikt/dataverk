@@ -7,7 +7,7 @@ from string import Template
 from shutil import copyfile, rmtree
 from xml.etree import ElementTree
 from . import settings_loader
-from dataverk.oop_settings import Settings
+from dataverk.utils.settings_store import SettingsStore
 from dataverk.utils import resource_discoverer, env_store
 from pathlib import Path
 
@@ -51,11 +51,11 @@ class CreateDataPackage:
 
         self.envs = env_store.EnvStore(path=Path(resources['.env']))
 
-        settings = Settings(settings_json_url=Path(resources["settings.json"]), env_file_path=Path(resources[".env"]))
+        settings = SettingsStore(settings_json_url=Path(resources["settings.json"]), env_file_path=Path(resources[".env"]))
 
         self.jenkins_server = jenkins.Jenkins(settings.get_field("jenkins")["url"],
-                                              username=self.envs.get_env_field(field='USER_IDENT'),
-                                              password=self.envs.get_env_field(field='PASSWORD'))
+                                              username=self.envs['USER_IDENT'],
+                                              password=self.envs['PASSWORD'])
 
         if self._jenkins_job_exists(name):
             raise NameError(f'En jobb med navn {name} eksisterer allerede på jenkins serveren. Datapakkenavn må være unikt.')

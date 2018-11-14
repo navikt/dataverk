@@ -1,13 +1,11 @@
-
-import json
 from elasticsearch import Elasticsearch
 from dataverk.connectors import BaseConnector
-from dataverk.oop_settings import Settings
+from dataverk.utils.settings_store import SettingsStore
 
 # Elasticsearch
 class ElasticsearchConnector(BaseConnector):
     """Elasticsearch connection"""
-    def __init__(self, settings: Settings, host='private'):
+    def __init__(self, settings: SettingsStore, host='private'):
 
         host_uri = settings.get_field("index_connections")[host]
 

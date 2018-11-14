@@ -1,14 +1,13 @@
 from dataverk.connectors import BaseConnector
-import os
 import boto3
-from dataverk.oop_settings import Settings
+from dataverk.utils.settings_store import SettingsStore
 
 # AWS S3
 class AWSS3Connector(BaseConnector):
     """Amazon S3 Storage compatible connection"""
 
     # Init
-    def __init__(self, settings: Settings, encrypted=True):
+    def __init__(self, settings: SettingsStore, encrypted=True):
 
         super(self.__class__, self).__init__(encrypted=encrypted)
 

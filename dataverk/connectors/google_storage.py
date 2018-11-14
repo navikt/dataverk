@@ -1,18 +1,16 @@
 import google.cloud.storage as storage
-import json
-import os
 from io import BytesIO
 from datetime import timedelta
 from dataverk.connectors.base import BaseConnector
 from google.cloud import exceptions
 from google.oauth2 import service_account
-from dataverk.oop_settings import Settings
+from dataverk.utils.settings_store import SettingsStore
 
 # Google storage
 class GoogleStorageConnector(BaseConnector):
     """Google Storage connector"""
     
-    def __init__(self, settings: Settings, encrypted=True):
+    def __init__(self, settings: SettingsStore, encrypted=True):
         """Init"""
 
         super(self.__class__, self).__init__(encrypted=encrypted)

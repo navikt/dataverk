@@ -1,13 +1,11 @@
-import json
 import time
-import os
 import cx_Oracle
 import pandas as pd
-from sqlalchemy import types, create_engine
+from sqlalchemy import create_engine
 
 from urllib import parse
 from dataverk.connectors import BaseConnector
-from dataverk.oop_settings import Settings
+from dataverk.utils.settings_store import SettingsStore
 
 # Oracle
 class OracleConnector(BaseConnector):
@@ -26,7 +24,7 @@ class OracleConnector(BaseConnector):
 
     """
 
-    def __init__(self, settings: Settings, source=None):
+    def __init__(self, settings: SettingsStore, source=None):
         super(OracleConnector, self).__init__()
 
         self.settings = settings

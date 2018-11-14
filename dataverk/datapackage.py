@@ -6,8 +6,8 @@ import datetime
 import re
 import uuid
 from dataverk.connectors import OracleConnector, ElasticsearchConnector
-from dataverk.utils import notebook2script, publish_data
-from .oop_settings import Settings
+from dataverk.utils import publish_data
+from dataverk.utils.settings_store import SettingsStore
 from pathlib import Path
 
 
@@ -22,7 +22,7 @@ class Datapackage:
         self.dir_path = self._get_path()
         self.datapackage_metadata = self._create_datapackage()
 
-        self.settings = Settings(settings_json_url=Path(settings_file_path), env_file_path=env_file_path)
+        self.settings = SettingsStore(settings_json_url=Path(settings_file_path), env_file_path=env_file_path)
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):

@@ -1,17 +1,16 @@
-import requests
 import json
 from cryptography.fernet import Fernet
 from dataverk.connectors.google_storage import GoogleStorageConnector
 from dataverk.connectors.file_storage import FileStorageConnector
 from dataverk.connectors.base import BaseConnector
-from dataverk.oop_settings import Settings
+from dataverk.utils.settings_store import SettingsStore
 
 class StorageConnector(BaseConnector):
     """Storage connection
     
     """
     
-    def __init__(self, settings: Settings, storage='gcs', encrypted = True):
+    def __init__(self, settings: SettingsStore, storage='gcs', encrypted = True):
 
         super(StorageConnector, self).__init__(encrypted=encrypted)
 
