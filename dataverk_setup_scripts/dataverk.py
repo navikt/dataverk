@@ -1,5 +1,5 @@
 import argparse
-from . import dataverk_init, dataverk_create, __version__
+from . import dataverk_init, dataverk_create, dataverk_create_settings_template, __version__
 
 
 def main():
@@ -31,6 +31,15 @@ def main():
     parse_create.add_argument('--settings-repo', dest="settings_repo", action='store', metavar='<settings_url>',
                               default=None, help="Github url for settings repo")
 
+    # Create_settings command
+    parser_create_settings = sub_arg_parser.add_parser('create_settings', add_help=False)
+    parser_create_settings.add_argument('-v, --version', action='version', version=__version__, help="Viser programversjon")
+    parser_create_settings.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
+    parser_create_settings.add_argument('--destination', dest="destination", action='store', metavar='<path>',
+                                        default=None, help="Sti til ønsket lagringslokasjon for settingsfil. "
+                                                           "Dersom denne ikke spesifiseres vil settings.json filen "
+                                                           "legges i stien som skriptet kjøres fra.")
+
     args = arg_parser.parse_args()
 
     if args.command == 'init':
@@ -40,8 +49,9 @@ def main():
                             update_schedule_in=args.update_schedule,
                             nais_namespace_in=args.nais_namespace,
                             settings_repo_in=args.settings_repo)
+    elif args.command == 'create_settings':
+        dataverk_create_settings_template.run(destination=args.destination)
 
 
 if __name__ == "__main__":
     main()
-
