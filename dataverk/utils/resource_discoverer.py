@@ -21,9 +21,9 @@ def search_for_files(start_path: Path, file_names: tuple, levels: int) -> dict:
 def search_current_path(path: Path, file_names):
     """
 
-    :param path: current path to be searched for files
+    :param path: path to be searched for files
     :param file_names: file names to be searched for
-    :return: dict with key: file name, value: Path to file
+    :return: dict with key: filename, value: Path to file
     """
     found_files = {}
     for file in path.iterdir():
