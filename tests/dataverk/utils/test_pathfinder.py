@@ -40,4 +40,5 @@ class MethodsReturnValues(Base):
     """
 
     def test_get_project_root__normal_case(self):
-        self.assertEqual(sys.path[0], pathfinder.get_calling_script_root())
+        print(pathfinder.get_calling_script_root())
+        self.assertEqual("test_pathfinder.py", pathfinder.get_calling_script_root().parts[-1], "Should be equal")

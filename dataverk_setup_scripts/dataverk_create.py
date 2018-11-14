@@ -51,9 +51,9 @@ class CreateDataPackage:
 
         self.envs = env_store.EnvStore(path=Path(resources['.env']))
 
-        settings = SettingsStore(settings_json_url=Path(resources["settings.json"]), env_file_path=Path(resources[".env"]))
+        settings = SettingsStore(settings_json_url=Path(resources["settings.json"]), env_store=self.envs)
 
-        self.jenkins_server = jenkins.Jenkins(settings.get_field("jenkins")["url"],
+        self.jenkins_server = jenkins.Jenkins(settings["jenkins"]["url"],
                                               username=self.envs['USER_IDENT'],
                                               password=self.envs['PASSWORD'])
 
