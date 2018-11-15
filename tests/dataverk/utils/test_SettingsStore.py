@@ -4,7 +4,7 @@
 # =================
 from unittest import TestCase
 from pathlib import Path
-from dataverk.utils import resource_discoverer, settings_store
+from dataverk.utils import resource_discoverer, settings_store, env_store
 import os
 import json
 import requests
@@ -144,6 +144,6 @@ class MethodsReturnValues(Base):
         os.environ["RUN_FROM_VDI"] = "True"
         # Should raise exception when trying to connect to the mock url endpoint
         # [TODO] Can we make the VDI settings setup more testable?
-        with self.assertRaises(requests.exceptions.ConnectionError) as cm:
+        with self.assertRaises((requests.exceptions.ConnectionError, requests.exceptions.HTTPError)) as cm:
             testObject = settings_store.SettingsStore(Path(self.files["testfile_settings.json"]), self.mock_env)
 

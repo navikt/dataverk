@@ -6,7 +6,7 @@ import datetime
 import re
 import uuid
 from dataverk.connectors import OracleConnector, ElasticsearchConnector
-from dataverk.utils import publish_data
+from dataverk.utils import resource_discoverer, publish_data
 from dataverk.utils.settings_store import SettingsStore
 from pathlib import Path
 from dataverk.utils import EnvStore
@@ -14,7 +14,7 @@ from dataverk.utils import EnvStore
 
 class Datapackage:
 
-    def __init__(self, settings_file_path: str, public=False, env_file_path: str=None):
+    def __init__(self, public=False, resource_files: dict=None):
         if not isinstance(public, bool):
             raise TypeError("public parameter must be boolean")
 
@@ -22,9 +22,19 @@ class Datapackage:
         self.resources = {}
         self.dir_path = self._get_path()
         self.datapackage_metadata = self._create_datapackage()
-        env_store = EnvStore(Path(env_file_path))
 
-        self.settings = SettingsStore(settings_json_url=Path(settings_file_path), env_store=env_store)
+        if resource_files is not None:
+            self.resource_files = resource_files
+        else:
+            self.resource_files = resource_discoverer.search_for_files(start_path=Path("."),
+                                                                  file_names=('settings.json', '.env'), levels=3)
+
+        try:
+            env_store = EnvStore(Path(self.resource_files[".env"]))
+        except KeyError:
+            env_store = None
+
+        self.settings = SettingsStore(settings_json_url=Path(self.resource_files["settings.json"]), env_store=env_store)
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
@@ -98,6 +108,7 @@ class Datapackage:
 
     def _get_csv_schema(self, df, filename):
         fields = []
+
         for name, dtype in zip(df.columns, df.dtypes):
             # TODO : Bool and others? Move to utility method
             if str(dtype) == 'object':
