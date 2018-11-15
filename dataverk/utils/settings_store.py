@@ -3,9 +3,9 @@ import json
 from os import environ
 import os
 import requests
+from . import EnvStore
 
-
-class Settings:
+class SettingsStore:
     """ Klassen har ansvar for å gjøre eksterne ressurser tilgjengelige og håndtere forskjellige kjøre miljøer
 
         The Setting class handles the reading of environments variables to
@@ -15,11 +15,11 @@ class Settings:
 
     """
 
-    def __init__(self, settings_json_url: Path, env_file_path: Path=None):
+    def __init__(self, settings_json_url: Path, env_store: EnvStore=None):
         self._validate_json_file(settings_json_url)
         self._settings_file_path = settings_json_url
         self._settings_store = {}
-        self._env_store = {}
+        self._env_store = env_store
 
         # loads data into the setting data store from the settings.json file
         self._set_settings_data_store()
@@ -27,34 +27,19 @@ class Settings:
         # sets commonly used setting keys if they are not set already
         self._set_common_settings_keys()
 
-        if env_file_path is not None:
-            self._set_env_data_store(env_file_path)
         self._set_enviroment_fields()
+
+    def __getitem__(self, item):
+        if not isinstance(item, str):
+            raise ValueError("field should be a str")
+        self._assert_fields_exist(item)
+        return self._settings_store[item]
 
     def _validate_json_file(self, url: Path):
         if not url.is_file():
             raise FileNotFoundError("The provided url does not resolve to a file")
         if self._get_url_suffix(str(url)) != "json":
             raise FileNotFoundError("The provided url does not resolve to a json file")
-
-    def _set_env_data_store(self, path: Path):
-        tmp_dict = {}
-        with path.open("r") as reader:
-            envs = reader.readlines()
-
-            for env in envs:
-                env = env.strip()
-                if env[0] == '#':
-                    continue
-
-                var = env.split('=')
-                tmp_dict[str(var[0])] = str(var[1])
-        self._env_store = tmp_dict
-
-    def _get_env_field(self, field: str):
-        if not isinstance(field, str):
-            raise ValueError("field should be a str")
-        return self._env_store[field]
 
     def _get_url_suffix(self, url:str):
         return url.split(".")[-1]
@@ -77,12 +62,6 @@ class Settings:
     def _read_file(self, path: Path):
         with path.open("r") as reader:
             return reader.read()
-
-    def get_field(self, field: str):
-        if not isinstance(field, str):
-            raise ValueError("field should be a str")
-        self._assert_fields_exist(field)
-        return self._settings_store[field]
 
     def _assert_fields_exist(self, field, *fields):
         if not field in self._settings_store:
@@ -136,12 +115,12 @@ class Settings:
 
         # asserts that the vault url is set in settings as it is needed to get secrets response
         self._assert_fields_exist("vault")
-        secrets_response_uri = self.get_field("vault")["secrets_uri"]
-        authentication_response_uri = self.get_field("vault")["auth_uri"]
+        secrets_response_uri = self["vault"]["secrets_uri"]
+        authentication_response_uri = self["vault"]["auth_uri"]
 
         # Make sure .env file is created, passed to _inint__ and contains fields below
-        user_ident = self._get_env_field("USER_IDENT")
-        password = self._get_env_field("PASSWORD")
+        user_ident = self._env_store["USER_IDENT"]
+        password = self._env_store["PASSWORD"]
 
         auth_response = requests.post(url=authentication_response_uri + user_ident,
                                       data=json.dumps({"password": password}))
@@ -177,8 +156,8 @@ class Settings:
         # Hent ut connections dicts, NB: hvis de ikke har blitt lagt til i gjennom __init__() så vil det feile
         bucket_storage_connections = self._settings_store["bucket_storage_connections"]
         db_connections = self._settings_store["db_connection_strings"]
-        index_connections = self.get_field("index_connections")
-        file_storage_connections = self.get_field("file_storage_connections")
+        index_connections = self["index_connections"]
+        file_storage_connections = self["file_storage_connections"]
 
         with open(os.path.join(config_path, 'dataverk-secrets.json')) as secrets:
             try:
