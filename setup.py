@@ -44,6 +44,7 @@ setup(
             'dataverk = dataverk_setup_scripts.dataverk:main'
         ]
     },
+    package_data={'': ['VERSION']},
 
      # metadata to display on PyPI
     author="NAV IKT",
