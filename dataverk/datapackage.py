@@ -27,7 +27,7 @@ class Datapackage:
             self.resource_files = resource_files
         else:
             self.resource_files = resource_discoverer.search_for_files(start_path=Path(search_start_path),
-                                                                  file_names=('settings.json', '.env'), levels=3)
+                                                                  file_names=('settings.json', '.env'), levels=2)
 
         try:
             env_store = EnvStore(Path(self.resource_files[".env"]))
