@@ -34,6 +34,7 @@ SETTINGS_TEMPLATE={
         }
     }
   },
+    "template_repository":  "https://github.com/path/to/templates",
 
   "vault": {
     "auth_uri": "https://test.test.no:1010/v12/test/test/test/",

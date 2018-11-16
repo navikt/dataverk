@@ -1,17 +1,4 @@
-from dataverk.utils import pathfinder
 from pathlib import Path
-
-
-def search_for_files_from_working_dir(file_names: tuple, levels: int):
-    """
-    Searches for filenames from working directory
-
-    :param file_names: Tuple with str of filename to be searched for
-    :param levels: levels up the file hierarchy to search
-    :return: dictionary with key: filename, value: Path to file
-    """
-    start_path = Path(pathfinder.get_calling_script_root())
-    return search_for_files(start_path, file_names, levels)
 
 
 def search_for_files(start_path: Path, file_names: tuple, levels: int) -> dict:
@@ -34,9 +21,9 @@ def search_for_files(start_path: Path, file_names: tuple, levels: int) -> dict:
 def search_current_path(path: Path, file_names):
     """
 
-    :param path: current path to be searched for files
+    :param path: path to be searched for files
     :param file_names: file names to be searched for
-    :return: dict with key: file name, value: Path to file
+    :return: dict with key: filename, value: Path to file
     """
     found_files = {}
     for file in path.iterdir():

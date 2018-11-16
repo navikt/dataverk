@@ -17,7 +17,7 @@ class EnvStore:
                 tmp_dict[str(var[0])] = str(var[1])
         self._env_store = tmp_dict
 
-    def get_env_field(self, field: str):
+    def __getitem__(self, field: str):
         if not isinstance(field, str):
             raise ValueError("field should be a str")
         return self._env_store[field]

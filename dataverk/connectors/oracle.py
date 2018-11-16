@@ -1,13 +1,11 @@
-import json
 import time
-import os
 import cx_Oracle
 import pandas as pd
-from sqlalchemy import types, create_engine
+from sqlalchemy import create_engine
 
 from urllib import parse
 from dataverk.connectors import BaseConnector
-from dataverk.oop_settings import Settings
+from dataverk.utils.settings_store import SettingsStore
 
 # Oracle
 class OracleConnector(BaseConnector):
@@ -26,7 +24,7 @@ class OracleConnector(BaseConnector):
 
     """
 
-    def __init__(self, settings: Settings, source=None):
+    def __init__(self, settings: SettingsStore, source=None):
         super(OracleConnector, self).__init__()
 
         self.settings = settings
@@ -34,11 +32,11 @@ class OracleConnector(BaseConnector):
         self.df = None
         self.dsn = None
     
-        if source not in settings.get_field("db_connection_strings"):
+        if source not in settings["db_connection_strings"]:
             raise ValueError(f'Database connection string not found in settings file.\
              Unable to establish connection to database: {source}')
 
-        db = self._parse_connection_string(settings.get_field("db_connection_strings")[source])
+        db = self._parse_connection_string(settings["db_connection_strings"][source])
         self.db = db
 
         if 'service_name' in db:

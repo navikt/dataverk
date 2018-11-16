@@ -28,8 +28,6 @@ def main():
                               default=None, help="Ønsket oppdateringsschedule for datapakke")
     parse_create.add_argument('--nais-namespace', dest="nais_namespace", action='store', metavar='<namespace>',
                               default=None, help="Ønsket NAIS namespace hvor cronjob skal deployes")
-    parse_create.add_argument('--settings-repo', dest="settings_repo", action='store', metavar='<settings_url>',
-                              default=None, help="Github url for settings repo")
 
     # Create_settings command
     parser_create_settings = sub_arg_parser.add_parser('create_settings', add_help=False)
@@ -57,8 +55,7 @@ def main():
     elif args.command == 'create':
         dataverk_create.run(package_name_in=args.package_name,
                             update_schedule_in=args.update_schedule,
-                            nais_namespace_in=args.nais_namespace,
-                            settings_repo_in=args.settings_repo)
+                            nais_namespace_in=args.nais_namespace)
     elif args.command == 'create_settings':
         dataverk_create_settings_template.run(destination=args.destination)
     elif args.command == 'create_env_file':
