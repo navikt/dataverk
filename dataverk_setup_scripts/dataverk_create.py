@@ -16,11 +16,9 @@ class CreateDataPackage:
     ''' Klasse for å opprette ny datapakke i et eksisterende repository for datapakker/datasett
     '''
 
-    def __init__(self, name: str,
-                 github_project: str, update_schedule: str,
-                 namespace: str, settings_repo: str):
+    def __init__(self, name: str, github_project: str, update_schedule: str, namespace: str):
 
-        self._verify_class_init_arguments(name, github_project, update_schedule, namespace, settings_repo)
+        self._verify_class_init_arguments(name, github_project, update_schedule, namespace)
 
         self.package_name = name
         self.github_project = github_project
@@ -35,32 +33,32 @@ class CreateDataPackage:
 
         self._create_folder_structure()
 
-        settings_path = settings_loader.GitSettingsLoader(url=settings_repo)
+        self.resources = resource_discoverer.search_for_files(start_path=Path(os.path.join(self.package_name, 'scripts')),
+                                                              file_names=('settings.json', '.env'), levels=3)
 
-        self.settings_folder_name = settings_path.download_to(self.package_name)
+        if not self._required_files_found(self.resources):
+            raise Exception(f'settings.json og .env må finnes i repo for å kunne kjøre dataverk create')
+
+        self.envs = env_store.EnvStore(path=Path(self.resources['.env']))
+
+        self.settings = SettingsStore(settings_json_url=Path(self.resources["settings.json"]), env_store=self.envs)
+
+        templates_path = settings_loader.GitSettingsLoader(url=self.settings["template_repository"])
+
+        self.templates_folder_name = templates_path.download_to(self.package_name)
 
         self._copy_template_files()
         self._copy_settings_file()
-        self._remove_settings_folder()
+        self._remove_templates_repo()
 
-        resources = resource_discoverer.search_for_files(start_path=Path(os.path.join(self.package_name, 'scripts')),
-                                                              file_names=('settings.json', '.env'), levels=3)
-
-        if not self._required_files_found(resources):
-            raise Exception(f'settings.json og .env må finnes i repo for å kunne kjøre dataverk create')
-
-        self.envs = env_store.EnvStore(path=Path(resources['.env']))
-
-        settings = SettingsStore(settings_json_url=Path(resources["settings.json"]), env_store=self.envs)
-
-        self.jenkins_server = jenkins.Jenkins(settings["jenkins"]["url"],
+        self.jenkins_server = jenkins.Jenkins(self.settings["jenkins"]["url"],
                                               username=self.envs['USER_IDENT'],
                                               password=self.envs['PASSWORD'])
 
         if self._jenkins_job_exists(name):
             raise NameError(f'En jobb med navn {name} eksisterer allerede på jenkins serveren. Datapakkenavn må være unikt.')
 
-    def _verify_class_init_arguments(self, name, github_project, update_schedule, namespace, settings_repo):
+    def _verify_class_init_arguments(self, name, github_project, update_schedule, namespace):
         if not isinstance(name, str):
             raise TypeError(f'name parameter must be of type string')
 
@@ -72,9 +70,6 @@ class CreateDataPackage:
 
         if not isinstance(namespace, str):
             raise TypeError(f'namespace parameter must be of type string')
-
-        if not isinstance(settings_repo, str):
-            raise TypeError(f'settings_repo parameter must be of type string')
 
     def _is_in_repo_root(self):
         ''' Sjekk på om create_dataverk kjøres fra toppnivå i repo.
@@ -144,8 +139,7 @@ class CreateDataPackage:
         @return path to settings json file
         '''
 
-        copyfile(os.path.join(str(self.settings_folder_name), 'settings.json'),
-                 os.path.join(self.package_name, 'scripts', 'settings.json'))
+        copyfile(self.resources['settings.json'], os.path.join(self.package_name, 'scripts', 'settings.json'))
 
         return os.path.join(self.package_name, 'scripts', 'settings.json')
 
@@ -162,21 +156,21 @@ class CreateDataPackage:
             - etl.ipynb
         '''
 
-        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'jenkins_base_config.xml'), os.path.join(self.package_name, 'jenkins_base_config.xml'))
-        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'jenkins_config.xml'), os.path.join(self.package_name, 'jenkins_config.xml'))
-        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'Jenkinsfile'), os.path.join(self.package_name, 'Jenkinsfile'))
-        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'cronjob.yaml'), os.path.join(self.package_name, 'cronjob.yaml'))
-        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'Dockerfile'), os.path.join(self.package_name, 'Dockerfile'))
-        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'LICENSE.md'), os.path.join(self.package_name, 'LICENSE.md'))
-        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'README.md'), os.path.join(self.package_name, 'README.md'))
-        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'METADATA.json'), os.path.join(self.package_name, 'METADATA.json'))
-        copyfile(os.path.join(str(self.settings_folder_name), 'file_templates', 'etl.ipynb'), os.path.join(self.package_name, 'scripts', 'etl.ipynb'))
+        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'jenkins_base_config.xml'), os.path.join(self.package_name, 'jenkins_base_config.xml'))
+        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'jenkins_config.xml'), os.path.join(self.package_name, 'jenkins_config.xml'))
+        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'Jenkinsfile'), os.path.join(self.package_name, 'Jenkinsfile'))
+        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'cronjob.yaml'), os.path.join(self.package_name, 'cronjob.yaml'))
+        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'Dockerfile'), os.path.join(self.package_name, 'Dockerfile'))
+        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'LICENSE.md'), os.path.join(self.package_name, 'LICENSE.md'))
+        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'README.md'), os.path.join(self.package_name, 'README.md'))
+        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'METADATA.json'), os.path.join(self.package_name, 'METADATA.json'))
+        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'etl.ipynb'), os.path.join(self.package_name, 'scripts', 'etl.ipynb'))
 
-    def _remove_settings_folder(self):
+    def _remove_templates_repo(self):
         try:
-            rmtree(str(self.settings_folder_name))
+            rmtree(str(self.templates_folder_name))
         except OSError:
-            raise OSError(f'Settings mappe eksisterer ikke.')
+            raise OSError(f'Templates mappe eksisterer ikke.')
 
     def _edit_package_metadata(self):
         '''  Tilpasser metadata fil til datapakken
@@ -194,7 +188,7 @@ class CreateDataPackage:
 
         try:
             with open(os.path.join(self.package_name, 'METADATA.json'), 'w') as metadatafile:
-                json.dump(package_metadata, metadatafile)
+                json.dump(package_metadata, metadatafile, indent=2)
         except OSError:
             raise OSError(f'Finner ikke METADATA.json fil')
 
@@ -369,7 +363,7 @@ def get_github_url():
     return os.popen('git config --get remote.origin.url').read().strip()
 
 
-def run(package_name_in: str=None, update_schedule_in: str=None, nais_namespace_in: str=None, settings_repo_in: str=None):
+def run(package_name_in: str=None, update_schedule_in: str=None, nais_namespace_in: str=None):
     ''' Entrypoint for dataverk create
 
     '''
@@ -397,14 +391,8 @@ def run(package_name_in: str=None, update_schedule_in: str=None, nais_namespace_
     else:
         namespace = nais_namespace_in
 
-    if settings_repo_in is None:
-        settings_repo_url = input(f'Lim inn url til settings repo: ')
-    else:
-        settings_repo_url = settings_repo_in
-
     new_datapackage = CreateDataPackage(name=datapackage, github_project=github_project,
-                                        update_schedule=update_schedule, settings_repo=settings_repo_url,
-                                        namespace=namespace)
+                                        update_schedule=update_schedule, namespace=namespace)
 
     new_datapackage.print_datapackage_config()
 
