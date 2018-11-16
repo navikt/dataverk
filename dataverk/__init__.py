@@ -5,7 +5,7 @@ from dataverk.api import get_path, read_sql, write_notebook, publish_datapackage
 from dataverk.datapackage import Datapackage
 from pathlib import Path
 
-version_file_path = Path(__file__).parent.parent.joinpath("VERSION")
+version_file_path = Path(__file__).parent.joinpath("VERSION")
 with version_file_path.open("r") as fh:
     __version__ = fh.read()
 

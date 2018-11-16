@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup
+from pathlib import Path
 
 #Gjør README.md om til den lange beskrivelsen på PiPy
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with open("VERSION", "r") as fh:
+with Path("dataverk/VERSION").open("r") as fh:
     __version__ = fh.read()
 
 setup(
@@ -44,7 +45,7 @@ setup(
             'dataverk = dataverk_setup_scripts.dataverk:main'
         ]
     },
-    package_data={'': ['VERSION']},
+    package_data={'dataverk': ['VERSION']},
 
      # metadata to display on PyPI
     author="NAV IKT",
