@@ -1,1 +1,4 @@
-__version__ = '0.0.1'
+from pathlib import Path
+
+with Path("VERSION").open("r") as fh:
+    __version__ = fh.read()
