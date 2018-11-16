@@ -5,7 +5,8 @@ from dataverk.api import get_path, read_sql, write_notebook, publish_datapackage
 from dataverk.datapackage import Datapackage
 from pathlib import Path
 
-with Path("VERSION").open("r") as fh:
+version_file_path = Path(__file__).parent.parent.joinpath("VERSION")
+with version_file_path.open("r") as fh:
     __version__ = fh.read()
 
 __all__ = ['connectors',

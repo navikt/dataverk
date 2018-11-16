@@ -1,4 +1,5 @@
 from pathlib import Path
 
-with Path("VERSION").open("r") as fh:
+version_file_path = Path(__file__).parent.parent.joinpath("VERSION")
+with version_file_path.open("r") as fh:
     __version__ = fh.read()
