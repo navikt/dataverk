@@ -6,6 +6,8 @@ import json
 import pandas as pd
 from unittest import TestCase
 from dataverk import Datapackage
+from pathlib import Path
+from dataverk.utils import resource_discoverer
 
 # Common input parameters
 # =======================
@@ -26,7 +28,16 @@ class Base(TestCase):
     This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
     def setUp(self):
-        self.datapackage = Datapackage(public=False)
+        if "RUN_FROM_VDI" in os.environ:
+            del os.environ["RUN_FROM_VDI"]
+
+        self.files = resource_discoverer.search_for_files(start_path=Path(__file__).parent.joinpath("static"),
+                                          file_names=('settings.json', '.env'), levels=3)
+
+        self.datapackage = Datapackage(public=False, resource_files=self.files)
+
+        with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'w+') as metadata_file:
+            json.dump(metadata_file_template, metadata_file)
 
     def tearDown(self):
         try:
@@ -43,12 +54,9 @@ class Instantiation(Base):
 
     Tests include: instantiation with args of wrong type, instantiation with input values outside constraints, etc.
     """
-    def setUp(self):
-        with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'w+') as metadata_file:
-            json.dump(metadata_file_template, metadata_file)
 
     def test_class_instantiation_normal(self):
-        datapackage = Datapackage(public=False)
+        datapackage = Datapackage(public=False, resource_files=self.files)
         self.assertEqual(datapackage.is_public, False)
 
     # Input arguments wrong type
@@ -58,12 +66,17 @@ class Instantiation(Base):
         for input_type in wrong_input_param_types:
             with self.subTest(msg="Wrong input parameter type in Datapackage class instantiation", _input=input_type):
                 with self.assertRaises(TypeError):
-                    Datapackage(public=input_type)
+                    Datapackage(public=input_type, resource_files=self.files)
+
+    # def test_class_instantiation_with_invalid_settings_file(self):
+    #     with self.assertRaises(FileNotFoundError):
+    #         Datapackage(settings_file_path=Path("settings_file_that_does_not_exist.json"), public=False,
+    #                     env_file_path=Path(self.files[".env_test"]))
 
     # Input arguments outside constraints
     # ===================================
     def test_invalid_bucket_or_datapackage_names(self):
-        invalid_names = ["_name", "-name", "name with spaces", "name_", "name-", "Name", "name;"]
+        invalid_names = ["_name", "-name", "name with spaces", "name_", "name-", "Name", "name_with_underscore"]
 
         for datapackage_name in invalid_names:
             with self.subTest(msg="Invalid data package name", _input=datapackage_name):
@@ -73,7 +86,7 @@ class Instantiation(Base):
                     metadata["Datapakke_navn"] = datapackage_name
                     json.dump(metadata, metadata_file)
                 with self.assertRaises(NameError):
-                    Datapackage(public=False)
+                    Datapackage(public=False, resource_files=self.files)
 
         for bucket_name in invalid_names:
             with self.subTest(msg="Invalid data package name", _input=bucket_name):
@@ -83,7 +96,7 @@ class Instantiation(Base):
                     metadata["Bucket_navn"] = bucket_name
                     json.dump(metadata, metadata_file)
                 with self.assertRaises(NameError):
-                    Datapackage(public=False)
+                    Datapackage(public=False, resource_files=self.files)
 
 
 class Set(Base):

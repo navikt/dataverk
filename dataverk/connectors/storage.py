@@ -1,28 +1,29 @@
-import requests
 import json
 from cryptography.fernet import Fernet
 from dataverk.connectors.google_storage import GoogleStorageConnector
 from dataverk.connectors.file_storage import FileStorageConnector
 from dataverk.connectors.base import BaseConnector
-import dataverk.settings as settings
+from dataverk.utils.settings_store import SettingsStore
+
 
 class StorageConnector(BaseConnector):
     """Storage connection
     
     """
     
-    def __init__(self, storage='gcs', encrypted = True):
+    def __init__(self, settings: SettingsStore, storage='gcs', encrypted = True):
 
         super(StorageConnector, self).__init__(encrypted=encrypted)
 
         self.log(f'Initializing storage connector: {storage}. Encrypted: {encrypted}')
         self.storage = storage
+        self.settings = settings
         # TODO make array instead??
 
         if storage == 'gcs':
-            self.conn = GoogleStorageConnector(encrypted=encrypted)
+            self.conn = GoogleStorageConnector(encrypted=encrypted,settings=self.settings)
         elif storage == 'file':
-            self.conn = FileStorageConnector(encrypted=encrypted)
+            self.conn = FileStorageConnector(encrypted=encrypted, settings=settings)
         else:
             raise ValueError("A storage provider must be specified in config file")
 
@@ -42,7 +43,7 @@ class StorageConnector(BaseConnector):
         if self.conn is not None:
 
             if self.encrypted: 
-                key = settings.encryption_key
+                key = self.settings["encryption_key"]
                 f = Fernet(key)
                 encypted_source_string = f.encrypt(source_string.encode('utf-8'))
                 self.log(f'Writing encrypted string to {destination_blob_name}')
@@ -73,7 +74,7 @@ class StorageConnector(BaseConnector):
                     blob = blob.encode("utf-8") 
 
                 try:
-                    key = settings.encryption_key
+                    key = self.settings["encryption_key"]
             
                     f = Fernet(key)
                     plain_text = f.decrypt(blob)

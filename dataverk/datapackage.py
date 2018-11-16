@@ -6,14 +6,15 @@ import datetime
 import re
 import uuid
 from dataverk.connectors import OracleConnector, ElasticsearchConnector
-from dataverk.utils import notebook2script, publish_data
-from .oop_settings import Settings
+from dataverk.utils import resource_discoverer, publish_data
+from dataverk.utils.settings_store import SettingsStore
 from pathlib import Path
+from dataverk.utils import EnvStore
 
 
 class Datapackage:
 
-    def __init__(self, settings_file_path: str, public=False, env_file_path: str=None):
+    def __init__(self, public=False, resource_files: dict=None, search_start_path: str="."):
         if not isinstance(public, bool):
             raise TypeError("public parameter must be boolean")
 
@@ -22,11 +23,18 @@ class Datapackage:
         self.dir_path = self._get_path()
         self.datapackage_metadata = self._create_datapackage()
 
-        self.settings = Settings(settings_json_url=Path(settings_file_path), env_file_path=Path(env_file_path))
+        if resource_files is not None:
+            self.resource_files = resource_files
+        else:
+            self.resource_files = resource_discoverer.search_for_files(start_path=Path(search_start_path),
+                                                                  file_names=('settings.json', '.env'), levels=3)
 
-    def write_notebook(self):
-        # TODO: Hører dette hjemme her eller er det mer naturlig å beholde det på dv nivå? 
-        notebook2script()
+        try:
+            env_store = EnvStore(Path(self.resource_files[".env"]))
+        except KeyError:
+            env_store = None
+
+        self.settings = SettingsStore(settings_json_url=Path(self.resource_files["settings.json"]), env_store=env_store)
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
@@ -100,6 +108,7 @@ class Datapackage:
 
     def _get_csv_schema(self, df, filename):
         fields = []
+
         for name, dtype in zip(df.columns, df.dtypes):
             # TODO : Bool and others? Move to utility method
             if str(dtype) == 'object':
@@ -183,10 +192,10 @@ class Datapackage:
             'datapackage_name': metadata['Datapakke_navn']
         }
 
-    def write_datapackage(self, datasets):
+    def write_datapackage(self):
         resources = []
         with open(self.dir_path + '/datapackage.json', 'w') as outfile:
-            for filename, df in datasets.items():
+            for filename, df in self.resources.items():
                 # TODO bruk Parquet i stedet for csv?
                 resources.append(self._get_csv_schema(df, filename))
 
@@ -202,14 +211,14 @@ class Datapackage:
                     if exc.errno != errno.EEXIST:
                         raise
 
-            for filename, df in datasets.items():
-                df.to_csv(self.dir_path + '/data/' + filename + '.csv', index=False, sep=';')
+            for filename, df in self.resources.items():
+                df.to_csv(data_path + filename + '.csv', index=False, sep=';')
 
     def _datapackage_key_prefix(self, datapackage_name):
         return datapackage_name + '/'
 
     def publish(self, destination=['nais', 'gcs']):
-        self.write_datapackage(self.resources)
+        self.write_datapackage()
         # TODO: add views
 
         if 'nais' in destination:

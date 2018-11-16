@@ -1,29 +1,26 @@
-import google.cloud.storage as storage
 import os
 import json
-from io import BytesIO
-from datetime import timedelta
 from dataverk.connectors.base import BaseConnector
 from dataverk.utils import write_file, read_file
-import dataverk.settings as settings
+from dataverk.utils.settings_store import SettingsStore
 
 
 
 class FileStorageConnector(BaseConnector):
     """File Storage connector"""
     
-    def __init__(self, encrypted=True, bucket=None):
+    def __init__(self, settings: SettingsStore, encrypted=True, bucket=None):
 
         super(self.__class__, self).__init__(encrypted=encrypted)
 
         self.bucket = bucket
+        self.settings = settings
 
         try: 
-            self.path = settings.file_storage_path
+            self.path = self.settings["file_storage_path"]
         except Exception as ex:
             print(ex)
 
-    
     def write(self, source_string, destination_blob_name, fmt, metadata=None):
 
         if not isinstance(source_string, str):

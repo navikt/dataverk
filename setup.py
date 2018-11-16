@@ -5,9 +5,12 @@ from setuptools import setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open("VERSION", "r") as fh:
+    __version__ = fh.read()
+
 setup(
     name='dataverk',
-    version='0.0.1',
+    version=__version__,
     packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_setup_scripts'],
     python_requires='~=3.6',
     install_requires=[
@@ -26,6 +29,7 @@ setup(
         'protobuf==3.6.1',
         'pyarrow>=0.10.0',
         'python-jenkins==1.3.0',
+        'PyYAML==3.13',
          #'python-snappy==0.5.3',
         'elasticsearch==6.3.0',
         'google-api-core==0.1.4',

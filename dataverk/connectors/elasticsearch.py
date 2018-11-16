@@ -1,21 +1,20 @@
-
-import json
 from elasticsearch import Elasticsearch
 from dataverk.connectors import BaseConnector
-from dataverk.oop_settings import Settings
+from dataverk.utils.settings_store import SettingsStore
 
 # Elasticsearch
 class ElasticsearchConnector(BaseConnector):
     """Elasticsearch connection"""
-    def __init__(self, settings: Settings, host='private'):
 
-        host_uri = settings.get_field("index_connections")[host]
+    def __init__(self, settings: SettingsStore, host='private'):
+
+        host_uri = settings["index_connections"][host]
 
         if host_uri is None:
             raise ValueError('Connection settings are not avilable for the host: {host}')
 
         self.es = Elasticsearch([host_uri])
-        self.index = settings.get_field("index_connections")["index"]
+        self.index = settings["index_connections"]["index"]
 
     def _create_index(self):
         """Create index
