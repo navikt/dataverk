@@ -14,7 +14,7 @@ from dataverk.utils import EnvStore
 
 class Datapackage:
 
-    def __init__(self, public=False, resource_files: dict=None):
+    def __init__(self, public=False, resource_files: dict=None, search_start_path: str="."):
         if not isinstance(public, bool):
             raise TypeError("public parameter must be boolean")
 
@@ -26,7 +26,7 @@ class Datapackage:
         if resource_files is not None:
             self.resource_files = resource_files
         else:
-            self.resource_files = resource_discoverer.search_for_files(start_path=Path("."),
+            self.resource_files = resource_discoverer.search_for_files(start_path=Path(search_start_path),
                                                                   file_names=('settings.json', '.env'), levels=3)
 
         try:
