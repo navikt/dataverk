@@ -1,6 +1,25 @@
+# Dataverk 
+
+### Get started
+
+#### Fra scratch - nytt dataverk prosjekt
+ 1. Opprett repository på github
+ 2. Klon github repository lokalt på din maskin
+ 3. ```pip3 install dataverk```
+ 4. ```dataverk create_settings```
+ 5. fyll ut den genererte settings.json filen med data
+ 
+#### Lage en ny datapakke i eksisterende repository
+ 1. Hvis du ikke har en .env fil kjør; ```dataverk create_env_file```
+ 2. ```dataverk create```
+ 3. ```jupyter notebook```
+ 4. åpne datapakke-navn/scripts/etl.ipynb
+ 5. Implementer data prosesseringen
+ 6. push prosjekt endringene til github (```git push orgin master```)
+
+
+
 ## Metoder for tilgang til datasett. 
-
-
 
 ### Forbindelser (source & sink med kryptering)
 * Fil 
