@@ -11,7 +11,6 @@ def search_for_files(start_path: Path, file_names: tuple, levels: int) -> dict:
     """
 
     file_names = _set_file_names(file_names)
-    _validate_path_levels(start_path, levels)
     _validate_search_path(start_path)
 
     current_path = start_path.absolute()
@@ -38,15 +37,11 @@ def _search_paths_in_range(current_path: Path, file_names: set, levels: int) -> 
     for times in range(levels):
         # merges newly found files with already found files. Keeping the first found in case of multiple matches
         found_files = {**search_current_path(current_path, file_names), **found_files}
-        if not Path(current_path.parent).exists():
+        # Path(/).parent == Path(/)
+        if current_path == current_path.parent:
             break
         current_path = current_path.parent
     return found_files
-
-
-def _validate_path_levels(path: Path, levels):
-    if not levels <= len(path.absolute().parts):
-        raise ValueError("levels to search is higher than path depth")
 
 
 def _set_file_names(files: tuple):
