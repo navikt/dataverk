@@ -2,6 +2,7 @@ import jenkins
 import os
 import json
 import yaml
+import re
 
 from string import Template
 from shutil import copyfile, rmtree
@@ -16,13 +17,12 @@ class CreateDataPackage:
     ''' Klasse for å opprette ny datapakke i et eksisterende repository for datapakker/datasett
     '''
 
-    def __init__(self, name: str, github_project: str, update_schedule: str, namespace: str):
+    def __init__(self, name: str, github_project: str, update_schedule: str):
 
-        self._verify_class_init_arguments(name, github_project, update_schedule, namespace)
+        self._verify_class_init_arguments(name, github_project, update_schedule)
 
         self.package_name = name
         self.github_project = github_project
-        self.namespace = namespace
         self.cronjob_schedule = update_schedule
 
         if not self._is_in_repo_root():
@@ -58,7 +58,7 @@ class CreateDataPackage:
         if self._jenkins_job_exists(name):
             raise NameError(f'En jobb med navn {name} eksisterer allerede på jenkins serveren. Datapakkenavn må være unikt.')
 
-    def _verify_class_init_arguments(self, name, github_project, update_schedule, namespace):
+    def _verify_class_init_arguments(self, name, github_project, update_schedule):
         if not isinstance(name, str):
             raise TypeError(f'name parameter must be of type string')
 
@@ -67,9 +67,6 @@ class CreateDataPackage:
 
         if not isinstance(update_schedule, str):
             raise TypeError(f'update_schedule parameter must be of type string')
-
-        if not isinstance(namespace, str):
-            raise TypeError(f'namespace parameter must be of type string')
 
     def _is_in_repo_root(self):
         ''' Sjekk på om create_dataverk kjøres fra toppnivå i repo.
@@ -204,7 +201,7 @@ class CreateDataPackage:
             raise OSError(f'Finner ikke cronjob.yaml fil')
 
         cronjob_config['metadata']['name'] = self.package_name
-        cronjob_config['metadata']['namespace'] = self.namespace
+        cronjob_config['metadata']['namespace'] = self.settings["nais_namespace"]
 
         cronjob_config['spec']['schedule'] = self.cronjob_schedule
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self.package_name + '-cronjob'
@@ -293,7 +290,7 @@ class CreateDataPackage:
               "\nDatapakkenavn: " + self.package_name +
               "\ngithub repo: " + self.github_project +
               "\ncronjob schedule: " + self.cronjob_schedule +
-              "\nNAIS namespace: " + self.namespace +
+              "\nNAIS namespace: " + self.settings["nais_namespace"] +
               "\n-------------------------------------------------\n")
 
     def create(self):
@@ -310,6 +307,13 @@ class CreateDataPackage:
         print(f'Datapakken {self.package_name} er opprettet')
 
         # TODO: Add more error handling
+
+
+def validate_datapackage_name(name):
+    valid_name_pattern = '(^[a-z0-9])([a-z0-9\-])+([a-z0-9])$'
+    if not re.match(pattern=valid_name_pattern, string=name):
+        raise NameError(f'Ulovlig datapakkenavn ({name}): '
+                        'Må være små bokstaver eller tall, ord separert med "-", og kan ikke starte eller ende med "-"')
 
 
 def validate_cronjob_schedule(schedule):
@@ -363,7 +367,7 @@ def get_github_url():
     return os.popen('git config --get remote.origin.url').read().strip()
 
 
-def run(package_name_in: str=None, update_schedule_in: str=None, nais_namespace_in: str=None):
+def run(package_name_in: str=None, update_schedule_in: str=None):
     ''' Entrypoint for dataverk create
 
     '''
@@ -377,6 +381,8 @@ def run(package_name_in: str=None, update_schedule_in: str=None, nais_namespace_
     else:
         datapackage = package_name_in
 
+    validate_datapackage_name(datapackage)
+
     if update_schedule_in is None:
         update_schedule = input(f'Skriv inn ønsket oppdateringsschedule for datapakken '
                                 f'(format: \"<minutt> <time> <dag i måned> <måned> <ukedag>\", '
@@ -386,13 +392,8 @@ def run(package_name_in: str=None, update_schedule_in: str=None, nais_namespace_
 
     validate_cronjob_schedule(update_schedule)
 
-    if nais_namespace_in is None:
-        namespace = input(f'Skriv inn ønsket NAIS namespace: ')
-    else:
-        namespace = nais_namespace_in
-
     new_datapackage = CreateDataPackage(name=datapackage, github_project=github_project,
-                                        update_schedule=update_schedule, namespace=namespace)
+                                        update_schedule=update_schedule)
 
     new_datapackage.print_datapackage_config()
 

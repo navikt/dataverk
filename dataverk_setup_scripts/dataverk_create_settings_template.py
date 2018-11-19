@@ -34,7 +34,9 @@ SETTINGS_TEMPLATE={
         }
     }
   },
-    "template_repository":  "https://github.com/path/to/templates",
+
+  "template_repository":  "https://github.com/path/to/templates",
+  "nais_namespace": "namespace",
 
   "vault": {
     "auth_uri": "https://test.test.no:1010/v12/test/test/test/",
