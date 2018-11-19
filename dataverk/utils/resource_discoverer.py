@@ -10,8 +10,7 @@ def search_for_files(start_path: Path, file_names: tuple, levels: int) -> dict:
     :return: dict containing found files key: file name, value: Absolute path to file
     """
 
-    file_names = _create_file_set(file_names)
-    _validate_path_levels(start_path, levels)
+    file_names = _set_file_names(file_names)
     _validate_search_path(start_path)
 
     current_path = start_path.absolute()
@@ -38,20 +37,14 @@ def _search_paths_in_range(current_path: Path, file_names: set, levels: int) -> 
     for times in range(levels):
         # merges newly found files with already found files. Keeping the first found in case of multiple matches
         found_files = {**search_current_path(current_path, file_names), **found_files}
-        if not Path(current_path.parent).exists():
+        # Path(/).parent == Path(/)
+        if current_path == current_path.parent:
             break
         current_path = current_path.parent
     return found_files
 
 
-def _validate_path_levels(path: Path, levels):
-    if not levels <= len(path.absolute().parts):
-        raise ValueError("with Path({}) and levels({}) levels to search is higher than path depth".
-                         format(path.absolute(), levels))
-    return True
-
-
-def _create_file_set(files: tuple):
+def _set_file_names(files: tuple):
     for file in files:
         if not isinstance(file, str):
             raise ValueError("values in file_names must be str")
@@ -64,4 +57,3 @@ def _create_file_set(files: tuple):
 def _validate_search_path(path: Path):
     if not path.is_dir():
         raise ValueError("path is not a directory")
-    return True
