@@ -58,3 +58,4 @@ def _create_file_set(files: Sequence):
 def _validate_search_path(path: Path):
     if not path.is_dir():
         raise ValueError("path is not a directory")
+    return True
