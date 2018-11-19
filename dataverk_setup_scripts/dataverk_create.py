@@ -139,9 +139,9 @@ class CreateDataPackage:
         @return path to settings json file
         '''
 
-        copyfile(self.resources['settings.json'], os.path.join(self.package_name, 'scripts', 'settings.json'))
+        copyfile(self.resources['settings.json'], os.path.join(self.package_name, 'settings.json'))
 
-        return os.path.join(self.package_name, 'scripts', 'settings.json')
+        return os.path.join(self.package_name, 'settings.json')
 
     def _copy_template_files(self):
         ''' Kopierer følgende template filer til datapakken:
