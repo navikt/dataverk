@@ -310,6 +310,11 @@ class CreateDataPackage:
 
 
 def validate_datapackage_name(name):
+    ''' Kontrollerer at pakkenavnet valgt består av kun små bokstaver og tall, ord separert med '-', og at det ikke
+        starter eller slutter med '-'
+
+    :param name: String med pakkenavn som skal valideres
+    '''
     valid_name_pattern = '(^[a-z0-9])([a-z0-9\-])+([a-z0-9])$'
     if not re.match(pattern=valid_name_pattern, string=name):
         raise NameError(f'Ulovlig datapakkenavn ({name}): '
