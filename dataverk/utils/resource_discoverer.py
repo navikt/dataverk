@@ -1,4 +1,5 @@
 from pathlib import Path
+from collections.abc import Sequence
 
 
 def search_for_files(start_path: Path, file_names: tuple, levels: int) -> dict:
@@ -10,10 +11,11 @@ def search_for_files(start_path: Path, file_names: tuple, levels: int) -> dict:
     :return: dict containing found files key: file name, value: Absolute path to file
     """
 
-    file_names = _set_file_names(file_names)
+    file_names = _create_file_set(file_names)
     _validate_search_path(start_path)
 
     current_path = start_path.absolute()
+    levels += 1 # to allow 0 levels
     return _search_paths_in_range(current_path, file_names, levels)
 
 
@@ -44,16 +46,16 @@ def _search_paths_in_range(current_path: Path, file_names: set, levels: int) -> 
     return found_files
 
 
-def _set_file_names(files: tuple):
+def _create_file_set(files: Sequence):
     for file in files:
         if not isinstance(file, str):
-            raise ValueError("values in file_names must be str")
-    try:
-        return set(files)
-    except ValueError as err:
-        raise ValueError("files_to_find has to contain only unique values")
+            raise ValueError("filenames must be strings")
+        if not file:
+            raise ValueError("filename({}) is not a valid filename".format(file))
+    return set(files)
 
 
 def _validate_search_path(path: Path):
     if not path.is_dir():
         raise ValueError("path is not a directory")
+    return True
