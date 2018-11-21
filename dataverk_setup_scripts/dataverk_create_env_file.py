@@ -3,6 +3,7 @@ import getpass
 
 user_ident_string = "USER_IDENT="
 password_string = "PASSWORD="
+settings_repo_string = "SETTINGS_REPO="
 
 
 class CreateEnvFile:
@@ -10,14 +11,15 @@ class CreateEnvFile:
 
     '''
 
-    def __init__(self, user_ident: str, password: str, destination: str=None):
-        self._verify_input_types(user_ident=user_ident, password=password)
+    def __init__(self, user_ident: str, password: str, settings_repo: str, destination: str=None):
+        self._verify_input_types(user_ident=user_ident, password=password, settings_repo=settings_repo)
         if destination is not None:
             self._verify_destination(destination)
             try:
                 with open(os.path.join(destination, ".env"), 'w') as env_file:
                     print(user_ident_string + user_ident, file=env_file)
                     print(password_string + password, file=env_file)
+                    print(settings_repo_string + settings_repo, file=env_file)
             except OSError:
                 raise OSError(f'Klarte ikke generere ny .env fil')
         else:
@@ -25,14 +27,17 @@ class CreateEnvFile:
                 with open(".env", 'w') as env_file:
                     print(user_ident_string + user_ident, file=env_file)
                     print(password_string + password, file=env_file)
+                    print(settings_repo_string + settings_repo, file=env_file)
             except OSError:
                 raise OSError(f'Klarte ikke generere ny .env fil')
 
-    def _verify_input_types(self, user_ident, password):
+    def _verify_input_types(self, user_ident, password, settings_repo):
         if not isinstance(user_ident, str):
             raise TypeError(f'user_ident må være av type string')
         if not isinstance(password, str):
             raise TypeError(f'password må være av type string')
+        if not isinstance(settings_repo, str):
+            raise TypeError(f'settings_repo må være av type string')
 
     def _verify_destination(self, path):
         if not isinstance(path, str):
@@ -42,8 +47,15 @@ class CreateEnvFile:
         elif not os.path.isdir(path=path):
             raise ValueError(f'Ønsket sti er ikke en mappe')
 
-def run(destination: str=None):
-    user_ident = input("Skriv inn brukerident: ")
-    password = getpass.getpass("Passord: ")
 
-    CreateEnvFile(user_ident=user_ident, password=password, destination=destination)
+def run(destination: str=None):
+    default_settings_repo = "https://github.com/navikt/dataverk_settings.git"
+
+    user_ident = input("Skriv inn brukerident: ")
+    password = getpass.getpass("Skriv inn passord: ")
+    settings_repo = input(f'Lim inn url til settings repository [{default_settings_repo}]: ')
+
+    if not settings_repo:
+        settings_repo = default_settings_repo
+
+    CreateEnvFile(user_ident=user_ident, password=password, settings_repo=settings_repo, destination=destination)

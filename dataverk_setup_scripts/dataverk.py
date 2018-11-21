@@ -1,5 +1,5 @@
 import argparse
-from . import dataverk_init, dataverk_create, dataverk_create_settings_template, dataverk_create_env_file, __version__
+from . import dataverk_init, dataverk_create, dataverk_create_env_file, __version__
 
 
 def main():
@@ -29,15 +29,6 @@ def main():
     parse_create.add_argument('--nais-namespace', dest="nais_namespace", action='store', metavar='<namespace>',
                               default=None, help="Ønsket NAIS namespace hvor cronjob skal deployes")
 
-    # Create_settings command
-    parser_create_settings = sub_arg_parser.add_parser('create_settings', add_help=False)
-    parser_create_settings.add_argument('-v, --version', action='version', version=__version__, help="Viser programversjon")
-    parser_create_settings.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
-    parser_create_settings.add_argument('--destination', dest="destination", action='store', metavar='<path>',
-                                        default=None, help="Sti til ønsket lagringslokasjon for settingsfil. "
-                                                           "Dersom denne ikke spesifiseres vil settings.json filen "
-                                                           "legges i stien som skriptet kjøres fra.")
-
     # Create env file command
     parser_create_env_file = sub_arg_parser.add_parser('create_env_file', add_help=False)
     parser_create_env_file.add_argument('-v, --version', action='version', version=__version__,
@@ -56,8 +47,6 @@ def main():
         dataverk_create.run(package_name_in=args.package_name,
                             update_schedule_in=args.update_schedule,
                             nais_namespace_in=args.nais_namespace)
-    elif args.command == 'create_settings':
-        dataverk_create_settings_template.run(destination=args.destination)
     elif args.command == 'create_env_file':
         dataverk_create_env_file.run(destination=args.destination)
 
