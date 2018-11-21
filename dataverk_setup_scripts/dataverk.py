@@ -30,7 +30,7 @@ def main():
                               default=None, help="Ønsket NAIS namespace hvor cronjob skal deployes")
 
     # Create env file command
-    parser_create_env_file = sub_arg_parser.add_parser('create_env_file', add_help=False)
+    parser_create_env_file = sub_arg_parser.add_parser('create-env-file', add_help=False)
     parser_create_env_file.add_argument('-v, --version', action='version', version=__version__,
                                         help="Viser programversjon")
     parser_create_env_file.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
