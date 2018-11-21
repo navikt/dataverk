@@ -30,7 +30,7 @@ def main():
                               default=None, help="Ønsket NAIS namespace hvor cronjob skal deployes")
 
     # Create_settings command
-    parser_create_settings = sub_arg_parser.add_parser('create_settings', add_help=False)
+    parser_create_settings = sub_arg_parser.add_parser('create-settings', add_help=False)
     parser_create_settings.add_argument('-v, --version', action='version', version=__version__, help="Viser programversjon")
     parser_create_settings.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
     parser_create_settings.add_argument('--destination', dest="destination", action='store', metavar='<path>',
@@ -39,7 +39,7 @@ def main():
                                                            "legges i stien som skriptet kjøres fra.")
 
     # Create env file command
-    parser_create_env_file = sub_arg_parser.add_parser('create_env_file', add_help=False)
+    parser_create_env_file = sub_arg_parser.add_parser('create-env-file', add_help=False)
     parser_create_env_file.add_argument('-v, --version', action='version', version=__version__,
                                         help="Viser programversjon")
     parser_create_env_file.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
@@ -54,11 +54,10 @@ def main():
         pass
     elif args.command == 'create':
         dataverk_create.run(package_name_in=args.package_name,
-                            update_schedule_in=args.update_schedule,
-                            nais_namespace_in=args.nais_namespace)
-    elif args.command == 'create_settings':
+                            update_schedule_in=args.update_schedule)
+    elif args.command == 'create-settings':
         dataverk_create_settings_template.run(destination=args.destination)
-    elif args.command == 'create_env_file':
+    elif args.command == 'create-env-file':
         dataverk_create_env_file.run(destination=args.destination)
 
 
