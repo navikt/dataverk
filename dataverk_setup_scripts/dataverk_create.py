@@ -7,7 +7,6 @@ from string import Template
 from shutil import copyfile, rmtree
 from xml.etree import ElementTree
 from . import settings_loader, settings_creator
-from dataverk.utils.settings_store import SettingsStore
 from dataverk.utils.env_store import EnvStore
 from dataverk.utils import resource_discoverer
 from pathlib import Path
@@ -19,7 +18,7 @@ class CreateDataPackage:
 
     def __init__(self, github_project: str, settings, envs: EnvStore):
 
-        self._verify_class_init_arguments(github_project, settings, envs)
+        self._verify_class_init_arguments(github_project, envs)
 
         self.settings = settings
         self.github_project = github_project
@@ -47,12 +46,9 @@ class CreateDataPackage:
             raise NameError(f'En jobb med navn {self.settings["package_name"]} '
                             f'eksisterer allerede på jenkins serveren. Datapakkenavn må være unikt.')
 
-    def _verify_class_init_arguments(self, github_project, settings, envs):
+    def _verify_class_init_arguments(self, github_project, envs):
         if not isinstance(github_project, str):
             raise TypeError(f'github_project parameter must be of type string')
-
-        if not isinstance(settings, SettingsStore):
-            raise TypeError(f'settings parameter must be of type SettingStore')
 
         if not isinstance(envs, EnvStore):
             raise TypeError(f'envs parameter must be of type EnvStore')
@@ -296,6 +292,8 @@ def run(args):
     settings_creator_object = settings_creator.get_settings_creator(args=args,
                                                                     default_settings_path=str(default_settings_path))
     settings = settings_creator_object.create_settings()
+
+    rmtree(str(default_settings_path))
 
     new_datapackage = CreateDataPackage(github_project=github_project, envs=envs, settings=settings)
 

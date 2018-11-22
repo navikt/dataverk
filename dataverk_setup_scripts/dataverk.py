@@ -35,9 +35,9 @@ def main():
     parse_create.add_argument('-ud, --use-defaults', dest="use_defaults", action='store_true',
                               help="Setter default verdier for alle optional parametre "
                                    "som ikke spesifiseres når skriptet kjøres")
-    parse_create.add_argument('-pn, --package-name', dest="package_name", action='store', metavar='<pakkenavn>',
+    parse_create.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
                               default=None, help="Ønsket navn på ny datapakke")
-    parse_create.add_argument('-us, --update-schedule', dest="update_schedule", action='store', metavar='<schedule>',
+    parse_create.add_argument('--update-schedule', dest="update_schedule", action='store', metavar='<schedule>',
                               default=None, help="Ønsket oppdateringsschedule for datapakke")
 
     parse_create.add_argument('--nais-namespace', dest="nais_namespace", action='store', metavar='<namespace>',
@@ -50,7 +50,7 @@ def main():
                               default=None, help="Endepunkt for jenkins server")
     parse_create.add_argument('--vault-auth-uri', dest="vault_auth_uri", action='store', metavar='<uri>',
                               default=None, help="URI for vault autentisering")
-    parse_create.add_argument('--vault-auth-uri', dest="vault_secrets_uri", action='store', metavar='<uri>',
+    parse_create.add_argument('--vault-secrets-uri', dest="vault_secrets_uri", action='store', metavar='<uri>',
                               default=None, help="URI for vault secrets")
     parse_create.add_argument('--vault-auth-path', dest="vault_auth_path", action='store', metavar='<path>',
                               default=None, help="Vault sti for vks auth path")
@@ -69,7 +69,7 @@ def main():
 
     if args.command == 'init':
         pass
-    elif args.command == 'create_env_file':
+    elif args.command == 'create-env-file':
         dataverk_create_env_file.run(destination=args.destination)
     elif args.command == 'create':
         dataverk_create.run(args)

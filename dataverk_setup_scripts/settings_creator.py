@@ -2,7 +2,6 @@ import re
 import json
 import os
 from . import settings_template
-from dataverk.utils.settings_store import SettingsStore
 
 
 class SettingsCreator:
@@ -31,9 +30,9 @@ class SettingsCreator:
             self.settings["index_connections"]["elastic_local"] = self.args.elastic_endpoint
 
         if self.args.aws_endpoint is None:
-            self.settings["bucket_storage_connections"]["AWS_S3"] = self._handle_missing_argument("aws_endpoint")
+            self.settings["bucket_storage_connections"]["AWS_S3"]["host"] = self._handle_missing_argument("aws_endpoint")
         else:
-            self.settings["bucket_storage_connections"]["AWS_S3"] = self.args.aws_endpoint
+            self.settings["bucket_storage_connections"]["AWS_S3"]["host"] = self.args.aws_endpoint
 
         if self.args.jenkins_endpoint is None:
             self.settings["jenkins"]["url"] = self._handle_missing_argument("jenkins_endpoint")
@@ -50,25 +49,25 @@ class SettingsCreator:
         else:
             self.settings["vault"]["secrets_uri"] = self.args.vault_secrets_uri
 
-        if self.args.vks_auth_path is None:
-            self.settings["vault"]["vks_auth_path"] = self._handle_missing_argument("vks_auth_path")
+        if self.args.vault_auth_path is None:
+            self.settings["vault"]["vks_auth_path"] = self._handle_missing_argument("vault_auth_path")
         else:
-            self.settings["vault"]["vks_auth_path"] = self.args.vks_auth_path
+            self.settings["vault"]["vks_auth_path"] = self.args.vault_auth_path
 
-        if self.args.vks_kv_path is None:
-            self.settings["vault"]["vks_kv_path"] = self._handle_missing_argument("vks_kv_path")
+        if self.args.vault_kv_path is None:
+            self.settings["vault"]["vks_kv_path"] = self._handle_missing_argument("vault_kv_path")
         else:
-            self.settings["vault"]["vks_kv_path"] = self.args.vks_kv_path
+            self.settings["vault"]["vks_kv_path"] = self.args.vault_kv_path
 
-        if self.args.vks_vault_role is None:
-            self.settings["vault"]["vks_vault_role"] = self._handle_missing_argument("vks_vault_role")
+        if self.args.vault_role is None:
+            self.settings["vault"]["vks_vault_role"] = self._handle_missing_argument("vault_role")
         else:
-            self.settings["vault"]["vks_vault_role"] = self.args.vks_vault_role
+            self.settings["vault"]["vks_vault_role"] = self.args.vault_role
 
-        if self.args.service_account is None:
-            self.settings["vault"]["service_account"] = self._handle_missing_argument("service_account")
+        if self.args.vault_service_account is None:
+            self.settings["vault"]["service_account"] = self._handle_missing_argument("vault_service_account")
         else:
-            self.settings["vault"]["service_account"] = self.args.service_account
+            self.settings["vault"]["service_account"] = self.args.vault_service_account
 
     def _validate_datapackage_name(self, name):
         ''' Kontrollerer at pakkenavnet valgt består av kun små bokstaver og tall, ord separert med '-', og at det ikke
@@ -166,7 +165,8 @@ class SettingsCreatorUseDefaults(SettingsCreator):
     def __init__(self, args, default_settings_path):
         super().__init__(args)
 
-        self.default_settings = json.load(default_settings_path)
+        with open(os.path.join(default_settings_path, 'settings.json'), 'r') as settings_file:
+            self.default_settings = json.load(settings_file)
         self.settings = self.default_settings
 
     def _get_default(self, key: str, default_settings):
@@ -196,6 +196,8 @@ class SettingsCreatorUseDefaults(SettingsCreator):
             return self._get_default(key="vks_vault_role", default_settings=self.default_settings["vault"])
         elif arg is "vault_service_account":
             return self._get_default(key="service_account", default_settings=self.default_settings["vault"])
+        else:
+            raise ValueError(f'{arg} is not a valid argument')
 
 
 def get_settings_creator(args, default_settings_path: str=None) -> type(SettingsCreator):
