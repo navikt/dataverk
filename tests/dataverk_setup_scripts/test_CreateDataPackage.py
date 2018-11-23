@@ -82,42 +82,9 @@ class MethodsInput(Base):
 
     Tests include: passing invalid input, etc.
     """
+    pass
 
     # Input arguments valid
-
-    def test_validate_datapackage_name_valid(self):
-        valid_datapackage_names = ["name", "name-with-separator"]
-
-        for name in valid_datapackage_names:
-            with self.subTest(msg="Valid datapackage name", _input=name):
-                dataverk_create.validate_datapackage_name(name)
-
-    def test_validate_cronjob_schedule_valid(self):
-        valid_schedule_strings = ["* * * * *", "59 * * * *", "* 23 * * *", "* * 31 * *", "* * * 12 *", "* * * * 6",
-                                  "0,55 * * * *", "* 0,12 * * *", "* * 1,15 * *", "* * * 1,5 *", "* * * * 0,6"]
-
-        for schedule_string in valid_schedule_strings:
-            with self.subTest(msg="Valid schedule string", _input=schedule_string):
-                dataverk_create.validate_cronjob_schedule(schedule=schedule_string)
-
-    # Input arguments invalid
-
-    def test_validate_datapackage_name_invalid(self):
-        invalid_datapackage_names = ["_name", "-name", "name with spaces", "name_", "name-", "Name", "name_with_underscore"]
-
-        for name in invalid_datapackage_names:
-            with self.subTest(msg="Invalid datapackage name", _input=name):
-                with self.assertRaises(NameError):
-                    dataverk_create.validate_datapackage_name(name)
-
-    def test_validate_cronjob_schedule_invalid(self):
-        invalid_schedule_strings = ["* * * *", "* * * * * *", "60 * * * *", "* 24 * * *",
-                                    "* * 32 * *", "* * * 13 *", "* * * * 7"]
-
-        for schedule_string in invalid_schedule_strings:
-            with self.subTest(msg="Invalid schedule string", _input=schedule_string):
-                with self.assertRaises(ValueError):
-                    dataverk_create.validate_cronjob_schedule(schedule=schedule_string)
 
 
 class MethodsReturnType(Base):

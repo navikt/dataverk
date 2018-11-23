@@ -62,8 +62,16 @@ def main():
                               default=None, help="Vault service account")
 
     # Update command
+    parse_update = sub_arg_parser.add_parser('update', add_help=False)
+    parse_update.add_argument('-v, --version', action='version', version=__version__,
+                              help="Viser programversjon")
+    parse_update.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
 
     # Delete command
+    parse_delete = sub_arg_parser.add_parser('update', add_help=False)
+    parse_delete.add_argument('-v, --version', action='version', version=__version__,
+                              help="Viser programversjon")
+    parse_delete.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
 
     args = arg_parser.parse_args()
 
@@ -73,6 +81,10 @@ def main():
         dataverk_create_env_file.run(destination=args.destination)
     elif args.command == 'create':
         dataverk_create.run(args)
+    elif args.command == 'update':
+        pass
+    elif args.command == 'delete':
+        pass
 
 
 if __name__ == "__main__":

@@ -4,7 +4,8 @@ import json
 import yaml
 
 from string import Template
-from shutil import copyfile, rmtree
+from shutil import rmtree
+from distutils.dir_util import copy_tree
 from xml.etree import ElementTree
 from . import settings_loader, settings_creator
 from dataverk.utils.env_store import EnvStore
@@ -16,9 +17,8 @@ class CreateDataPackage:
     ''' Klasse for å opprette ny datapakke i et eksisterende repository for datapakker/datasett
     '''
 
-    def __init__(self, github_project: str, settings, envs: EnvStore):
-
-        self._verify_class_init_arguments(github_project, envs)
+    def __init__(self, github_project: str, settings: dict, envs: EnvStore):
+        self._verify_class_init_arguments(github_project, settings, envs)
 
         self.settings = settings
         self.github_project = github_project
@@ -31,24 +31,20 @@ class CreateDataPackage:
             raise NameError(f'En mappe med navn {self.settings["package_name"]} '
                             f'eksisterer allerede i repo {self.github_project}')
 
-        self._create_folder_structure()
-        templates_path = settings_loader.GitSettingsLoader(url=self.envs["SETTINGS_REPO"])
-        self.templates_folder_name = templates_path.download_to(self.settings["package_name"])
-        self._copy_template_files()
-        self._create_settings_file(path=self.settings["package_name"])
-        self._remove_templates_repo()
-
         self.jenkins_server = jenkins.Jenkins(self.settings["jenkins"]["url"],
                                               username=self.envs['USER_IDENT'],
                                               password=self.envs['PASSWORD'])
 
-        if self._jenkins_job_exists(self.settings["package_name"]):
+        if self.jenkins_server.job_exists(name=self.settings["package_name"]):
             raise NameError(f'En jobb med navn {self.settings["package_name"]} '
                             f'eksisterer allerede på jenkins serveren. Datapakkenavn må være unikt.')
 
-    def _verify_class_init_arguments(self, github_project, envs):
+    def _verify_class_init_arguments(self, github_project, settings, envs):
         if not isinstance(github_project, str):
             raise TypeError(f'github_project parameter must be of type string')
+
+        if not isinstance(settings, dict):
+            raise TypeError(f'settings parameter must be of type dict')
 
         if not isinstance(envs, EnvStore):
             raise TypeError(f'envs parameter must be of type EnvStore')
@@ -77,52 +73,27 @@ class CreateDataPackage:
 
         return False
 
-    def _jenkins_job_exists(self, name):
-        ''' Sjekk på om det finnes en jobb på jenkinsserveren med samme navn som ønsket pakkenavn
-            Jenkinsjobben får samme navn som pakkenavnet valgt
-
-        :return: boolean: "True" hvis jenkinsjob allerede er tatt i bruk, "False" ellers
-        '''
-
-        if self.jenkins_server.job_exists(name):
-            print(f'En jobb med navn {name} eksisterer allerede på jenkins serveren')
-            return True
-
-        return False
-
-    def _create_folder_structure(self):
-        ''' Lager mappestrukturen for datapakken. Oppretter mappene:
-            {repo_root}/{pakkenavn}/scripts
-            {repo_root}/{pakkenavn}/data
+    def _create_datapackage_local(self):
+        ''' Lager mappestrukturen for datapakken lokalt og henter template filer
         '''
 
         os.mkdir(self.settings["package_name"])
-        os.mkdir(os.path.join(self.settings["package_name"], 'scripts'))
-        os.mkdir(os.path.join(self.settings["package_name"], 'data'))
 
-    def _copy_template_files(self):
-        ''' Kopierer template filer til datapakken:
-        '''
+        templates_path = settings_loader.GitSettingsLoader(url=self.envs["SETTINGS_REPO"])
+        templates_folder_name = templates_path.download_to(".")
+        copy_tree(os.path.join(str(templates_folder_name), 'file_templates'), self.settings["package_name"])
 
-        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'jenkins_base_config.xml'), os.path.join(self.settings["package_name"], 'jenkins_base_config.xml'))
-        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'jenkins_config.xml'), os.path.join(self.settings["package_name"], 'jenkins_config.xml'))
-        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'Jenkinsfile'), os.path.join(self.settings["package_name"], 'Jenkinsfile'))
-        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'cronjob.yaml'), os.path.join(self.settings["package_name"], 'cronjob.yaml'))
-        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'Dockerfile'), os.path.join(self.settings["package_name"], 'Dockerfile'))
-        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'LICENSE.md'), os.path.join(self.settings["package_name"], 'LICENSE.md'))
-        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'README.md'), os.path.join(self.settings["package_name"], 'README.md'))
-        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'METADATA.json'), os.path.join(self.settings["package_name"], 'METADATA.json'))
-        copyfile(os.path.join(str(self.templates_folder_name), 'file_templates', 'etl.ipynb'), os.path.join(self.settings["package_name"], 'scripts', 'etl.ipynb'))
-
-    def _create_settings_file(self, path: str):
-        with open(os.path.join(path, 'settings.json'), 'w') as settings_file:
-            json.dump(self.settings, settings_file, indent=2)
-
-    def _remove_templates_repo(self):
         try:
-            rmtree(str(self.templates_folder_name))
+            rmtree(str(templates_folder_name))
         except OSError:
             raise OSError(f'Templates mappe eksisterer ikke.')
+
+    def _create_settings_file(self, path: str):
+        try:
+            with open(os.path.join(path, 'settings.json'), 'w') as settings_file:
+                json.dump(self.settings, settings_file, indent=2)
+        except OSError:
+            raise OSError(f'Klarte ikke å generere settings fil for datapakke')
 
     def _edit_package_metadata(self):
         '''  Tilpasser metadata fil til datapakken
@@ -212,7 +183,6 @@ class CreateDataPackage:
 
         xml_base = ElementTree.parse(os.path.join(self.settings["package_name"], 'jenkins_base_config.xml'))
         xml_base_root = xml_base.getroot()
-
         xml_base_config = ElementTree.tostring(xml_base_root, encoding='utf-8', method='xml').decode()
 
         try:
@@ -253,6 +223,8 @@ class CreateDataPackage:
 
         '''
 
+        self._create_datapackage_local()
+        self._create_settings_file(path=self.settings["package_name"])
         self._edit_package_metadata()
         self._edit_cronjob_config()
         self._edit_jenkins_file()
@@ -293,7 +265,7 @@ def run(args):
                                                                     default_settings_path=str(default_settings_path))
     settings = settings_creator_object.create_settings()
 
-    rmtree(str(default_settings_path))
+    rmtree(str(default_settings_path)) # TODO: Må fjernes selv om det feiler
 
     new_datapackage = CreateDataPackage(github_project=github_project, envs=envs, settings=settings)
 
