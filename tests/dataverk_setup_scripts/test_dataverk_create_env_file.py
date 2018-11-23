@@ -43,7 +43,8 @@ class Instantiation(Base):
         self.non_existant_path = './mappe_som_ikke_eksisterer'
 
     def test_normal_instanciation(self):
-        dataverk_create_env_file.CreateEnvFile(user_ident="brukerident", password="passord", settings_repo="repo.git")
+        dataverk_create_env_file.CreateEnvFile(user_ident="brukerident", password="passord",
+                                               settings_repo="repo.git", template_repo="repo2.git")
 
     # Input arguments wrong type
     # ==========================
@@ -53,32 +54,44 @@ class Instantiation(Base):
                               _input=input):
                 with self.assertRaises(TypeError):
                     dataverk_create_env_file.CreateEnvFile(user_ident=input, password="passord",
-                                                           settings_repo="repo.git", destination=".")
+                                                           settings_repo="repo.git", template_repo="repo2.git",
+                                                           destination=".")
             with self.subTest(msg="Wrong input parameter type in CreateSettingsTemplate class instantiation",
                               _input=input):
                 with self.assertRaises(TypeError):
                     dataverk_create_env_file.CreateEnvFile(user_ident="brukerident", password=input,
-                                                           settings_repo="repo.git", destination=".")
+                                                           settings_repo="repo.git", template_repo="repo2.git",
+                                                           destination=".")
             with self.subTest(msg="Wrong input parameter type in CreateSettingsTemplate class instantiation",
                               _input=input):
                 with self.assertRaises(TypeError):
                     dataverk_create_env_file.CreateEnvFile(user_ident="brukerident", password="passord",
-                                                           settings_repo=input, destination=".")
+                                                           settings_repo=input, template_repo="repo2.git",
+                                                           destination=".")
             with self.subTest(msg="Wrong input parameter type in CreateSettingsTemplate class instantiation",
                               _input=input):
                 with self.assertRaises(TypeError):
                     dataverk_create_env_file.CreateEnvFile(user_ident="brukerident", password="passord",
-                                                           settings_repo="repo.git", destination=input)
+                                                           settings_repo="repo.git", template_repo=input,
+                                                           destination=".")
+            with self.subTest(msg="Wrong input parameter type in CreateSettingsTemplate class instantiation",
+                              _input=input):
+                with self.assertRaises(TypeError):
+                    dataverk_create_env_file.CreateEnvFile(user_ident="brukerident", password="passord",
+                                                           settings_repo="repo.git", template_repo="repo2.git",
+                                                           destination=input)
 
     def test_instanctiation_with_path_to_file(self):
         with self.assertRaises(ValueError):
             dataverk_create_env_file.CreateEnvFile(user_ident="brukerident", password="passord",
-                                                   settings_repo="repo.git", destination=self.path_to_file)
+                                                   settings_repo="repo.git", template_repo="repo2.git",
+                                                   destination=self.path_to_file)
 
     def test_instanciation_with_non_existant_path(self):
         with self.assertRaises(ValueError):
             dataverk_create_env_file.CreateEnvFile(user_ident="brukerident", password="passord",
-                                                   settings_repo="repo.git", destination=self.non_existant_path)
+                                                   settings_repo="repo.git", template_repo="repo2.git",
+                                                   destination=self.non_existant_path)
 
 
     # Input arguments outside constraints
