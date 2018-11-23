@@ -79,14 +79,17 @@ class CreateDataPackage:
 
         os.mkdir(self.settings["package_name"])
 
-        templates_path = settings_loader.GitSettingsLoader(url=self.envs["SETTINGS_REPO"])
-        templates_folder_name = templates_path.download_to(".")
-        copy_tree(os.path.join(str(templates_folder_name), 'file_templates'), self.settings["package_name"])
+        templates_path = ""
 
         try:
-            rmtree(str(templates_folder_name))
+            templates_loader = settings_loader.GitSettingsLoader(url=self.envs["TEMPLATES_REPO"])
+            templates_path = templates_loader.download_to(".")
+            copy_tree(os.path.join(str(templates_path), 'file_templates'), self.settings["package_name"])
         except OSError:
             raise OSError(f'Templates mappe eksisterer ikke.')
+        finally:
+            if os.path.exists(str(templates_path)):
+                rmtree(str(templates_path))
 
     def _create_settings_file(self, path: str):
         try:
@@ -188,8 +191,7 @@ class CreateDataPackage:
         try:
             self.jenkins_server.create_job(name=self.settings["package_name"], config_xml=xml_base_config)
         except jenkins.JenkinsException:
-            rmtree(self.settings["package_name"])
-            raise jenkins.JenkinsException
+            raise jenkins.JenkinsException("Klarte ikke sette opp jenkinsjobb")
 
         self.jenkins_server.build_job(name=self.settings["package_name"])
 
@@ -233,8 +235,6 @@ class CreateDataPackage:
 
         print(f'Datapakken {self.settings["package_name"]} er opprettet')
 
-        # TODO: Add more error handling
-
 
 def get_github_url():
     if not os.popen('git rev-parse --is-inside-work-tree').read().strip():
@@ -251,21 +251,25 @@ def run(args):
     github_project = get_github_url()
     print(f'Opprettelse av ny datapakke i {github_project}')
 
-    resource_files = resource_discoverer.search_for_files(start_path=Path('.'), file_names=('settings.json', '.env'), levels=3)
+    resource_files = resource_discoverer.search_for_files(start_path=Path('.'), file_names=('.env',), levels=3)
 
     if '.env' not in resource_files:
         Exception(f'.env fil må finnes i repo for å kunne kjøre dataverk create')
 
     envs = EnvStore(path=Path(resource_files['.env']))
 
-    default_settings_loader = settings_loader.GitSettingsLoader(url=envs["SETTINGS_REPO"])
-    default_settings_path = default_settings_loader.download_to('.')
+    default_settings_path = ""
 
-    settings_creator_object = settings_creator.get_settings_creator(args=args,
-                                                                    default_settings_path=str(default_settings_path))
-    settings = settings_creator_object.create_settings()
+    try:
+        default_settings_loader = settings_loader.GitSettingsLoader(url=envs["SETTINGS_REPO"])
+        default_settings_path = default_settings_loader.download_to('.')
 
-    rmtree(str(default_settings_path)) # TODO: Må fjernes selv om det feiler
+        settings_creator_object = settings_creator.get_settings_creator(args=args,
+                                                                        default_settings_path=str(default_settings_path))
+        settings = settings_creator_object.create_settings()
+    finally:
+        if os.path.exists(str(default_settings_path)):
+            rmtree(str(default_settings_path))
 
     new_datapackage = CreateDataPackage(github_project=github_project, envs=envs, settings=settings)
 
@@ -273,6 +277,11 @@ def run(args):
     res = input(f'Vil du opprette datapakken med konfigurasjonen over? [j/n] ')
 
     if res in {'j', 'ja', 'y', 'yes'}:
-        new_datapackage.create()
+        try:
+            new_datapackage.create()
+        except Exception:
+            if os.path.exists(settings["package_name"]):
+                rmtree(settings["package_name"])
+            raise Exception(f'new_datapackage.create() feilet. Klarte ikke generere datapakke {settings["package_name"]}')
     else:
         print(f'Datapakken ble ikke opprettet')
