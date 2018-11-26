@@ -1,6 +1,6 @@
 import argparse
-from . import dataverk_create, dataverk_create_env_file, __version__
-
+from .datapackage import Action, get_datapackage_object
+from . import dataverk_create_env_file, __version__
 
 def main():
     # Top level parser
@@ -32,9 +32,9 @@ def main():
     parse_create.add_argument('-v, --version', action='version', version=__version__,
                               help="Viser programversjon")
     parse_create.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
-    parse_create.add_argument('-ud, --use-defaults', dest="use_defaults", action='store_true',
-                              help="Setter default verdier for alle optional parametre "
-                                   "som ikke spesifiseres når skriptet kjøres")
+    parse_create.add_argument('-p, --prompt-missing-args', dest="prompt_missing_args", action='store_true',
+                              help="Prompter bruker om å skrive inn alle settings parametere som ikke "
+                                   "angis som input til skriptet (default settings fil brukes ikke)")
     parse_create.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
                               default=None, help="Ønsket navn på ny datapakke")
     parse_create.add_argument('--update-schedule', dest="update_schedule", action='store', metavar='<schedule>',
@@ -80,7 +80,8 @@ def main():
     elif args.command == 'create-env-file':
         dataverk_create_env_file.run(destination=args.destination)
     elif args.command == 'create':
-        dataverk_create.run(args)
+        dp = get_datapackage_object(action=Action.CREATE, args=args)
+        dp.run()
     elif args.command == 'update':
         pass
     elif args.command == 'delete':

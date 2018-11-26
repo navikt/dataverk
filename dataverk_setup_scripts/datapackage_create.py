@@ -7,71 +7,17 @@ from string import Template
 from shutil import rmtree
 from distutils.dir_util import copy_tree
 from xml.etree import ElementTree
-from . import settings_loader, settings_creator
+from . import settings_loader
+from .datapackage import DataPackage
 from dataverk.utils.env_store import EnvStore
-from dataverk.utils import resource_discoverer
-from pathlib import Path
 
 
-class CreateDataPackage:
+class CreateDataPackage(DataPackage):
     ''' Klasse for å opprette ny datapakke i et eksisterende repository for datapakker/datasett
     '''
 
-    def __init__(self, github_project: str, settings: dict, envs: EnvStore):
-        self._verify_class_init_arguments(github_project, settings, envs)
-
-        self.settings = settings
-        self.github_project = github_project
-        self.envs = envs
-
-        if not self._is_in_repo_root():
-            raise Exception(f'dataverk create må kjøres fra topp-nivået i git repoet')
-
-        if self._folder_exists_in_repo(self.settings["package_name"]):
-            raise NameError(f'En mappe med navn {self.settings["package_name"]} '
-                            f'eksisterer allerede i repo {self.github_project}')
-
-        self.jenkins_server = jenkins.Jenkins(self.settings["jenkins"]["url"],
-                                              username=self.envs['USER_IDENT'],
-                                              password=self.envs['PASSWORD'])
-
-        if self.jenkins_server.job_exists(name=self.settings["package_name"]):
-            raise NameError(f'En jobb med navn {self.settings["package_name"]} '
-                            f'eksisterer allerede på jenkins serveren. Datapakkenavn må være unikt.')
-
-    def _verify_class_init_arguments(self, github_project, settings, envs):
-        if not isinstance(github_project, str):
-            raise TypeError(f'github_project parameter must be of type string')
-
-        if not isinstance(settings, dict):
-            raise TypeError(f'settings parameter must be of type dict')
-
-        if not isinstance(envs, EnvStore):
-            raise TypeError(f'envs parameter must be of type EnvStore')
-
-    def _is_in_repo_root(self):
-        ''' Sjekk på om create_dataverk kjøres fra toppnivå i repo.
-
-        :return: boolean: "True" hvis dataverk_create kjøres fra toppnivå i repo, "False" ellers
-        '''
-
-        current_dir = os.getcwd()
-        git_root = os.popen('git rev-parse --show-toplevel').read().strip()
-
-        return os.path.samefile(current_dir, git_root)
-
-    def _folder_exists_in_repo(self, name: str):
-        ''' Sjekk på om det finnes en mappe i repoet med samme navn som ønsket pakkenavn
-
-        :return: boolean: "True" hvis pakkenavn allerede er tatt i bruk, "False" ellers
-        '''
-
-        for filename in os.listdir(os.getcwd()):
-            if name == filename:
-                print(f'En mappe med navn {name} eksisterer allerede i repo {self.github_project}')
-                return True
-
-        return False
+    def __init__(self, settings: dict, envs: EnvStore):
+        super().__init__(settings=settings, envs=envs)
 
     def _create_datapackage_local(self):
         ''' Lager mappestrukturen for datapakken lokalt og henter template filer
@@ -212,15 +158,7 @@ class CreateDataPackage:
 
         self.jenkins_server.reconfig_job(self.settings["package_name"], xml_config)
 
-    def print_datapackage_config(self):
-        print("\n-------------Ny datapakke------------------------" +
-              "\nDatapakkenavn: " + self.settings["package_name"] +
-              "\ngithub repo: " + self.github_project +
-              "\ncronjob schedule: " + self.settings["update_schedule"] +
-              "\nNAIS namespace: " + self.settings["nais_namespace"] +
-              "\n-------------------------------------------------\n")
-
-    def create(self):
+    def _create(self):
         ''' Oppretter ny datapakke med ønsket konfigurasjon
 
         '''
@@ -235,53 +173,30 @@ class CreateDataPackage:
 
         print(f'Datapakken {self.settings["package_name"]} er opprettet')
 
+    def run(self):
+        ''' Entrypoint for dataverk create
 
-def get_github_url():
-    if not os.popen('git rev-parse --is-inside-work-tree').read().strip():
-        raise Exception("dataverk create må kjøres fra et git repository")
+        '''
 
-    return os.popen('git config --get remote.origin.url').read().strip()
+        if self._folder_exists_in_repo(self.settings["package_name"]):
+            raise NameError(f'En mappe med navn {self.settings["package_name"]} '
+                            f'eksisterer allerede i repo {self.github_project}')
 
+        if self.jenkins_server.job_exists(name=self.settings["package_name"]):
+            raise NameError(f'En jobb med navn {self.settings["package_name"]} '
+                            f'eksisterer allerede på jenkins serveren. Datapakkenavn må være unikt.')
 
-def run(args):
-    ''' Entrypoint for dataverk create
+        print(f'Opprettelse av ny datapakke i {self.github_project}')
 
-    '''
+        self._print_datapackage_config()
+        res = input(f'Vil du opprette datapakken med konfigurasjonen over? [j/n] ')
 
-    github_project = get_github_url()
-    print(f'Opprettelse av ny datapakke i {github_project}')
-
-    resource_files = resource_discoverer.search_for_files(start_path=Path('.'), file_names=('.env',), levels=3)
-
-    if '.env' not in resource_files:
-        Exception(f'.env fil må finnes i repo for å kunne kjøre dataverk create')
-
-    envs = EnvStore(path=Path(resource_files['.env']))
-
-    default_settings_path = ""
-
-    try:
-        default_settings_loader = settings_loader.GitSettingsLoader(url=envs["SETTINGS_REPO"])
-        default_settings_path = default_settings_loader.download_to('.')
-
-        settings_creator_object = settings_creator.get_settings_creator(args=args,
-                                                                        default_settings_path=str(default_settings_path))
-        settings = settings_creator_object.create_settings()
-    finally:
-        if os.path.exists(str(default_settings_path)):
-            rmtree(str(default_settings_path))
-
-    new_datapackage = CreateDataPackage(github_project=github_project, envs=envs, settings=settings)
-
-    new_datapackage.print_datapackage_config()
-    res = input(f'Vil du opprette datapakken med konfigurasjonen over? [j/n] ')
-
-    if res in {'j', 'ja', 'y', 'yes'}:
-        try:
-            new_datapackage.create()
-        except Exception:
-            if os.path.exists(settings["package_name"]):
-                rmtree(settings["package_name"])
-            raise Exception(f'new_datapackage.create() feilet. Klarte ikke generere datapakke {settings["package_name"]}')
-    else:
-        print(f'Datapakken ble ikke opprettet')
+        if res in {'j', 'ja', 'y', 'yes'}:
+            try:
+                self._create()
+            except Exception:
+                if os.path.exists(self.settings["package_name"]):
+                    rmtree(self.settings["package_name"])
+                raise Exception(f'Klarte ikke generere datapakken {self.settings["package_name"]}')
+        else:
+            print(f'Datapakken {self.settings["package_name"]} ble ikke opprettet')
