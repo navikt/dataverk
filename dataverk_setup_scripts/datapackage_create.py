@@ -8,7 +8,7 @@ from shutil import rmtree
 from distutils.dir_util import copy_tree
 from xml.etree import ElementTree
 from . import settings_loader
-from .datapackage import DataPackage
+from .datapackage_base import DataPackage
 from dataverk.utils.env_store import EnvStore
 
 
@@ -26,7 +26,6 @@ class CreateDataPackage(DataPackage):
         os.mkdir(self.settings["package_name"])
 
         templates_path = ""
-
         try:
             templates_loader = settings_loader.GitSettingsLoader(url=self.envs["TEMPLATES_REPO"])
             templates_path = templates_loader.download_to(".")
@@ -37,16 +36,15 @@ class CreateDataPackage(DataPackage):
             if os.path.exists(str(templates_path)):
                 rmtree(str(templates_path))
 
-    def _create_settings_file(self, path: str):
+    def _write_settings_file(self, path: str):
         try:
             with open(os.path.join(path, 'settings.json'), 'w') as settings_file:
                 json.dump(self.settings, settings_file, indent=2)
         except OSError:
-            raise OSError(f'Klarte ikke å generere settings fil for datapakke')
+            raise OSError(f'Klarte ikke å skrive settings fil for datapakke')
 
     def _edit_package_metadata(self):
         '''  Tilpasser metadata fil til datapakken
-
         '''
 
         try:
@@ -66,7 +64,6 @@ class CreateDataPackage(DataPackage):
 
     def _edit_cronjob_config(self):
         ''' Tilpasser cronjob config fil til datapakken
-
         '''
 
         try:
@@ -90,7 +87,6 @@ class CreateDataPackage(DataPackage):
 
     def _edit_jenkins_file(self):
         ''' Tilpasser Jenkinsfile til datapakken
-
         '''
 
         try:
@@ -112,7 +108,6 @@ class CreateDataPackage(DataPackage):
 
     def _create_jenkins_job(self):
         ''' Tilpasser jenkins konfigurasjonsfil og setter opp ny jenkins jobb for datapakken
-
         '''
 
         try:
@@ -160,11 +155,10 @@ class CreateDataPackage(DataPackage):
 
     def _create(self):
         ''' Oppretter ny datapakke med ønsket konfigurasjon
-
         '''
 
         self._create_datapackage_local()
-        self._create_settings_file(path=self.settings["package_name"])
+        self._write_settings_file(path=self.settings["package_name"])
         self._edit_package_metadata()
         self._edit_cronjob_config()
         self._edit_jenkins_file()
@@ -175,7 +169,6 @@ class CreateDataPackage(DataPackage):
 
     def run(self):
         ''' Entrypoint for dataverk create
-
         '''
 
         if self._folder_exists_in_repo(self.settings["package_name"]):
@@ -186,7 +179,7 @@ class CreateDataPackage(DataPackage):
             raise NameError(f'En jobb med navn {self.settings["package_name"]} '
                             f'eksisterer allerede på jenkins serveren. Datapakkenavn må være unikt.')
 
-        print(f'Opprettelse av ny datapakke i {self.github_project}')
+        print(f'Opprettelse av ny datapakke ({self.settings["package_name"]}) i {self.github_project}')
 
         self._print_datapackage_config()
         res = input(f'Vil du opprette datapakken med konfigurasjonen over? [j/n] ')

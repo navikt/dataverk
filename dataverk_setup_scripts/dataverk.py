@@ -1,38 +1,41 @@
 import argparse
-from .datapackage import Action, get_datapackage_object
+
 from . import dataverk_create_env_file, __version__
+from .datapackage_base import Action
+from .datapackage_factory import get_datapackage_object
+
 
 def main():
     # Top level parser
     arg_parser = argparse.ArgumentParser(add_help=False)
-    arg_parser.add_argument('-v, --version', action='version', version=__version__,
+    arg_parser.add_argument('-v', '--version', action='version', version=__version__,
                             help="Viser programversjon")
-    arg_parser.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
+    arg_parser.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
     sub_arg_parser = arg_parser.add_subparsers(title='commands', dest='command')
     sub_arg_parser.required = True
 
     # Init command
     parser_init = sub_arg_parser.add_parser('init', add_help=False)
-    parser_init.add_argument('-v, --version', action='version', version=__version__,
+    parser_init.add_argument('-v', '--version', action='version', version=__version__,
                              help="Viser programversjon")
-    parser_init.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
+    parser_init.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
 
     # Create env file command
     parser_create_env_file = sub_arg_parser.add_parser('create-env-file', add_help=False)
-    parser_create_env_file.add_argument('-v, --version', action='version', version=__version__,
+    parser_create_env_file.add_argument('-v', '--version', action='version', version=__version__,
                                         help="Viser programversjon")
-    parser_create_env_file.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
-    parser_create_env_file.add_argument('--destination', dest="destination", action='store', metavar='<path>',
+    parser_create_env_file.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
+    parser_create_env_file.add_argument('-d', '--destination', dest="destination", action='store', metavar='<path>',
                                         default=None, help="Sti til ønsket lagringslokasjon for .env fil. "
                                                            "Dersom denne ikke spesifiseres vil .env filen "
                                                            "legges i stien som skriptet kjøres fra.")
 
     # Create command
     parse_create = sub_arg_parser.add_parser('create', add_help=False)
-    parse_create.add_argument('-v, --version', action='version', version=__version__,
+    parse_create.add_argument('-v', '--version', action='version', version=__version__,
                               help="Viser programversjon")
-    parse_create.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
-    parse_create.add_argument('-p, --prompt-missing-args', dest="prompt_missing_args", action='store_true',
+    parse_create.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
+    parse_create.add_argument('-p', '--prompt-missing-args', dest="prompt_missing_args", action='store_true',
                               help="Prompter bruker om å skrive inn alle settings parametere som ikke "
                                    "angis som input til skriptet (default settings fil brukes ikke)")
     parse_create.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
@@ -63,15 +66,15 @@ def main():
 
     # Update command
     parse_update = sub_arg_parser.add_parser('update', add_help=False)
-    parse_update.add_argument('-v, --version', action='version', version=__version__,
+    parse_update.add_argument('-v', '--version', action='version', version=__version__,
                               help="Viser programversjon")
-    parse_update.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
+    parse_update.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
 
     # Delete command
-    parse_delete = sub_arg_parser.add_parser('update', add_help=False)
-    parse_delete.add_argument('-v, --version', action='version', version=__version__,
+    parse_delete = sub_arg_parser.add_parser('delete', add_help=False)
+    parse_delete.add_argument('-v', '--version', action='version', version=__version__,
                               help="Viser programversjon")
-    parse_delete.add_argument('-h, --help', action='help', help="Viser denne hjelpemeldingen")
+    parse_delete.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
 
     args = arg_parser.parse_args()
 
@@ -83,9 +86,11 @@ def main():
         dp = get_datapackage_object(action=Action.CREATE, args=args)
         dp.run()
     elif args.command == 'update':
-        pass
+        dp = get_datapackage_object(action=Action.UPDATE, args=args)
+        dp.run()
     elif args.command == 'delete':
-        pass
+        dp = get_datapackage_object(action=Action.DELETE, args=args)
+        dp.run()
 
 
 if __name__ == "__main__":
