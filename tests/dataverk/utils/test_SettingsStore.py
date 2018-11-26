@@ -147,3 +147,12 @@ class MethodsReturnValues(Base):
         with self.assertRaises((requests.exceptions.ConnectionError, requests.exceptions.HTTPError)) as cm:
             testObject = settings_store.SettingsStore(Path(self.files["testfile_settings.json"]), self.mock_env)
 
+    def test_get_field__CONFIG_PATH_SET_fields(self):
+        os.environ["CONFIG_PATH"] = str(self.files["testfile_settings.json"].parents[0])
+
+        store = settings_store.SettingsStore(Path(self.files["testfile_settings.json"]), self.mock_env)
+
+        for key, val in store:
+            print(val)
+
+
