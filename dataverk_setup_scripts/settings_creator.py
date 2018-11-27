@@ -1,9 +1,41 @@
 import json
 import os
 import functools
-from .settings_template import SETTINGS_TEMPLATE, optional_parameters
+
 from dataverk.utils.validators import validate_datapackage_name, validate_cronjob_schedule
 from abc import ABC
+
+
+SETTINGS_TEMPLATE = {
+    "index_connections": {},
+
+    "file_storage_connections": {
+        "local": {}
+    },
+
+    "bucket_storage_connections": {
+        "AWS_S3": {},
+        "google_cloud": {
+            "credentials": {}
+        }
+    },
+
+    "vault": {},
+
+    "jenkins": {}
+}
+
+datapackage_optional_parameters = {
+    "nais_namespace": ('nais_namespace',),
+    "elastic_endpoint": ('index_connections', 'elastic_private'),
+    "aws_endpoint": ('bucket_storage_connections', 'AWS_S3', 'host'),
+    "jenkins_endpoint": ('jenkins', 'url'),
+    "vault_secrets_uri": ('vault', 'secrets_uri'),
+    "vault_auth_path": ('vault', 'vks_auth_path'),
+    "vault_kv_path": ('vault', 'vks_kv_path'),
+    "vault_role": ('vault', 'vks_vault_role'),
+    "vault_service_account": ('vault', 'service_account')
+}
 
 
 class SettingsCreator(ABC):
@@ -25,11 +57,11 @@ class SettingsCreator(ABC):
                          keys_tuple[:-1], self.settings)[keys_tuple[-1]] = value
 
     def _populate_settings(self):
-        for param in optional_parameters:
+        for param in datapackage_optional_parameters:
             if getattr(self.args, param) is None:
-                self._set_settings_param(optional_parameters[param], self._handle_missing_argument(param))
+                self._set_settings_param(datapackage_optional_parameters[param], self._handle_missing_argument(param))
             else:
-                self._set_settings_param(optional_parameters[param], getattr(self.args, param))
+                self._set_settings_param(datapackage_optional_parameters[param], getattr(self.args, param))
 
     def create_settings(self):
         if self.args.package_name is None:
@@ -77,16 +109,17 @@ class SettingsCreatorUseDefaults(SettingsCreator):
         self.settings = self.default_settings
 
     def _get_default(self, keys_list: tuple):
-        for key in keys_list:
+        default_value = self.settings[keys_list[0]]
+        for key in keys_list[1:]:
             try:
-                default_value = self.settings[key]
+                default_value = default_value[key]
             except KeyError:
                 print(f'Key {key} is not found in {os.path.join(self.default_settings_path, "settings.json")}')
                 return ""
         return default_value
 
     def _handle_missing_argument(self, arg: str):
-        return self._get_default(optional_parameters[arg])
+        return self._get_default(datapackage_optional_parameters[arg])
 
 
 def get_settings_creator(args, default_settings_path: str=None) -> type(SettingsCreator):

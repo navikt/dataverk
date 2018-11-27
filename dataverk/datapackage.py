@@ -217,17 +217,26 @@ class Datapackage:
             publish_data.publish_s3_nais(dir_path=self.dir_path,
                                          datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]),
                                          settings=self.settings)
-    
+
+            try:
+                es = ElasticsearchConnector(self.settings, host="elastic_private")
+                id = self.datapackage_metadata["datapackage_name"]
+                js = json.dumps(self.datapackage_metadata)
+                es.write(id, js)
+            except:
+                print("Exception: write to elastic index failed")
+                pass
+
         if self.is_public and 'gcs' in destination:
             publish_data.publish_google_cloud(dir_path=self.dir_path,
                                               datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]),
                                               settings=self.settings)
 
             try: 
-                es = ElasticsearchConnector('public')
-                id = self.datapackage_metadata['datapackage_name']
+                es = ElasticsearchConnector(self.settings, host="elastic_public")
+                id = self.datapackage_metadata["datapackage_name"]
                 js = json.dumps(self.datapackage_metadata)
                 es.write(id, js)
             except:
+                print("Exception: write to public elastic index failed")
                 pass 
-

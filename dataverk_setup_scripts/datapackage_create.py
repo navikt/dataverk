@@ -1,7 +1,6 @@
 import jenkins
 import os
 import json
-import yaml
 
 from string import Template
 from shutil import rmtree
@@ -43,69 +42,6 @@ class CreateDataPackage(DataPackage):
         except OSError:
             raise OSError(f'Klarte ikke å skrive settings fil for datapakke')
 
-    def _edit_package_metadata(self):
-        '''  Tilpasser metadata fil til datapakken
-        '''
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'METADATA.json'), 'r') as metadatafile:
-                package_metadata = json.load(metadatafile)
-        except OSError:
-            raise OSError(f'Finner ikke METADATA.json fil')
-
-        package_metadata['Datapakke_navn'] = self.settings["package_name"]
-        package_metadata['Bucket_navn'] = 'nav-opendata'
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'METADATA.json'), 'w') as metadatafile:
-                json.dump(package_metadata, metadatafile, indent=2)
-        except OSError:
-            raise OSError(f'Finner ikke METADATA.json fil')
-
-    def _edit_cronjob_config(self):
-        ''' Tilpasser cronjob config fil til datapakken
-        '''
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'cronjob.yaml'), 'r') as yamlfile:
-                cronjob_config = yaml.load(yamlfile)
-        except OSError:
-            raise OSError(f'Finner ikke cronjob.yaml fil')
-
-        cronjob_config['metadata']['name'] = self.settings["package_name"]
-        cronjob_config['metadata']['namespace'] = self.settings["nais_namespace"]
-
-        cronjob_config['spec']['schedule'] = self.settings["update_schedule"]
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self.settings["package_name"] + '-cronjob'
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = 'repo.adeo.no:5443/' + self.settings["package_name"]
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'cronjob.yaml'), 'w') as yamlfile:
-                yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
-        except OSError:
-            raise OSError(f'Finner ikke cronjob.yaml fil')
-
-    def _edit_jenkins_file(self):
-        ''' Tilpasser Jenkinsfile til datapakken
-        '''
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'Jenkinsfile'), 'r') as jenkinsfile:
-                jenkins_config = jenkinsfile.read()
-        except OSError:
-            raise OSError(f'Finner ikke Jenkinsfile')
-
-        template = Template(jenkins_config)
-        jenkins_config = template.safe_substitute(package_name=self.settings["package_name"],
-                                                  package_repo=self.github_project,
-                                                  package_path=self.settings["package_name"])
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'Jenkinsfile'), 'w') as jenkinsfile:
-                jenkinsfile.write(jenkins_config)
-        except OSError:
-            raise OSError(f'Finner ikke Jenkinsfile')
-
     def _create_jenkins_job(self):
         ''' Tilpasser jenkins konfigurasjonsfil og setter opp ny jenkins jobb for datapakken
         '''
@@ -136,19 +72,10 @@ class CreateDataPackage(DataPackage):
 
         self.jenkins_server.build_job(name=self.settings["package_name"])
 
+        self._edit_jenkins_job_config()
+
         xml = ElementTree.parse(os.path.join(self.settings["package_name"], 'jenkins_config.xml'))
         xml_root = xml.getroot()
-
-        for elem in xml_root.getiterator():
-            if elem.tag == 'scriptPath':
-                elem.text = self.settings["package_name"] + '/Jenkinsfile'
-            elif elem.tag == 'projectUrl':
-                elem.text = self.github_project
-            elif elem.tag == 'url':
-                elem.text = self.github_project
-
-        xml.write(os.path.join(self.settings["package_name"], 'jenkins_config.xml'))
-
         xml_config = ElementTree.tostring(xml_root, encoding='utf-8', method='xml').decode()
 
         self.jenkins_server.reconfig_job(self.settings["package_name"], xml_config)

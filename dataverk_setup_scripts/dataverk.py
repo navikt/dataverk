@@ -45,14 +45,12 @@ def main():
 
     parse_create.add_argument('--nais-namespace', dest="nais_namespace", action='store', metavar='<namespace>',
                               default=None, help="Namespace på NAIS plattform")
-    parse_create.add_argument('--elastic-endpoint', dest="elastic_endpoint", action='store', metavar='<endpoint>',
-                              default=None, help="Endepunkt for elastic index")
+    parse_create.add_argument('--elastic-private', dest="elastic_private", action='store', metavar='<endpoint>',
+                              default=None, help="Endepunkt for private elastic index")
     parse_create.add_argument('--aws-endpoint', dest="aws_endpoint", action='store', metavar='<endpoint>',
                               default=None, help="Endepunkt for AWS S3")
     parse_create.add_argument('--jenkins-endpoint', dest="jenkins_endpoint", action='store', metavar='<endpoint>',
                               default=None, help="Endepunkt for jenkins server")
-    parse_create.add_argument('--vault-auth-uri', dest="vault_auth_uri", action='store', metavar='<uri>',
-                              default=None, help="URI for vault autentisering")
     parse_create.add_argument('--vault-secrets-uri', dest="vault_secrets_uri", action='store', metavar='<uri>',
                               default=None, help="URI for vault secrets")
     parse_create.add_argument('--vault-auth-path', dest="vault_auth_path", action='store', metavar='<path>',
@@ -69,12 +67,16 @@ def main():
     parse_update.add_argument('-v', '--version', action='version', version=__version__,
                               help="Viser programversjon")
     parse_update.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
+    parse_update.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
+                              default=None, help="Navn på datapakke sommmm ønskes oppdatert")
 
     # Delete command
     parse_delete = sub_arg_parser.add_parser('delete', add_help=False)
     parse_delete.add_argument('-v', '--version', action='version', version=__version__,
                               help="Viser programversjon")
     parse_delete.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
+    parse_delete.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
+                              default=None, help="Navn på datapakke som ønskes fjernet")
 
     args = arg_parser.parse_args()
 
