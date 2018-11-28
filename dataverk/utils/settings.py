@@ -10,18 +10,31 @@ import requests
 import json
 
 
-def create_settingsStore(settings_json_url, env_store: Mapping) -> Mapping:
-    settings_builder = SettingsBuilder(settings_json_url, env_store)
+def create_settingsStore(settings_json_path, env_store: Mapping) -> Mapping:
+    """ Lager et nytt SettingsStore objekt fra en settings.json fil og modifiserer den basert på env variabler.
+
+    :param settings_json_path: Path til settings.json filen
+    :param env_store: EnvStore objekt
+    :return: Ferdig konfigurert SettingsStore Objekt
+    """
+    settings_builder = SettingsBuilder(settings_json_path, env_store)
     settings_builder = _set_env_specific_settings(env_store, settings_builder)
     return settings_builder.build()
 
 
-def _set_env_specific_settings(env: Mapping, settings_builder: SettingsBuilder):
-    if env.get('VKS_SECRET_DEST_PATH') is not None:
+def _set_env_specific_settings(env_store: Mapping, settings_builder: SettingsBuilder):
+    """ Gjør endringer på settings_store gjennom SettingsBuilder basert på felter satt i EnvStore
+
+    :param env_store: EnvStore objekt for å gjøre konfigurasjoner basert på env variabler eller felter i .env filen
+    :param settings_builder: SettingsBuilder objektet som håndterer modifikasjoner til settings_store objektet
+    :return: SettingsBuilder
+    """
+
+    if env_store.get('VKS_SECRET_DEST_PATH') is not None:
         settings_builder.apply(_set_vks_fields)
-    elif env.get("RUN_FROM_VDI") is not None:
+    elif env_store.get("RUN_FROM_VDI") is not None:
         settings_builder.apply(_set_vdi_fields)
-    elif env.get("CONFIG_PATH") is not None:
+    elif env_store.get("CONFIG_PATH") is not None:
         settings_builder.apply(_set_config_path_fields)
     else:
         settings_builder.apply(_set_travis_fields)
@@ -33,23 +46,23 @@ def _set_vks_fields(settings_builder: SettingsBuilder) -> None:
 
     :return: dict med endepunkter og keys
     """
-    settings_dict = settings_builder.settings
+    settings_dict = settings_builder.settings_store
 
     _field_asserter(settings_dict, "db_connection_strings")
     
     db_connection_strings = settings_dict["db_connection_strings"]
-    db_connection_strings["dvh"] = open(os.getenv('VKS_SECRET_DEST_PATH') + '/DVH_CONNECTION_STRING',
+    db_connection_strings["dvh"] = open(settings_builder.env_store['VKS_SECRET_DEST_PATH'] + '/DVH_CONNECTION_STRING',
                                         'r').read()
-    db_connection_strings["datalab"] = open(os.getenv('VKS_SECRET_DEST_PATH') + '/DATALAB_CONNECTION_STRING',
+    db_connection_strings["datalab"] = open(settings_builder.env_store['VKS_SECRET_DEST_PATH'] + '/DATALAB_CONNECTION_STRING',
                                             'r').read()
 
     bucket_storage_connections = settings_dict["bucket_storage_connections"]
     bucket_storage_connections["AWS_S3"]["access_key"] = open(
-        os.getenv('VKS_SECRET_DEST_PATH') + '/S3_ACCESS_KEY', 'r').read()
+        settings_builder.env_store['VKS_SECRET_DEST_PATH'] + '/S3_ACCESS_KEY', 'r').read()
     bucket_storage_connections["AWS_S3"]["secret_key"] = open(
-        os.getenv('VKS_SECRET_DEST_PATH') + '/S3_SECRET_KEY', 'r').read()
+        settings_builder.env_store['VKS_SECRET_DEST_PATH'] + '/S3_SECRET_KEY', 'r').read()
     bucket_storage_connections["google_cloud"]["credentials"]["private_key"] = open(
-        os.getenv('VKS_SECRET_DEST_PATH') +
+        settings_builder.env_store['VKS_SECRET_DEST_PATH'] +
         '/GCLOUD_PRIVATE_KEY', 'r').read()
 
 
@@ -59,7 +72,7 @@ def _set_vdi_fields(settings_builder: SettingsBuilder) -> None:
     :return: dict med endepunkter og keys
     """
 
-    settings_store = settings_builder.settings
+    settings_store = settings_builder.settings_store
 
     # asserts that the vault url is set in settings as it is needed to get secrets response
     _field_asserter(settings_store, "vault")
@@ -100,7 +113,7 @@ def _set_vdi_fields(settings_builder: SettingsBuilder) -> None:
 def _set_config_path_fields(settings_builder: SettingsBuilder) -> None:
     # For testing and running locally
 
-    settings_store = settings_builder.settings
+    settings_store = settings_builder.settings_store
     env_store = settings_builder.env_store
     config_path = env_store["CONFIG_PATH"]
     config = {}
@@ -135,13 +148,14 @@ def _set_config_path_fields(settings_builder: SettingsBuilder) -> None:
 def _set_travis_fields(settings_builder):
     # Locally or Travis ci
 
-    settings_store = settings_builder.settings
+    settings_store = settings_builder.settings_store
     bucket_storage_connections = settings_store["bucket_storage_connections"]
     try:
-        with open(os.path.join(os.path.dirname(os.getcwd()), 'client-secret.json')) as gcloud_credentials:
+        path = os.path.join(os.path.dirname(os.getcwd()), 'client-secret.json')
+        with open(path) as gcloud_credentials:
             bucket_storage_connections["google_cloud"]["credentials"] = json.load(gcloud_credentials)
     except:
-        pass
+        FileNotFoundError(f" file at path: {path} was not found")
 
 
 def _field_asserter(store, *fields):

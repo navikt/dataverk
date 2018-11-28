@@ -1,22 +1,23 @@
 from collections.abc import Mapping
 from pathlib import Path
 import json
+from typing import Callable
 
 
 class SettingsBuilder:
-    """ Bygger SettingsStore objektet fra json fil og eventuelle modifiers
+    """ Bygger SettingsStore objektet fra json fil og tilgjenngeliggjør modifikasjon gjennom apply() metoden.
 
     """
 
-    def __init__(self, settings_json_path: Path, env_store: Mapping):
-        self._validate_json_file(settings_json_path)
-        self._settings_json = settings_json_path
+    def __init__(self, settings_file_path: Path, env_store: Mapping):
+        self._validate_params(settings_file_path, env_store)
+        self._settings_json = settings_file_path
         self._env_store = env_store
-        self._mut_settings_store = self._set_settings_data_store(settings_json_path)
+        self._mut_settings_store = self._set_settings_data_store(settings_file_path)
         self._set_common_settings_keys()
 
     @property
-    def settings(self):
+    def settings_store(self):
         return self._mut_settings_store
 
     @property
@@ -24,15 +25,25 @@ class SettingsBuilder:
         return self._env_store
 
     def apply(self, modifier):
+        """ public metode som gir eksterne funskjoner tilgang til å endre, berike og/eller fjerne felter i settings_store
+        """
+
+        if not isinstance(modifier, Callable):
+            raise TypeError(f"modifier: {modifier} must be callable")
         modifier(self)
 
     def build(self) -> Mapping:
         return SettingsStore(self._mut_settings_store)
     
-    def _validate_json_file(self, url: Path):
-        if not url.is_file():
+    def _validate_params(self, settings_file_path: Path, env_store: Mapping):
+        if not isinstance(settings_file_path, Path):
+            raise TypeError(f"settings_file_path: {settings_file_path} should be a Path object")
+        if not isinstance(env_store, Mapping):
+            raise TypeError(f"env_store: {env_store} should be a Mapping object")
+
+        if not settings_file_path.is_file():
             raise FileNotFoundError("The provided url does not resolve to a file")
-        if self._get_url_suffix(str(url)) != "json":
+        if self._get_url_suffix(str(settings_file_path)) != "json":
             raise FileNotFoundError("The provided url does not resolve to a json file")
 
     def _get_url_suffix(self, url:str):
@@ -66,7 +77,7 @@ class SettingsBuilder:
 
 
 class SettingsStore(Mapping):
-    """ Klassen har ansvar for å gjøre eksterne ressurser tilgjengelige
+    """ Klassen har ansvar for å gjøre settings som eksterne URLer, keys, flagg og andre ressurser tilgjengelige
 
     """
 
