@@ -3,7 +3,7 @@ from pathlib import Path
 import json
 from typing import Callable
 
-COMMON_FIELDS = ("db_connection_strings", "bucket_storage_connections", "jenkins", "vault", "nais-namespace")
+COMMON_FIELDS = ("db_connection_strings", "bucket_storage_connections", "jenkins", "vault", "nais_namespace")
 
 
 class SettingsBuilder:
