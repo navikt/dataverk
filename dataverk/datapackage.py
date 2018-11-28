@@ -3,11 +3,11 @@ import os
 import json
 import errno
 import datetime
-import re
 import uuid
 from dataverk.connectors import OracleConnector, ElasticsearchConnector
 from dataverk.utils import resource_discoverer, publish_data
 from dataverk.utils.settings_store import SettingsStore
+from dataverk.utils.validators import validate_bucket_name, validate_datapackage_name
 from pathlib import Path
 from dataverk.utils import EnvStore
 
@@ -126,15 +126,6 @@ class Datapackage:
             'schema': {'fields': fields}
         }
 
-    def _verify_bucket_and_datapackage_names(self, metadata):
-        valid_name_pattern = '(^[a-z0-9])([a-z0-9\-])+([a-z0-9])$'
-        if not re.match(pattern=valid_name_pattern, string=metadata["Bucket_navn"]):
-            raise NameError(f'Invalid bucket name ({metadata["Bucket_navn"]}): '
-                            'Must be lowercase letters or numbers, words separated by "-", and cannot start or end with "-"')
-        if not re.match(pattern=valid_name_pattern, string=metadata["Datapakke_navn"]):
-            raise NameError(f'Invalid datapackage name ({metadata["Datapakke_navn"]}): '
-                            'Must be lowercase letters or numbers, words separated by "-", and cannot start or end with "-"')
-
     def _create_datapackage(self):
         today = datetime.date.today().strftime('%Y-%m-%d')
         guid = uuid.uuid4().hex
@@ -169,13 +160,14 @@ class Datapackage:
      
         metadata['Sist oppdatert'] = today
         metadata['Lisens'] = license
-        metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav')
+        metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav-opendata')
         metadata['Datapakke_navn'] = metadata.get('Datapakke_navn', guid)
+
+        validate_bucket_name(metadata["Bucket_navn"])
+        validate_datapackage_name(metadata["Datapakke_navn"])
 
         with open(os.path.join(self.dir_path, 'METADATA.json'), 'w', encoding="utf-8") as f:
             f.write(json.dumps(metadata, indent=2))
-
-        self._verify_bucket_and_datapackage_names(metadata)
 
         return {
             'name': metadata.get('Id', ''),
@@ -225,17 +217,26 @@ class Datapackage:
             publish_data.publish_s3_nais(dir_path=self.dir_path,
                                          datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]),
                                          settings=self.settings)
-    
+
+            try:
+                es = ElasticsearchConnector(self.settings, host="elastic_private")
+                id = self.datapackage_metadata["datapackage_name"]
+                js = json.dumps(self.datapackage_metadata)
+                es.write(id, js)
+            except:
+                print("Exception: write to elastic index failed")
+                pass
+
         if self.is_public and 'gcs' in destination:
             publish_data.publish_google_cloud(dir_path=self.dir_path,
                                               datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]),
                                               settings=self.settings)
 
             try: 
-                es = ElasticsearchConnector('public')
-                id = self.datapackage_metadata['datapackage_name']
+                es = ElasticsearchConnector(self.settings, host="elastic_public")
+                id = self.datapackage_metadata["datapackage_name"]
                 js = json.dumps(self.datapackage_metadata)
                 es.write(id, js)
             except:
+                print("Exception: write to public elastic index failed")
                 pass 
-
