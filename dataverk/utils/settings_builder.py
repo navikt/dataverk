@@ -3,6 +3,8 @@ from pathlib import Path
 import json
 from typing import Callable
 
+COMMON_FIELDS = ("db_connection_strings", "bucket_storage_connections", "jenkins", "vault", "nais-namespace")
+
 
 class SettingsBuilder:
     """ Bygger SettingsStore objektet fra json fil og tilgjenngeliggjør modifikasjon gjennom apply() metoden.
@@ -53,8 +55,8 @@ class SettingsBuilder:
         return self._json_to_dict(settings_path)
 
     def _set_common_settings_keys(self):
-        common_fields = ("db_connection_strings", "bucket_storage_connections")
-        for fields in common_fields:
+
+        for fields in COMMON_FIELDS:
             self._set_field_if_not_set(fields, {}, self._mut_settings_store)
 
     def _set_field_if_not_set(self, key, value, store):
