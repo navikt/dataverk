@@ -6,7 +6,7 @@ import datetime
 import uuid
 from dataverk.connectors import OracleConnector, ElasticsearchConnector
 from dataverk.utils import resource_discoverer, publish_data
-from dataverk.utils.settings_store import SettingsStore
+from dataverk.utils import settings
 from dataverk.utils.validators import validate_bucket_name, validate_datapackage_name
 from pathlib import Path
 from dataverk.utils import EnvStore
@@ -34,7 +34,8 @@ class Datapackage:
         except KeyError:
             env_store = None
 
-        self.settings = SettingsStore(settings_json_url=Path(self.resource_files["settings.json"]), env_store=env_store)
+        self.settings = settings.create_settings_store(settings_file_path=Path(self.resource_files["settings.json"]),
+                                                       env_store=env_store)
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):

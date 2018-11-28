@@ -4,7 +4,7 @@ from datetime import timedelta
 from dataverk.connectors.base import BaseConnector
 from google.cloud import exceptions
 from google.oauth2 import service_account
-from dataverk.utils.settings_store import SettingsStore
+from dataverk.utils.settings_builder import SettingsStore
 
 # Google storage
 class GoogleStorageConnector(BaseConnector):

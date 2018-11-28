@@ -6,6 +6,7 @@ from pathlib import Path
 from dataverk.utils.settings_builder import SettingsBuilder
 from collections.abc import Mapping
 import json
+from dataverk.utils import resource_discoverer
 
 # Common input parameters
 # =======================
@@ -28,9 +29,12 @@ class Base(unittest.TestCase):
         self.bad_type_settings_file_paths = tuple(bad_type_settings_file_paths)
         self.bad_value_settings_file_paths = tuple(bad_value_settings_file_paths)
         self.bad_modifiers_type = tuple(bad_modifiers_type)
-        self.basic_settings_builder = SettingsBuilder(settings_file_path=Path("static/testfile_settings.json"),
+        self.files = resource_discoverer.search_for_files(start_path=Path(__file__).parent.joinpath("static"),
+                                                          file_names=('testfile_settings.json', '.env'), levels=1)
+
+        self.basic_settings_builder = SettingsBuilder(settings_file_path=self.files['testfile_settings.json'],
                                                       env_store={})
-        self.test_file_settings_dict = json.loads(self._read_file(Path("static/testfile_settings.json")))
+        self.test_file_settings_dict = json.loads(self._read_file(self.files['testfile_settings.json']))
 
     def _read_file(self, path: Path):
         with path.open("r") as reader:

@@ -7,6 +7,7 @@ from pathlib import Path
 from dataverk.utils import resource_discoverer
 import os
 import json
+import requests
 # Common input parameters
 # =======================
 bad_url_inputs = ("", "testfile_settings.json", 1, object(), [], None)
@@ -92,9 +93,22 @@ class MethodsReturnValues(Base):
     """
 
     def test_create_settings_store_normal_case(self):
-        res = settings.create_settingsStore(Path("static/testfile_settings.json"), Path("static/.env_test"))
-        self.assertEqual(self.test_file_settings_dict, res)
+        res = settings.create_settings_store(self.files["testfile_settings.json"], {})
+        for key in self.test_file_settings_dict:
+            self.assertTrue(key in res, f" key={key} should be in {res}")
 
     def test_create_settings_store_CONFIG_PATH_SET(self):
-        res = settings.create_settingsStore(Path("static/testfile_settings.json"), {"CONFIG_PATH": "static/"})
-        self.assertEqual({**self.test_file_settings_dict, **self.dataverk_secrets_dict}, res)
+        static_dir = str(self.files["testfile_settings.json"].parent)
+        res = settings.create_settings_store(self.files["testfile_settings.json"], {"CONFIG_PATH": static_dir})
+        test_dict = {**self.test_file_settings_dict, **self.dataverk_secrets_dict}
+        for key in test_dict:
+            self.assertTrue(key in res, f" key={key} should be in {res}")
+
+    def test_get_field__RUN_FROM_VDI_normal_case(self):
+        # Should raise exception when trying to connect to the mock url endpoint
+        with self.assertRaises((requests.exceptions.ConnectionError, requests.exceptions.HTTPError)) as cm:
+            testObject = settings.create_settings_store(Path(self.files["testfile_settings.json"]),
+                                                        {"RUN_FROM_VDI": "True",
+                                                         "USER_IDENT": "testuser",
+                                                         "PASSWORD": "testpass"})
+

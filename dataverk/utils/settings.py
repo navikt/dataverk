@@ -4,20 +4,24 @@
 
 from collections.abc import Mapping
 from dataverk.utils.settings_builder import SettingsBuilder
-from dataverk.utils.env_store import EnvStore
+from pathlib import Path
 import os
 import requests
 import json
 
 
-def create_settingsStore(settings_json_path, env_store: Mapping) -> Mapping:
+def create_settings_store(settings_file_path: Path, env_store: Mapping) -> Mapping:
     """ Lager et nytt SettingsStore objekt fra en settings.json fil og modifiserer den basert på env variabler.
 
-    :param settings_json_path: Path til settings.json filen
+    :param settings_file_path: Path til settings.json filen
     :param env_store: EnvStore objekt
     :return: Ferdig konfigurert SettingsStore Objekt
     """
-    settings_builder = SettingsBuilder(settings_json_path, env_store)
+
+    _validate_params(settings_file_path=settings_file_path)
+    if env_store is None:
+        env_store = {}
+    settings_builder = SettingsBuilder(settings_file_path, env_store)
     settings_builder = _set_env_specific_settings(env_store, settings_builder)
     return settings_builder.build()
 
@@ -80,8 +84,8 @@ def _set_vdi_fields(settings_builder: SettingsBuilder) -> None:
     authentication_response_uri = settings_store["vault"]["auth_uri"]
 
     # Make sure .env file is created, passed to _inint__ and contains fields below
-    user_ident = settings_store.env_store["USER_IDENT"]
-    password = settings_store.env_store["PASSWORD"]
+    user_ident = settings_builder.env_store["USER_IDENT"]
+    password = settings_builder.env_store["PASSWORD"]
 
     auth_response = requests.post(url=authentication_response_uri + user_ident,
                                   data=json.dumps({"password": password}))
@@ -162,3 +166,17 @@ def _field_asserter(store, *fields):
     for field in fields:
         if field not in store:
             raise KeyError(f" {field} not in store {store}")
+
+
+def _validate_params(settings_file_path: Path):
+    if not isinstance(settings_file_path, Path):
+        raise TypeError(f"settings_file_path: {settings_file_path} should be a Path object")
+
+    if not settings_file_path.is_file():
+        raise FileNotFoundError(f"settings_file_path={settings_file_path} does not resolve to a file")
+    if _get_url_suffix(str(settings_file_path)) != "json":
+        raise FileNotFoundError(f"settings_file_path={settings_file_path} does not resolve to a json file")
+
+
+def _get_url_suffix(url:str):
+    return url.split(".")[-1]

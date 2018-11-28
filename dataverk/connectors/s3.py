@@ -1,6 +1,6 @@
 from dataverk.connectors import BaseConnector
 import boto3
-from dataverk.utils.settings_store import SettingsStore
+from dataverk.utils.settings_builder import SettingsStore
 
 # AWS S3
 class AWSS3Connector(BaseConnector):

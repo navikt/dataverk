@@ -1,6 +1,6 @@
 from . import connectors
 from . import utils
-from dataverk.utils.settings_store import SettingsStore
+from dataverk.utils.settings import create_settings_store
 from dataverk.api import get_path, read_sql, write_notebook, publish_datapackage, publish_datapackage_google_cloud, publish_datapackage_s3_nais, write_datapackage
 from dataverk.datapackage import Datapackage
 from pathlib import Path
@@ -19,5 +19,5 @@ __all__ = ['connectors',
            'publish_datapackage',
            'write_datapackage',
            'Datapackage',
-           'SettingsStore'
+           'create_settings_store'
            ]

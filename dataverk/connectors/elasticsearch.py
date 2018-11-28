@@ -1,6 +1,6 @@
 from elasticsearch import Elasticsearch
 from dataverk.connectors import BaseConnector
-from dataverk.utils.settings_store import SettingsStore
+from dataverk.utils.settings_builder import SettingsStore
 from ssl import create_default_context
 
 

@@ -9,8 +9,10 @@ class SettingsBuilder:
 
     """
 
-    def __init__(self, settings_file_path: Path, env_store: Mapping):
-        self._validate_params(settings_file_path, env_store)
+    def __init__(self, settings_file_path: Path, env_store: Mapping=None):
+        self._validate_params(settings_file_path)
+        if env_store is None:
+            env_store = {}
         self._settings_json = settings_file_path
         self._env_store = env_store
         self._mut_settings_store = self._set_settings_data_store(settings_file_path)
@@ -35,11 +37,9 @@ class SettingsBuilder:
     def build(self) -> Mapping:
         return SettingsStore(self._mut_settings_store)
     
-    def _validate_params(self, settings_file_path: Path, env_store: Mapping):
+    def _validate_params(self, settings_file_path: Path):
         if not isinstance(settings_file_path, Path):
             raise TypeError(f"settings_file_path: {settings_file_path} should be a Path object")
-        if not isinstance(env_store, Mapping):
-            raise TypeError(f"env_store: {env_store} should be a Mapping object")
 
         if not settings_file_path.is_file():
             raise FileNotFoundError("The provided url does not resolve to a file")
@@ -81,8 +81,9 @@ class SettingsStore(Mapping):
 
     """
 
-    def __init__(self, settings_dict: dict):
-
+    def __init__(self, settings_dict: Mapping):
+        if not isinstance(settings_dict, Mapping):
+            raise TypeError(f"param settings_dict={settings_dict} has to be Mapping")
         self._settings_store = settings_dict
 
     def __getitem__(self, item):
