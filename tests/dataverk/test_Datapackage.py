@@ -68,10 +68,9 @@ class Instantiation(Base):
                 with self.assertRaises(TypeError):
                     Datapackage(public=input_type, resource_files=self.files)
 
-    # def test_class_instantiation_with_invalid_settings_file(self):
-    #     with self.assertRaises(FileNotFoundError):
-    #         Datapackage(settings_file_path=Path("settings_file_that_does_not_exist.json"), public=False,
-    #                     env_file_path=Path(self.files[".env_test"]))
+    def test_class_instantiation_without_settings_file(self):
+        with self.assertRaises(KeyError):
+            Datapackage(public=False, resource_files={})
 
     # Input arguments outside constraints
     # ===================================
@@ -176,7 +175,10 @@ class MethodsReturnType(Base):
     """
     Tests methods' output types
     """
-    pass
+
+    def test__datapackage_key_prefix(self):
+        self.assertEqual(self.datapackage._datapackage_key_prefix("pakkenavn"), "pakkenavn/")
+
 
 
 class MethodsReturnUnits(Base):

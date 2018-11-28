@@ -3,11 +3,11 @@ import os
 import json
 import errno
 import datetime
-import re
 import uuid
 from dataverk.connectors import OracleConnector, ElasticsearchConnector
 from dataverk.utils import resource_discoverer, publish_data
 from dataverk.utils.settings_store import SettingsStore
+from dataverk.utils.validators import validate_bucket_name, validate_datapackage_name
 from pathlib import Path
 from dataverk.utils import EnvStore
 
@@ -27,7 +27,7 @@ class Datapackage:
             self.resource_files = resource_files
         else:
             self.resource_files = resource_discoverer.search_for_files(start_path=Path(search_start_path),
-                                                                  file_names=('settings.json', '.env'), levels=1)
+                                                                  file_names=('settings.json', '.env'), levels=4)
 
         try:
             env_store = EnvStore(Path(self.resource_files[".env"]))
@@ -38,11 +38,11 @@ class Datapackage:
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
-            raise TypeError("df must be of type pandas.Dataframe()")
+            raise TypeError(f'df must be of type pandas.Dataframe()')
         if not isinstance(dataset_name, str):
-            raise TypeError("dataset_name must be of type string")
+            raise TypeError(f'dataset_name must be of type string')
         if not isinstance(dataset_description, str):
-            raise TypeError("dataset_description must be of type string")
+            raise TypeError(f'dataset_description must be of type string')
 
     def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str=""):
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
@@ -51,9 +51,9 @@ class Datapackage:
 
     def _verify_update_metadata_input_types(self, key, value):
         if not isinstance(key, str):
-            raise TypeError("Key must be of type string")
+            raise TypeError(f'Key must be of type string')
         if not isinstance(value, str):
-            raise TypeError("Value must be of type string")
+            raise TypeError(f'Value must be of type string')
 
     def update_metadata(self, key: str, value: str):
         self._verify_update_metadata_input_types(key, value)
@@ -88,7 +88,7 @@ class Datapackage:
                     query = f.read()
                 df = conn.get_pandas_df(query)
         else:
-            raise TypeError("Connector type '" + connector + "' is not supported")
+            raise TypeError(f'Connector type {connector} is not supported')
 
         # TODO add more connector options
 
@@ -126,15 +126,6 @@ class Datapackage:
             'schema': {'fields': fields}
         }
 
-    def _verify_bucket_and_datapackage_names(self, metadata):
-        valid_name_pattern = '(^[a-z0-9])([a-z0-9\-])+([a-z0-9])$'
-        if not re.match(pattern=valid_name_pattern, string=metadata["Bucket_navn"]):
-            raise NameError("Invalid bucket name (" + metadata["Bucket_navn"] + "): "
-                            "Must be lowercase letters or numbers, words separated by '-', and cannot start or end with '-'")
-        if not re.match(pattern=valid_name_pattern, string=metadata["Datapakke_navn"]):
-            raise NameError("Invalid datapackage name (" + metadata["Datapakke_navn"] +"): "
-                            "Must be lowercase letters or numbers, words separated by '-', and cannot start or end with '-'")
-
     def _create_datapackage(self):
         today = datetime.date.today().strftime('%Y-%m-%d')
         guid = uuid.uuid4().hex
@@ -142,15 +133,15 @@ class Datapackage:
         try:
             with open(os.path.join(self.dir_path, 'LICENSE.md'), encoding="utf-8") as f:
                 license = f.read()
-        except:
-            license="No LICENSE file available"
+        except OSError:
+            license = "No LICENSE file available"
             pass
 
         try:   
             with open(os.path.join(self.dir_path, 'README.md'), encoding="utf-8") as f:
                 readme = f.read()
-        except:
-            readme="No README file available"
+        except OSError:
+            readme = "No README file available"
             pass
 
         metadata = {}
@@ -158,7 +149,7 @@ class Datapackage:
         try:
             with open(os.path.join(self.dir_path, 'METADATA.json'), encoding="utf-8") as f:
                 metadata = json.loads(f.read())
-        except:
+        except OSError:
             pass
 
         if metadata.get('Offentlig', False) is True:
@@ -169,13 +160,14 @@ class Datapackage:
      
         metadata['Sist oppdatert'] = today
         metadata['Lisens'] = license
-        metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav')
+        metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav-opendata')
         metadata['Datapakke_navn'] = metadata.get('Datapakke_navn', guid)
+
+        validate_bucket_name(metadata["Bucket_navn"])
+        validate_datapackage_name(metadata["Datapakke_navn"])
 
         with open(os.path.join(self.dir_path, 'METADATA.json'), 'w', encoding="utf-8") as f:
             f.write(json.dumps(metadata, indent=2))
-
-        self._verify_bucket_and_datapackage_names(metadata)
 
         return {
             'name': metadata.get('Id', ''),
@@ -225,17 +217,26 @@ class Datapackage:
             publish_data.publish_s3_nais(dir_path=self.dir_path,
                                          datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]),
                                          settings=self.settings)
-    
+
+            try:
+                es = ElasticsearchConnector(self.settings, host="elastic_private")
+                id = self.datapackage_metadata["datapackage_name"]
+                js = json.dumps(self.datapackage_metadata)
+                es.write(id, js)
+            except:
+                print("Exception: write to elastic index failed")
+                pass
+
         if self.is_public and 'gcs' in destination:
             publish_data.publish_google_cloud(dir_path=self.dir_path,
                                               datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]),
                                               settings=self.settings)
 
             try: 
-                es = ElasticsearchConnector('public')
-                id = self.datapackage_metadata['datapackage_name']
+                es = ElasticsearchConnector(self.settings, host="elastic_public")
+                id = self.datapackage_metadata["datapackage_name"]
                 js = json.dumps(self.datapackage_metadata)
                 es.write(id, js)
             except:
+                print("Exception: write to public elastic index failed")
                 pass 
-

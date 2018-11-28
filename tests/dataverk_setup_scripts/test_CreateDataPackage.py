@@ -3,7 +3,7 @@
 # =================
 import os
 from unittest import TestCase
-from dataverk_setup_scripts import dataverk_create
+from dataverk_setup_scripts import datapackage_create
 from shutil import rmtree
 
 # Common input parameters
@@ -47,41 +47,15 @@ class Instantiation(Base):
         for input_type in wrong_input_param_types:
             with self.subTest(msg="Wrong input parameter type in CreateDataPackage class instantiation", _input=input_type):
                 with self.assertRaises(TypeError):
-                    dataverk_create.CreateDataPackage(name=input_type,
-                                                      github_project="https://github.com/navikt/datasett.git",
-                                                      update_schedule="0 12 * * 1", namespace="opendata",
-                                                      settings_repo="https://github.com/navikt/dataverk_settings.git",
-                                                      user="userident", password="password")
-                    dataverk_create.CreateDataPackage(name="ny-datapakke",
-                                                      github_project=input_type,
-                                                      update_schedule="0 12 * * 1", namespace="opendata",
-                                                      settings_repo="https://github.com/navikt/dataverk_settings.git",
-                                                      user="userident", password="password")
-                    dataverk_create.CreateDataPackage(name="ny-datapakke",
-                                                      github_project="https://github.com/navikt/datasett.git",
-                                                      update_schedule=input_type, namespace="opendata",
-                                                      settings_repo="https://github.com/navikt/dataverk_settings.git",
-                                                      user="userident", password="password")
-                    dataverk_create.CreateDataPackage(name="ny-datapakke",
-                                                      github_project="https://github.com/navikt/datasett.git",
-                                                      update_schedule="0 12 * * 1", namespace=input_type,
-                                                      settings_repo="https://github.com/navikt/dataverk_settings.git",
-                                                      user="userident", password="password")
-                    dataverk_create.CreateDataPackage(name="ny-datapakke",
-                                                      github_project="https://github.com/navikt/datasett.git",
-                                                      update_schedule="0 12 * * 1", namespace="opendata",
-                                                      settings_repo=input_type,
-                                                      user="userident", password="password")
-                    dataverk_create.CreateDataPackage(name="ny-datapakke",
-                                                      github_project="https://github.com/navikt/datasett.git",
-                                                      update_schedule="0 12 * * 1", namespace="opendata",
-                                                      settings_repo="https://github.com/navikt/dataverk_settings.git",
-                                                      user=input_type, password="password")
-                    dataverk_create.CreateDataPackage(name="ny-datapakke",
-                                                      github_project="https://github.com/navikt/datasett.git",
-                                                      update_schedule="0 12 * * 1", namespace="opendata",
-                                                      settings_repo="https://github.com/navikt/dataverk_settings.git",
-                                                      user="userident", password=input_type)
+                    datapackage_create.CreateDataPackage(name=input_type,
+                                                         github_project="https://github.com/navikt/datasett.git",
+                                                         update_schedule="0 12 * * 1")
+                    datapackage_create.CreateDataPackage(name="ny-datapakke",
+                                                         github_project=input_type,
+                                                         update_schedule="0 12 * * 1")
+                    datapackage_create.CreateDataPackage(name="ny-datapakke",
+                                                         github_project="https://github.com/navikt/datasett.git",
+                                                         update_schedule=input_type)
 
     # Input arguments outside constraints
     # ===================================
@@ -108,25 +82,9 @@ class MethodsInput(Base):
 
     Tests include: passing invalid input, etc.
     """
-    def setUp(self):
-        pass
+    pass
 
-    def test_valid_cronjob_schedule(self):
-        valid_schedule_strings = ["* * * * *", "59 * * * *", "* 23 * * *", "* * 31 * *", "* * * 12 *", "* * * * 6",
-                                  "0,55 * * * *", "* 0,12 * * *", "* * 1,15 * *", "* * * 1,5 *", "* * * * 0,6"]
-
-        for schedule_string in valid_schedule_strings:
-            with self.subTest(msg="Valid schedule string", _input=schedule_string):
-                dataverk_create.validate_cronjob_schedule(schedule=schedule_string)
-
-    def test_invalid_cronjob_schedule(self):
-        invalid_schedule_strings = ["* * * *", "* * * * * *", "60 * * * *", "* 24 * * *",
-                                    "* * 32 * *", "* * * 13 *", "* * * * 7"]
-
-        for schedule_string in invalid_schedule_strings:
-            with self.subTest(msg="Invalid schedule string", _input=schedule_string):
-                with self.assertRaises(ValueError):
-                    dataverk_create.validate_cronjob_schedule(schedule=schedule_string)
+    # Input arguments valid
 
 
 class MethodsReturnType(Base):

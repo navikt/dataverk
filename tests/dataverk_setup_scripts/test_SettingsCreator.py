@@ -1,32 +1,28 @@
 # -*- coding: utf-8 -*-
 # Import statements
 # =================
-import unittest
 import os
-from dataverk_setup_scripts import dataverk_create_settings_template
+from unittest import TestCase
+from dataverk_setup_scripts.settings_creator import SettingsCreator
+from shutil import rmtree
 
 # Common input parameters
 # =======================
 
 # Base classes
 # ============
-
-
-class Base(unittest.TestCase):
+class Base(TestCase):
     """
     Base class for tests
 
     This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
     def setUp(self):
+        self.settings_creator_object = SettingsCreator(args=())
         pass
 
     def tearDown(self):
-        try:
-            os.remove('settings.json')
-        except OSError:
-            pass
-
+        pass
 
 
 # Test classes
@@ -37,31 +33,10 @@ class Instantiation(Base):
 
     Tests include: instantiation with args of wrong type, instantiation with input values outside constraints, etc.
     """
-    def setUp(self):
-        self.invalid_path_types = [1, False, object(), list()]
-        self.path_to_file = './mappe/fil.json'
-        self.non_existant_path = './mappe_som_ikke_eksisterer'
-
-    def test_normal_instanciation(self):
-        dataverk_create_settings_template.CreateSettingsTemplate()
+    pass
 
     # Input arguments wrong type
     # ==========================
-    def test_instanciation_with_wrong_input_types(self):
-        for input in self.invalid_path_types:
-            with self.subTest(msg="Wrong input parameter type in CreateSettingsTemplate class instantiation",
-                              _input=input):
-                with self.assertRaises(TypeError):
-                    dataverk_create_settings_template.CreateSettingsTemplate(destination=input)
-
-    def test_instanctiation_with_path_to_file(self):
-        with self.assertRaises(ValueError):
-            dataverk_create_settings_template.CreateSettingsTemplate(destination=self.path_to_file)
-
-    def test_instanciation_with_non_existant_path(self):
-        with self.assertRaises(ValueError):
-            dataverk_create_settings_template.CreateSettingsTemplate(destination=self.non_existant_path)
-
 
     # Input arguments outside constraints
     # ===================================
@@ -88,6 +63,8 @@ class MethodsInput(Base):
 
     Tests include: passing invalid input, etc.
     """
+
+    # Input arguments valid
     pass
 
 
@@ -109,3 +86,4 @@ class MethodsReturnValues(Base):
     """
     Tests values of methods against known values
     """
+    pass
