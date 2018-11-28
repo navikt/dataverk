@@ -110,5 +110,8 @@ class MethodsReturnValues(Base):
     def test_build_normal_case(self):
         self.test_file_settings_dict["db_connection_strings"] = {}
         self.test_file_settings_dict["bucket_storage_connections"] = {}
+        self.test_file_settings_dict["jenkins"] = {}
+        self.test_file_settings_dict["nais-namespace"] = {}
+        self.test_file_settings_dict["vault"] = {}
         self.assertEqual(len(self.test_file_settings_dict), len(self.basic_settings_builder.build()))
 
