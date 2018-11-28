@@ -1,19 +1,23 @@
 from elasticsearch import Elasticsearch
 from dataverk.connectors import BaseConnector
 from dataverk.utils.settings_store import SettingsStore
+from ssl import create_default_context
+
 
 # Elasticsearch
 class ElasticsearchConnector(BaseConnector):
     """Elasticsearch connection"""
 
-    def __init__(self, settings: SettingsStore, host='private'):
+    def __init__(self, settings: SettingsStore, host="elastic_private"):
+        super(self.__class__, self).__init__()
 
+        ssl_context = create_default_context()
         host_uri = settings["index_connections"][host]
 
         if host_uri is None:
-            raise ValueError('Connection settings are not avilable for the host: {host}')
+            raise ValueError('Connection settings are not available for the host: {host}')
 
-        self.es = Elasticsearch([host_uri])
+        self.es = Elasticsearch([host_uri], ssl_context=ssl_context)
         self.index = settings["index_connections"]["index"]
 
     def _create_index(self):
@@ -89,11 +93,10 @@ class ElasticsearchConnector(BaseConnector):
 
         self.es.indices.create(index=self.index, body = body)
 
-
     def write(self, id, doc):
-        """Add or update ddocument"""
+        """Add or update document"""
 
-        res = self.es.index(index=self.index, doc_type=self.index, id=id, body=doc)
+        res = self.es.index(index=self.index, doc_type="json", id=id, body=doc)
         self.es.indices.refresh(index=self.index)
         self.log(f'{self.__class__}: Document {id} of type {self.index} indexed to elastic index: {self.index}.')
         return res
