@@ -18,7 +18,7 @@ class Action(Enum):
     DELETE = 3
 
 
-class DataPackage(ABC):
+class BaseDataPackage(ABC):
     ''' Abstrakt baseklasse for dataverk scripts.
     '''
 

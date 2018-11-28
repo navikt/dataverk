@@ -27,7 +27,7 @@ SETTINGS_TEMPLATE = {
 
 datapackage_optional_parameters = {
     "nais_namespace": ('nais_namespace',),
-    "elastic_endpoint": ('index_connections', 'elastic_private'),
+    "elastic_private": ('index_connections', 'elastic_private'),
     "aws_endpoint": ('bucket_storage_connections', 'AWS_S3', 'host'),
     "jenkins_endpoint": ('jenkins', 'url'),
     "vault_secrets_uri": ('vault', 'secrets_uri'),

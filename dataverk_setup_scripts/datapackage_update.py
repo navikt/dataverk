@@ -1,12 +1,12 @@
 import os
 
-from .datapackage_base import DataPackage
+from .datapackage_base import BaseDataPackage
 from . import settings_loader
 from shutil import rmtree, copy
 from xml.etree import ElementTree
 
 
-class UpdateDataPackage(DataPackage):
+class UpdateDataPackage(BaseDataPackage):
 
     def __init__(self, settings: dict, envs):
         super().__init__(settings=settings, envs=envs)

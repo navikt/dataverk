@@ -160,7 +160,7 @@ class Datapackage:
      
         metadata['Sist oppdatert'] = today
         metadata['Lisens'] = license
-        metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav')
+        metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav-opendata')
         metadata['Datapakke_navn'] = metadata.get('Datapakke_navn', guid)
 
         validate_bucket_name(metadata["Bucket_navn"])

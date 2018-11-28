@@ -7,11 +7,11 @@ from shutil import rmtree
 from distutils.dir_util import copy_tree
 from xml.etree import ElementTree
 from . import settings_loader
-from .datapackage_base import DataPackage
+from .datapackage_base import BaseDataPackage
 from dataverk.utils.env_store import EnvStore
 
 
-class CreateDataPackage(DataPackage):
+class CreateDataPackage(BaseDataPackage):
     ''' Klasse for å opprette ny datapakke i et eksisterende repository for datapakker/datasett
     '''
 

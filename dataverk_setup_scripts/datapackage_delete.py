@@ -1,9 +1,9 @@
-from .datapackage_base import DataPackage
+from .datapackage_base import BaseDataPackage
 from dataverk.utils.env_store import EnvStore
 from shutil import rmtree
 
 
-class DeleteDataPackage(DataPackage):
+class DeleteDataPackage(BaseDataPackage):
 
     def __init__(self, settings: dict, envs: EnvStore):
         super().__init__(settings=settings, envs=envs)

@@ -1,6 +1,6 @@
 import os
 
-from .datapackage_base import Action, DataPackage, create_settings_dict, get_settings_dict
+from .datapackage_base import Action, BaseDataPackage, create_settings_dict, get_settings_dict
 from .datapackage_create import CreateDataPackage
 from .datapackage_update import UpdateDataPackage
 from .datapackage_delete import DeleteDataPackage
@@ -9,7 +9,7 @@ from dataverk.utils import resource_discoverer
 from pathlib import Path
 
 
-def get_datapackage_object(action: Action, args) -> type(DataPackage):
+def get_datapackage_object(action: Action, args) -> type(BaseDataPackage):
     if not os.popen('git rev-parse --is-inside-work-tree').read().strip():
         raise Exception(f'dataverk create/update/delete må kjøres fra et git repository')
 
