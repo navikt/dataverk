@@ -1,6 +1,6 @@
 import os
 from dataverk.connectors import GoogleStorageConnector, AWSS3Connector
-from dataverk import SettingsStore
+from dataverk.utils.settings_builder import SettingsStore
 
 def publish_google_cloud(dir_path, datapackage_key_prefix, settings: SettingsStore):
     conn = GoogleStorageConnector(encrypted=False, settings=settings)
