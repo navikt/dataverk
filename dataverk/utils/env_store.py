@@ -31,7 +31,7 @@ class EnvStore(Mapping):
     def get(self, key):
         if not isinstance(key, str):
             raise ValueError("field should be a str")
-        return self._env_store[key]
+        return self._env_store.get(key)
 
     def keys(self):
         return self._env_store.keys()

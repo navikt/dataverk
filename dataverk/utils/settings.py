@@ -102,9 +102,9 @@ def _set_vdi_fields(settings_builder: SettingsBuilder) -> None:
 
     secrets = json.loads(secrets_response.text)
 
-    bucket_storage_connections = settings_store._settings_store["bucket_storage_connections"]
+    bucket_storage_connections = settings_store["bucket_storage_connections"]
 
-    db_connection_strings = settings_store._settings_store["db_connection_strings"]
+    db_connection_strings = settings_store["db_connection_strings"]
 
     db_connection_strings["dvh"] = secrets["data"]["DVH_CONNECTION_STRING"]
     db_connection_strings["datalab"] = secrets["data"]["DATALAB_CONNECTION_STRING"]
