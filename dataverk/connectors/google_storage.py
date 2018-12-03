@@ -5,12 +5,14 @@ from dataverk.connectors.base import BaseConnector
 from google.cloud import exceptions
 from google.oauth2 import service_account
 from dataverk.utils.settings_builder import SettingsStore
+from collections.abc import Mapping
+
 
 # Google storage
 class GoogleStorageConnector(BaseConnector):
     """Google Storage connector"""
     
-    def __init__(self, settings: SettingsStore, encrypted=True):
+    def __init__(self, settings: Mapping, encrypted=True):
         """Init"""
 
         super(self.__class__, self).__init__(encrypted=encrypted)
@@ -30,7 +32,6 @@ class GoogleStorageConnector(BaseConnector):
             self.bucket.acl.reload()
         except Exception as ex:
             print(ex)
-
 
     def write(self, source_string, destination_blob_name, fmt, metadata={}):
         """Write string to a bucket."""

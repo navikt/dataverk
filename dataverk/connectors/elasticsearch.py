@@ -2,13 +2,14 @@ from elasticsearch import Elasticsearch
 from dataverk.connectors import BaseConnector
 from dataverk.utils.settings_builder import SettingsStore
 from ssl import create_default_context
+from collections.abc import Mapping
 
 
 # Elasticsearch
 class ElasticsearchConnector(BaseConnector):
     """Elasticsearch connection"""
 
-    def __init__(self, settings: SettingsStore, host="elastic_private"):
+    def __init__(self, settings: Mapping, host="elastic_private"):
         super(self.__class__, self).__init__()
 
         ssl_context = create_default_context()

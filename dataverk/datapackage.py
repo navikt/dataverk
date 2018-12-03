@@ -20,7 +20,7 @@ class Datapackage:
 
         self.is_public = public
         self.resources = {}
-        self.dir_path = self._get_path()
+        self.dir_path = self._package_top_dir()
         self.datapackage_metadata = self._create_datapackage()
 
         if resource_files is not None:
@@ -63,10 +63,8 @@ class Datapackage:
     def add_view(self):
         pass
 
-    def _get_path(self):
-        if 'current_path' not in globals():
-            path = os.getcwd()
-        return os.path.abspath(os.path.join(path, os.pardir))
+    def _package_top_dir(self) -> Path:
+        return Path(".").parent
 
     def _is_sql_file(self, source):
         if '.sql' in source:
@@ -84,7 +82,7 @@ class Datapackage:
             if self._is_sql_file(source):
                 df = conn.get_pandas_df(source)
             else:
-                path = self._get_path()
+                path = self._package_top_dir()
                 with open(os.path.join(path, sql)) as f:
                     query = f.read()
                 df = conn.get_pandas_df(query)
@@ -187,7 +185,7 @@ class Datapackage:
 
     def write_datapackage(self):
         resources = []
-        with open(self.dir_path + '/datapackage.json', 'w') as outfile:
+        with self.dir_path.joinpath('/datapackage.json').open('w') as outfile:
             for filename, df in self.resources.items():
                 # TODO bruk Parquet i stedet for csv?
                 resources.append(self._get_csv_schema(df, filename))
@@ -196,48 +194,10 @@ class Datapackage:
 
             json.dump(self.datapackage_metadata, outfile, indent=2, sort_keys=True)
 
-            data_path = self.dir_path + '/data/'
-            if not os.path.exists(data_path):
-                try:
-                    os.makedirs(data_path)
-                except OSError as exc:  # Guard against race condition
-                    if exc.errno != errno.EEXIST:
-                        raise
+            data_path = self.dir_path.joinpath('data/')
+            if not data_path.exists():
+                data_path.mkdir()
 
             for filename, df in self.resources.items():
-                df.to_csv(data_path + filename + '.csv', index=False, sep=';')
+                df.to_csv(data_path.joinpath(filename + '.csv'), index=False, sep=';')
 
-    def _datapackage_key_prefix(self, datapackage_name):
-        return datapackage_name + '/'
-
-    def publish(self, destination=['nais', 'gcs']):
-        self.write_datapackage()
-        # TODO: add views
-
-        if 'nais' in destination:
-            publish_data.publish_s3_nais(dir_path=self.dir_path,
-                                         datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]),
-                                         settings=self.settings)
-
-            try:
-                es = ElasticsearchConnector(self.settings, host="elastic_private")
-                id = self.datapackage_metadata["datapackage_name"]
-                js = json.dumps(self.datapackage_metadata)
-                es.write(id, js)
-            except:
-                print("Exception: write to elastic index failed")
-                pass
-
-        if self.is_public and 'gcs' in destination:
-            publish_data.publish_google_cloud(dir_path=self.dir_path,
-                                              datapackage_key_prefix=self._datapackage_key_prefix(self.datapackage_metadata["datapackage_name"]),
-                                              settings=self.settings)
-
-            try: 
-                es = ElasticsearchConnector(self.settings, host="elastic_public")
-                id = self.datapackage_metadata["datapackage_name"]
-                js = json.dumps(self.datapackage_metadata)
-                es.write(id, js)
-            except:
-                print("Exception: write to public elastic index failed")
-                pass 
