@@ -3,6 +3,7 @@ import argparse
 from . import dataverk_create_env_file, __version__
 from .datapackage_base import Action
 from .datapackage_factory import get_datapackage_object
+from .datapackage_publish import publish_datapackage
 
 
 def main():
@@ -78,6 +79,12 @@ def main():
     parse_delete.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
                               default=None, help="Navn på datapakke som ønskes fjernet")
 
+    # Delete command
+    parse_publish = sub_arg_parser.add_parser('publish', add_help=False)
+    parse_publish.add_argument('-v', '--version', action='version', version=__version__,
+                              help="Viser programversjon")
+    parse_publish.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
+
     args = arg_parser.parse_args()
 
     if args.command == 'init':
@@ -93,6 +100,8 @@ def main():
     elif args.command == 'delete':
         dp = get_datapackage_object(action=Action.DELETE, args=args)
         dp.run()
+    elif args.command == "publish":
+        publish_datapackage()
 
 
 if __name__ == "__main__":

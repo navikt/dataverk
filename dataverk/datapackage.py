@@ -4,8 +4,8 @@ import json
 import errno
 import datetime
 import uuid
-from dataverk.connectors import OracleConnector, ElasticsearchConnector
-from dataverk.utils import resource_discoverer, publish_data
+from dataverk.connectors import OracleConnector
+from dataverk.utils import resource_discoverer
 from dataverk.utils import settings
 from dataverk.utils.validators import validate_bucket_name, validate_datapackage_name
 from pathlib import Path
@@ -14,11 +14,8 @@ from dataverk.utils import EnvStore
 
 class Datapackage:
 
-    def __init__(self, public=False, resource_files: dict=None, search_start_path: str="."):
-        if not isinstance(public, bool):
-            raise TypeError("public parameter must be boolean")
-
-        self.is_public = public
+    def __init__(self, resource_files: dict=None, search_start_path: str="."):
+        self.is_public = False
         self.resources = {}
         self.dir_path = self._package_top_dir()
         self.datapackage_metadata = self._create_datapackage()
@@ -27,7 +24,7 @@ class Datapackage:
             self.resource_files = resource_files
         else:
             self.resource_files = resource_discoverer.search_for_files(start_path=Path(search_start_path),
-                                                                  file_names=('settings.json', '.env'), levels=4)
+                                                                       file_names=('settings.json', '.env'), levels=4)
 
         try:
             env_store = EnvStore(Path(self.resource_files[".env"]))
@@ -83,7 +80,7 @@ class Datapackage:
                 df = conn.get_pandas_df(source)
             else:
                 path = self._package_top_dir()
-                with open(os.path.join(path, sql)) as f:
+                with path.joinpath(sql).open(mode='r') as f:
                     query = f.read()
                 df = conn.get_pandas_df(query)
         else:
@@ -130,14 +127,14 @@ class Datapackage:
         guid = uuid.uuid4().hex
 
         try:
-            with open(os.path.join(self.dir_path, 'LICENSE.md'), encoding="utf-8") as f:
+            with self.dir_path.joinpath('LICENSE.md').open(mode='r', encoding="utf-8") as f:
                 license = f.read()
         except OSError:
             license = "No LICENSE file available"
             pass
 
         try:   
-            with open(os.path.join(self.dir_path, 'README.md'), encoding="utf-8") as f:
+            with self.dir_path.joinpath('README.md').open(mode='r', encoding="utf-8") as f:
                 readme = f.read()
         except OSError:
             readme = "No README file available"
@@ -146,14 +143,14 @@ class Datapackage:
         metadata = {}
 
         try:
-            with open(os.path.join(self.dir_path, 'METADATA.json'), encoding="utf-8") as f:
+            with self.dir_path.joinpath('METADATA.json').open(mode='r', encoding="utf-8") as f:
                 metadata = json.loads(f.read())
         except OSError:
             pass
 
         if metadata.get('Offentlig', False) is True:
             self.is_public = True
-        
+
         if metadata.get('Public', False) is True:
             self.is_public = True
      
@@ -165,7 +162,7 @@ class Datapackage:
         validate_bucket_name(metadata["Bucket_navn"])
         validate_datapackage_name(metadata["Datapakke_navn"])
 
-        with open(os.path.join(self.dir_path, 'METADATA.json'), 'w', encoding="utf-8") as f:
+        with self.dir_path.joinpath('METADATA.json').open(mode='w', encoding="utf-8") as f:
             f.write(json.dumps(metadata, indent=2))
 
         return {
@@ -174,7 +171,6 @@ class Datapackage:
             'author': metadata.get('Opphav', ''),
             'status': metadata.get('Tilgangsrettigheter', ''),
             'Datasett': metadata.get('Datasett', {}),
-            'license': license,
             'readme': readme,
             'metadata': metadata,
             'sources': metadata.get('Kilder', ''),
@@ -185,7 +181,7 @@ class Datapackage:
 
     def write_datapackage(self):
         resources = []
-        with self.dir_path.joinpath('/datapackage.json').open('w') as outfile:
+        with self.dir_path.joinpath('datapackage.json').open('w+') as outfile:
             for filename, df in self.resources.items():
                 # TODO bruk Parquet i stedet for csv?
                 resources.append(self._get_csv_schema(df, filename))
@@ -200,4 +196,3 @@ class Datapackage:
 
             for filename, df in self.resources.items():
                 df.to_csv(data_path.joinpath(filename + '.csv'), index=False, sep=';')
-
