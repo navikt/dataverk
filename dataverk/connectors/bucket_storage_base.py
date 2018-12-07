@@ -4,12 +4,6 @@ from dataverk.connectors.base import BaseConnector
 from collections.abc import Mapping
 
 
-class BucketType(Enum):
-    AWS = 1
-    GCLOUD = 2
-    AZURE = 3
-
-
 class BucketStorageConnector(ABC, BaseConnector):
 
     def __init__(self, settings: Mapping, encrypted=True):

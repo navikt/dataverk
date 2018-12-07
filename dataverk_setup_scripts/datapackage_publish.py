@@ -61,9 +61,9 @@ class PublishDataPackage:
                     js = json.dumps(self.package_metadata)
                     es.write(id, js)
                 except urllib3.exceptions.LocationValueError:
-                    print(f'write to elastic search failed, host_uri could not be resolved')
+                    print(f'write to elastic search failed, host_uri could not be resolved') # TODO: Må egentlig kaste exception her, men vi har ingen public ES index ennå
                 except Exception:
-                    print(f'Exception: write to elastic index {es.host_uri} failed')
+                    print(f'Exception: write to elastic index {es.host_uri} failed') # TODO: Må egentlig kaste exception her, men vi har ingen public ES index ennå
 
         print(f'Package {self.package_settings["package_name"]} successfully published')
 

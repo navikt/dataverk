@@ -79,7 +79,7 @@ def main():
     parse_delete.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
                               default=None, help="Navn på datapakke som ønskes fjernet")
 
-    # Delete command
+    # Publish command
     parse_publish = sub_arg_parser.add_parser('publish', add_help=False)
     parse_publish.add_argument('-v', '--version', action='version', version=__version__,
                               help="Viser programversjon")

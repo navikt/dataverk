@@ -181,7 +181,7 @@ class Datapackage:
 
     def write_datapackage(self):
         resources = []
-        with self.dir_path.joinpath('datapackage.json').open('w+') as outfile:
+        with self.dir_path.joinpath('datapackage.json').open('w') as outfile:
             for filename, df in self.resources.items():
                 # TODO bruk Parquet i stedet for csv?
                 resources.append(self._get_csv_schema(df, filename))

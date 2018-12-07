@@ -1,4 +1,4 @@
-from dataverk.connectors.bucket_storage_base import BucketStorageConnector, BucketType
+from dataverk.connectors.bucket_storage_base import BucketStorageConnector
 from dataverk.connectors.google_storage import GoogleStorageConnector
 from dataverk.connectors.azure_blob_storage import AzureStorageConnector
 from dataverk.connectors.s3 import AWSS3Connector
