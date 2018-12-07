@@ -11,8 +11,13 @@ from pathlib import Path
 
 class PublishDataPackage:
 
-    def __init__(self):
-        self.resource_files = search_for_files(start_path=Path('.'), file_names=('.env', 'settings.json'), levels=4)
+    def __init__(self, resource_files: dict=None, search_start_path: str='.'):
+
+        if resource_files is not None:
+            self.resource_files = resource_files
+        else:
+            self.resource_files = search_for_files(start_path=Path(search_start_path),
+                                                   file_names=('settings.json', '.env'), levels=4)
 
         try:
             self.env_store = EnvStore(Path(self.resource_files[".env"]))

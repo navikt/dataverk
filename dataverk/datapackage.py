@@ -61,7 +61,7 @@ class Datapackage:
         pass
 
     def _package_top_dir(self) -> Path:
-        return Path(".").parent
+        return Path(".").parent.absolute()
 
     def _is_sql_file(self, source):
         if '.sql' in source:
