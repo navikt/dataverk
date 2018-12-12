@@ -1,7 +1,7 @@
 import json
 import urllib3
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
-from dataverk.connectors.bucket_connector_factory import get_storage_connector
+from dataverk.connectors.bucket_connector_factory import get_storage_connector, BucketType
 from dataverk.utils.resource_discoverer import search_for_files
 from dataverk.utils.env_store import EnvStore
 from dataverk.utils import settings
@@ -53,7 +53,7 @@ class PublishDataPackage:
         for bucket_type in self.package_settings["bucket_storage_connections"]:
             if self.package_settings["bucket_storage_connections"][bucket_type]["publish"] == "True":
                 publish_data.upload_to_storage_bucket(dir_path=str(self._package_top_dir()),
-                                                      conn=get_storage_connector(bucket_type=bucket_type,
+                                                      conn=get_storage_connector(bucket_type=BucketType(bucket_type),
                                                                                  bucket_name=self.package_metadata.get("bucket_name"),
                                                                                  settings=self.package_settings,
                                                                                  encrypted=False),
