@@ -19,5 +19,5 @@ __all__ = ['connectors',
            'publish_datapackage',
            'write_datapackage',
            'Datapackage',
-           'create_settings_store'
+           'create_settings_store',
            ]
