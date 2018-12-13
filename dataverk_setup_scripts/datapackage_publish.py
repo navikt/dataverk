@@ -35,10 +35,10 @@ class PublishDataPackage:
         except OSError:
             raise OSError(f'No datapackage.json file found in datapackage')
 
-    def _get_elastic_index(self, bucket_type: str) -> ElasticsearchConnector:
-        if bucket_type == "google_cloud":
+    def _get_elastic_index(self, bucket_type: BucketType) -> ElasticsearchConnector:
+        if bucket_type == BucketType.GCS:
             return ElasticsearchConnector(settings=self.package_settings, host="elastic_public")
-        elif bucket_type == "AWS_S3":
+        elif bucket_type == BucketType.AWS_S3:
             return ElasticsearchConnector(settings=self.package_settings, host="elastic_private")
 
     def _package_top_dir(self) -> Path:
@@ -61,7 +61,7 @@ class PublishDataPackage:
                                                           self.package_settings["package_name"]))
 
                 try:
-                    es = self._get_elastic_index(bucket_type=bucket_type)
+                    es = self._get_elastic_index(bucket_type=BucketType(bucket_type))
                     id = self.package_settings["package_name"]
                     js = json.dumps(self.package_metadata)
                     es.write(id, js)
