@@ -19,3 +19,5 @@ def get_storage_connector(bucket_type: BucketType, bucket_name: str, settings: M
         return GoogleStorageConnector(bucket_name=bucket_name, settings=settings, encrypted=encrypted)
     elif bucket_type == BucketType.AZURE:
         return AzureStorageConnector(bucket_name=bucket_name, settings=settings, encrypted=encrypted)
+    else:
+        raise ValueError(f'Bucket type {bucket_type} is not supported')
