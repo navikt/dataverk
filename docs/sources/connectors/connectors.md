@@ -360,6 +360,90 @@ write(source_string, destination_blob_name, fmt, metadata=None)
 
 ----
 
+<span style="float:right;">[[source]](https://github.com/navikt/dataverk/blob/master/dataverk/connectors/oracle.py#L11)</span>
+## OracleConnector class
+
+```python
+dataverk.connectors.oracle.OracleConnector(settings, source=None)
+```
+
+Common oracle connector methods
+
+Troubleshooting:
+
+Note: Oracle instant client libraries required to be installed in order to use cx_Oracle
+
+Mac:
+
+´´´
+unzip instant client zip file from oracle to ~/opt/oracle/instantclient_12_2
+ln -s ~/opt/oracle/instantclient_12_2/libclntsh.dylib.12.1 /usr/local/lib/
+´´´
+
+
+
+---
+## OracleConnector methods
+
+### get_pandas_df
+
+
+```python
+get_pandas_df(sql, arraysize=100000)
+```
+
+---
+### get_user
+
+
+```python
+dataverk.utils.get_user()
+```
+
+
+Get currently logged in user
+
+Inherited from AuthMixin class 
+
+
+---
+### is_authorized
+
+
+```python
+dataverk.utils.is_authorized(user=None)
+```
+
+
+Check if is user is authorized to access data source
+
+Inherited from AuthMixin class 
+
+
+---
+### log
+
+
+```python
+log(message)
+```
+
+
+Logging util
+
+Method inherited from BaseConnector
+
+
+---
+### persist_pandas_df
+
+
+```python
+persist_pandas_df(table, schema=None, df=None, chunksize=10000)
+```
+
+----
+
 <span style="float:right;">[[source]](https://github.com/navikt/dataverk/blob/master/dataverk/connectors/google_storage.py#L10)</span>
 ## GoogleStorageConnector class
 
