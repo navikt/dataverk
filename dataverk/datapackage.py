@@ -172,6 +172,7 @@ class Datapackage:
             'status': metadata.get('Tilgangsrettigheter', ''),
             'Datasett': metadata.get('Datasett', {}),
             'readme': readme,
+            'license': license,
             'metadata': metadata,
             'sources': metadata.get('Kilder', ''),
             'last_updated': today,

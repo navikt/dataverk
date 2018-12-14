@@ -35,23 +35,35 @@ class PublishDataPackage:
         except OSError:
             raise OSError(f'No datapackage.json file found in datapackage')
 
-    def _get_elastic_index(self, bucket_type: BucketType) -> ElasticsearchConnector:
-        if bucket_type == BucketType.GCS:
-            return ElasticsearchConnector(settings=self.package_settings, host="elastic_public")
-        elif bucket_type == BucketType.AWS_S3:
-            return ElasticsearchConnector(settings=self.package_settings, host="elastic_private")
-
     def _package_top_dir(self) -> Path:
         return Path(".").parent
 
     def _datapackage_key_prefix(self, datapackage_name: str):
         return datapackage_name + '/'
 
+    def _update_es_index(self):
+        try:
+            es = ElasticsearchConnector(settings=self.package_settings, host="elastic_private")
+            id = self.package_settings["package_name"]
+            js = json.dumps(self.package_metadata)
+            es.write(id, js)
+        except urllib3.exceptions.LocationValueError as err:
+            print(f'write to elastic search failed, host_uri could not be resolved')
+            raise urllib3.exceptions.LocationValueError(err)
+
+    def _is_publish_set(self, bucket_type: str):
+        return self.package_settings["bucket_storage_connections"][bucket_type]["publish"].lower() == "true"
+
     def publish(self):
+        ''' - Iterates through all bucket storage conenctions in the settings.json file and publishes the datapackage
+            - Updates ES index with metadata for the datapackage
+
+        :return: None
+        '''
         print(f'Publishing package {self.package_settings["package_name"]}')
 
         for bucket_type in self.package_settings["bucket_storage_connections"]:
-            if self.package_settings["bucket_storage_connections"][bucket_type]["publish"] == "True":
+            if self._is_publish_set(bucket_type=bucket_type):
                 publish_data.upload_to_storage_bucket(dir_path=str(self._package_top_dir()),
                                                       conn=get_storage_connector(bucket_type=BucketType(bucket_type),
                                                                                  bucket_name=self.package_metadata.get("bucket_name"),
@@ -59,16 +71,7 @@ class PublishDataPackage:
                                                                                  encrypted=False),
                                                       datapackage_key_prefix=self._datapackage_key_prefix(
                                                           self.package_settings["package_name"]))
-
-                try:
-                    es = self._get_elastic_index(bucket_type=BucketType(bucket_type))
-                    id = self.package_settings["package_name"]
-                    js = json.dumps(self.package_metadata)
-                    es.write(id, js)
-                except urllib3.exceptions.LocationValueError:
-                    print(f'write to elastic search failed, host_uri could not be resolved') # TODO: Må egentlig kaste exception her, men vi har ingen public ES index ennå
-                except Exception:
-                    print(f'Exception: write to elastic index {es.host_uri} failed') # TODO: Må egentlig kaste exception her, men vi har ingen public ES index ennå
+                self._update_es_index()
 
         print(f'Package {self.package_settings["package_name"]} successfully published')
 
