@@ -5,7 +5,7 @@ import os
 import json
 import pandas as pd
 from unittest import TestCase
-from dataverk import Datapackage
+from dataverk.datapackage import Datapackage
 from pathlib import Path
 from dataverk.utils import resource_discoverer
 
@@ -32,16 +32,16 @@ class Base(TestCase):
             del os.environ["RUN_FROM_VDI"]
 
         self.files = resource_discoverer.search_for_files(start_path=Path(__file__).parent.joinpath("static"),
-                                          file_names=('settings.json', '.env'), levels=3)
+                                                          file_names=('settings.json', '.env'), levels=3)
 
-        self.datapackage = Datapackage(public=False, resource_files=self.files)
+        self.datapackage = Datapackage(resource_files=self.files)
 
-        with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'w+') as metadata_file:
+        with open('METADATA.json', 'w') as metadata_file:
             json.dump(metadata_file_template, metadata_file)
 
     def tearDown(self):
         try:
-            os.remove(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')))
+            os.remove('METADATA.json')
         except OSError:
             pass
 
@@ -56,21 +56,13 @@ class Instantiation(Base):
     """
 
     def test_class_instantiation_normal(self):
-        datapackage = Datapackage(public=False, resource_files=self.files)
+        datapackage = Datapackage(resource_files=self.files)
         self.assertEqual(datapackage.is_public, False)
 
-    # Input arguments wrong type
-    # ==========================
-    def test_class_instantiation_wrong_input_param_type(self):
-        wrong_input_param_types = [0, "False", pd.DataFrame(), object(), list()]
-        for input_type in wrong_input_param_types:
-            with self.subTest(msg="Wrong input parameter type in Datapackage class instantiation", _input=input_type):
-                with self.assertRaises(TypeError):
-                    Datapackage(public=input_type, resource_files=self.files)
 
     def test_class_instantiation_without_settings_file(self):
         with self.assertRaises(KeyError):
-            Datapackage(public=False, resource_files={})
+            Datapackage(resource_files={})
 
     # Input arguments outside constraints
     # ===================================
@@ -79,23 +71,23 @@ class Instantiation(Base):
 
         for datapackage_name in invalid_names:
             with self.subTest(msg="Invalid data package name", _input=datapackage_name):
-                with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'r') as metadata_file:
+                with open('METADATA.json', 'r') as metadata_file:
                     metadata = json.load(metadata_file)
-                with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'w') as metadata_file:
+                with open('METADATA.json', 'w') as metadata_file:
                     metadata["Datapakke_navn"] = datapackage_name
                     json.dump(metadata, metadata_file)
                 with self.assertRaises(NameError):
-                    Datapackage(public=False, resource_files=self.files)
+                    Datapackage(resource_files=self.files)
 
         for bucket_name in invalid_names:
             with self.subTest(msg="Invalid data package name", _input=bucket_name):
-                with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'r') as metadata_file:
+                with open('METADATA.json', 'r') as metadata_file:
                     metadata = json.load(metadata_file)
-                with open(os.path.abspath(os.path.join(os.pardir, 'METADATA.json')), 'w') as metadata_file:
+                with open('METADATA.json', 'w') as metadata_file:
                     metadata["Bucket_navn"] = bucket_name
                     json.dump(metadata, metadata_file)
                 with self.assertRaises(NameError):
-                    Datapackage(public=False, resource_files=self.files)
+                    Datapackage(resource_files=self.files)
 
 
 class Set(Base):
@@ -175,10 +167,6 @@ class MethodsReturnType(Base):
     """
     Tests methods' output types
     """
-
-    def test__datapackage_key_prefix(self):
-        self.assertEqual(self.datapackage._datapackage_key_prefix("pakkenavn"), "pakkenavn/")
-
 
 
 class MethodsReturnUnits(Base):

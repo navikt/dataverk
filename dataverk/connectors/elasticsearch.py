@@ -1,6 +1,6 @@
 from elasticsearch import Elasticsearch
 from dataverk.connectors import BaseConnector
-from dataverk.utils.settings_builder import SettingsStore
+from collections.abc import Mapping
 from ssl import create_default_context
 
 
@@ -8,21 +8,21 @@ from ssl import create_default_context
 class ElasticsearchConnector(BaseConnector):
     """Elasticsearch connection"""
 
-    def __init__(self, settings: SettingsStore, host="elastic_private"):
+    def __init__(self, settings: Mapping, host="elastic_private"):
         super(self.__class__, self).__init__()
 
         ssl_context = create_default_context()
-        host_uri = settings["index_connections"][host]
+        self.host_uri = settings["index_connections"][host]
 
-        if host_uri is None:
-            raise ValueError('Connection settings are not available for the host: {host}')
+        if self.host_uri is None:
+            raise ValueError(f'Connection settings are not available for the host: {host}')
 
-        self.es = Elasticsearch([host_uri], ssl_context=ssl_context)
+        self.es = Elasticsearch([self.host_uri], ssl_context=ssl_context)
         self.index = settings["index_connections"]["index"]
 
     def _create_index(self):
         """Create index
-        
+
         """
         self.es.indices.delete(index=self.index, ignore=[400, 404])
 
@@ -91,7 +91,7 @@ class ElasticsearchConnector(BaseConnector):
         }
         """
 
-        self.es.indices.create(index=self.index, body = body)
+        self.es.indices.create(index=self.index, body=body)
 
     def write(self, id, doc):
         """Add or update document"""
@@ -119,8 +119,5 @@ class ElasticsearchConnector(BaseConnector):
             hits = self.es.search(index=self.index, query=query)
             return hits
         except:
-            self.log(f'{self.__class__}: Unable to retrieve document with query: {query} from elastic index: {self.index}.')
-        
-      
-
-
+            self.log(
+                f'{self.__class__}: Unable to retrieve document with query: {query} from elastic index: {self.index}.')
