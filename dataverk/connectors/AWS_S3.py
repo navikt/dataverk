@@ -43,7 +43,7 @@ class S3Connector(BucketStorageConnector):
         pass
 
     def download_blob(self, blob_name: str, destination_file_name: str):
-        with open(destination_file_name, 'r') as dest_file:
+        with open(destination_file_name, 'w') as dest_file:
             res = requests.get(url=f'{self.s3_api_url}/{self.bucket_name}/{blob_name}')
 
             if res.status_code != 200:
