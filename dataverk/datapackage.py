@@ -48,7 +48,7 @@ class Datapackage:
         self.resources[dataset_name] = df
         self.datapackage_metadata['Datasett'][dataset_name] = dataset_description
 
-    def add_view(self, name: str, view_type: str="Simple", resource: str, columns: None, title: str="", description: str=""):
+    def add_view(self, name: str, resource: str, columns: None, view_type: str="Simple", title: str="", description: str=""):
         if columns is None: columns = [] 
         view = {
             'name': name,
