@@ -56,7 +56,7 @@ add_resource(df,[description=markdown])
 ```
 - med støtte for views
 ```python
-add_view(spec=... title=... type=... [description=markdown]) 
+add_view(title=... type=... resource=... columns=... [spec=...]  [description=markdown]) 
 ```
 
 ## 5 - Publisere datapakken  
