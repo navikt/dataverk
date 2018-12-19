@@ -2,13 +2,13 @@
 ### Hva ØNSKER JEG Å GJØRE?  
 Opprette mappe med undermapper og nødvendige filer: datapackage.json, LISENCE.md, README.md METADATA.md  
 Legge inn navn på prosjektet/datapakken i mappenavn + i filer (?)  
-Hente env-fil fra repo dataverk_settings   
 Kobling til Vault / credentials - (?)  
 Skrive Jenkins eller Travis script ?
+Kopiere settings.json fra lukket repo dataverk_settings
     
 ### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?
 ```console
-$ dataverk-cli init-datapackage
+$ dataverk-cli init([settings=...], [secrets=...]) # ref til repo repo dataverk_settings
 ``` 
 Alternativt: klone eksisterende repo, endre navn på mappe, endre navn i filer (?)  
   
@@ -21,13 +21,19 @@ Opprette dataframes fra kilde
   
 ### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?
 ```python
-import dataverk as dv  
-con = dv.connect(source='dvh') # gir større fleksiblitet, mer inituitiv modell og mulighet for feilmeldinger eller annen tilbakemelding til bruker ved etablering av connection  
-df = con.execute('select * from table')
+import dataverk as dv
+#con = dv.connect(source='dvh') # implisitt init singleton
+#con2 = dv.connect(source='kafka url')
+# df = con.read('select * from table')
+# df2 = con.read('....')
 #eller?
-df = dv.read_sql('select * from table', con=con)
+#df = dv.read_sql('select * from table', con=con)
+#df2 = dv.read_kafka('...', con=con2)
 #eller med automagisk etablering av connection (as-is)?
-df = dv.read_sql(source='dvh', 'select * from table' [,name=None] [,connector='Oracle'] [,description=""]) # enklere kode?
+df = dv.read_sql(source='dvh', query='select * from table')   
+df2 = dv.read_kafka(url='dvh', topic='....', filter='...', window='...')   
+df3 = dv.read_service(url='dvh')  
+df4 = dv.read_dp(url='', resource='')  
 ```
   
 ## 3 - Bearbeide data  
@@ -52,14 +58,23 @@ Definere views
 Manuell redigering av .md og .json-filer  
 Datapackage-klassen i dataverk ?  
 Fork av datapackage-py ?  
-- med støtte for df -> resource: 
 ```python
-add_resource(df,name=..., description=...) # description in markdown format
+dp = dv.Datapackage()
+```
+```python
+dp.add_resource(df,name=..., description=...) # description in markdown format
 ```
 - med støtte for views
 ```python
-add_view(title=..., type=..., resource=..., columns=... ,description=... [spec=...])  # description in markdown format
+dp.add_view(title=..., type=..., resource=..., columns=... ,description=... [spec=...])  # description in markdown format
 ```
+```python
+dp.add_notebook(title=..., type=..., resource=..., description=... [spec=...])  # description in markdown format
+```
+```python
+dp.write() # local directory inkl hash, dato ... 
+```
+
 
 ## 5 - Publisere datapakken  
 ### Hva ØNSKER JEG Å GJØRE?  
@@ -69,7 +84,7 @@ Begge operasjonene bør være underlagt versjonskontroll ved endringer
 ### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET? 
 I terminalen?  
 ```console
-$ dataverk-cli publish(package=..., storage=..., index=...)
+$ dataverk-cli publish  #([package=...] [,[storage=...] [, index=...]) # storage & index kommer som default verdier fra settings.json
 ```
 fork av data-cli?  
   
@@ -79,8 +94,10 @@ Sette notebook'en i "produksjon" - sette den til å kjøre på NAIS (eller Travi
 ### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?  
 Eksplisitt kommando i dataverk-scriptet?  
 Som en del av publiseringen ?
+Sette opp Jenkins jobb 
+
 ```console
-$ dataverk-cli publish(package=..., storage=..., index=..., schedule=...)
+$ dataverk-cli schedule([schedule=...]) # default verdi Never = 31. feb
 ```
 
 ## 7 - Manage pipelines

@@ -26,12 +26,12 @@ class PublishDataPackage:
 
         self.package_settings = settings.create_settings_store(settings_file_path=Path(self.resource_files["settings.json"]),
                                                                env_store=self.env_store)
-        self.package_metadata = self._read_metadata()
+        self.datapackage_json = self.read_datapackage_json()
 
-    def _read_metadata(self):
+    def read_datapackage_json(self):
         try:
-            with self._package_top_dir().joinpath('datapackage.json').open(mode='r') as metadata_file:
-                return json.load(metadata_file)
+            with self._package_top_dir().joinpath('datapackage.json').open(mode='r') as datapackage_file:
+                return json.load(datapackage_file)
         except OSError:
             raise OSError(f'No datapackage.json file found in datapackage')
 
@@ -45,7 +45,12 @@ class PublishDataPackage:
         try:
             es = ElasticsearchConnector(settings=self.package_settings, host="elastic_private")
             id = self.package_settings["package_name"]
-            js = json.dumps(self.package_metadata)
+            js = return {
+            'name':  id,
+            'title':  self.datapackage_json.get('Datapakke_navn',''),
+            'description':  self.datapackage_json.get('Datapakke_navn',''),
+            'metadata': json.dumps(self.datapackage_json)
+            }
             es.write(id, js)
         except urllib3.exceptions.LocationValueError as err:
             print(f'write to elastic search failed, host_uri could not be resolved')
@@ -66,7 +71,7 @@ class PublishDataPackage:
             if self._is_publish_set(bucket_type=bucket_type):
                 publish_data.upload_to_storage_bucket(dir_path=str(self._package_top_dir()),
                                                       conn=get_storage_connector(bucket_type=BucketType(bucket_type),
-                                                                                 bucket_name=self.package_metadata.get("bucket_name"),
+                                                                                 bucket_name=self.datapackage_json.get("bucket_name"),
                                                                                  settings=self.package_settings,
                                                                                  encrypted=False),
                                                       datapackage_key_prefix=self._datapackage_key_prefix(
