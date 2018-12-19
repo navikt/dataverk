@@ -78,7 +78,7 @@ Sette notebook'en i "produksjon" - sette den til å kjøre på NAIS (eller Travi
 Eksplisitt kommando i dataverk-scriptet?  
 Som en del av publiseringen ?
 ```console
-dataverk-cli publish(package=... storage=... index=..., schedule=...)
+$ dataverk-cli publish(package=... storage=... index=..., schedule=...)
 ```
 
 ## 7 - Manage pipelines
