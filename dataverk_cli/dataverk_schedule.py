@@ -90,13 +90,13 @@ class DataverkSchedule(DataverkBase):
 
         self.jenkins_server.reconfig_job(self.settings["package_name"], xml_config)
 
-    def _schedule(self):
+    def _schedule_job(self):
         self._edit_cronjob_config()
         self._edit_jenkins_file()
         self._create_jenkins_job()
 
     def run(self):
-        if self.args.update_schedule is None:
+        if self.args.schedule is None:
             self.settings["update_schedule"] = input("Skriv inn ønsket oppdateringsschedule for datapakken "
                                                      "(format: \"<minutt> <time> <dag i måned> <måned> <ukedag>\", "
                                                      "f.eks. \"0 12 * * 2,4\" vil gi <Hver tirsdag og torsdag kl 12.00 UTC>): ")
@@ -108,7 +108,7 @@ class DataverkSchedule(DataverkBase):
 
         if res in {'j', 'ja', 'y', 'yes'}:
             try:
-                self._schedule()
+                self._schedule_job()
             except Exception:
                 if os.path.exists(self.settings["package_name"]):
                     rmtree(self.settings["package_name"])

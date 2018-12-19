@@ -72,10 +72,7 @@ class SettingsCreator(ABC):
         validate_datapackage_name(self.settings["package_name"])
 
         if self.args.update_schedule is None:
-            update_schedule =  self._prompt_for_user_input(arg="update schedule")
-            if not update_schedule:
-                update_schedule = "* * 31 2 *" # Default value Feb 31 (i.e. never)
-            self.settings["update_schedule"] = update_schedule
+            self.settings["update_schedule"] = "* * 31 2 *" # Default value Feb 31 (i.e. never)
         else:
             self.settings["update_schedule"] = self.args.update_schedule
 
