@@ -58,7 +58,7 @@ add_resource(df,[description=markdown])
 ```
 - med støtte for views
 ```python
-add_view(title=... type=... resource=... columns=... [spec=...]  [description=markdown]) 
+add_view(title=..., type=..., resource=..., columns=... [,spec=...]  [,description=markdown]) 
 ```
 
 ## 5 - Publisere datapakken  
@@ -69,7 +69,7 @@ Begge operasjonene bør være underlagt versjonskontroll ved endringer
 ### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET? 
 I terminalen?  
 ```console
-$ dataverk-cli publish(package=... storage=... index=...)
+$ dataverk-cli publish(package=..., storage=..., index=...)
 ```
 fork av data-cli?  
   
@@ -80,7 +80,7 @@ Sette notebook'en i "produksjon" - sette den til å kjøre på NAIS (eller Travi
 Eksplisitt kommando i dataverk-scriptet?  
 Som en del av publiseringen ?
 ```console
-$ dataverk-cli publish(package=... storage=... index=..., schedule=...)
+$ dataverk-cli publish(package=..., storage=..., index=..., schedule=...)
 ```
 
 ## 7 - Manage pipelines
