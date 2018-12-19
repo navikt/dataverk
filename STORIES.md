@@ -6,8 +6,10 @@ Hente env-fil fra repo dataverk_settings
 Kobling til Vault / credentials - (?)  
 Skrive Jenkins eller Travis script ?
     
-### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?  
-dataverk-cli init-datapackage i terminalen  
+### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?
+```console
+$ dataverk-cli init-datapackage
+``` 
 Alternativt: klone eksisterende repo, endre navn på mappe, endre navn i filer (?)  
   
 ## 2 - Hente data fra kilder  
@@ -17,10 +19,16 @@ Ett objekt per connection, eller et masterobjekt med all config?
 Connections til både sources og sinks i samme objekt?  
 Opprette dataframes fra kilde  
   
-### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?  
+### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?
+```python
 import dataverk as dv  
-con = dv.connect('dvh')  
-df = con.execute('select * from table')  
+con = dv.connect('dvh') # gir større fleksiblitet, mer inituitiv modell og mulighet for feilmeldinger eller annen tilbakemelding til bruker ved etablering av connection  
+df = con.execute('select * from table')
+#eller?
+df = dv.read_sql('select * from table', con=con)
+#eller med automagisk etablering av connection?
+df = dv.read_sql('select * from table', source='dvh') # enklere kode?
+```
   
 ## 3 - Bearbeide data  
 ### Hva ØNSKER JEG Å GJØRE?  
@@ -44,16 +52,25 @@ Definere views
 Manuell redigering av .md og .json-filer  
 Datapackage-klassen i dataverk ?  
 Fork av datapackage-py ?  
-- med støtte for df -> resource: add_resource(df,[description=markdown])  
-- med støtte for views: add_view(spec=... title=... type=... [description=markdown])  
+- med støtte for df -> resource: 
+```python
+add_resource(df,[description=markdown])
+```
+- med støtte for views
+```python
+add_view(title=..., type=..., resource=..., columns=... [,spec=...]  [,description=markdown]) 
+```
 
 ## 5 - Publisere datapakken  
 ### Hva ØNSKER JEG Å GJØRE?  
 Kopiere datafilene til S3  
 Legge inn metadatadokument i en elastic index  
 Begge operasjonene bør være underlagt versjonskontroll ved endringer  
-### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?  
-dataverk-cli publish(package=... storage=... index=...) i terminalen  
+### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET? 
+I terminalen?  
+```console
+$ dataverk-cli publish(package=..., storage=..., index=...)
+```
 fork av data-cli?  
   
 ## 6 - Schedulere datapipeline  
@@ -61,8 +78,10 @@ fork av data-cli?
 Sette notebook'en i "produksjon" - sette den til å kjøre på NAIS (eller Travis?) ved faste intervaller  
 ### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?  
 Eksplisitt kommando i dataverk-scriptet?  
-Som en del av publiseringen ?  
-- dataverk-cli publish(package=... storage=... index=..., schedule=...) i terminalen  
+Som en del av publiseringen ?
+```console
+$ dataverk-cli publish(package=..., storage=..., index=..., schedule=...)
+```
 
 ## 7 - Manage pipelines
 ### HVA ØNSKER JEG Å GJØRE?
