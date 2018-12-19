@@ -22,10 +22,12 @@ Opprette dataframes fra kilde
 ### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?
 ```python
 import dataverk as dv  
-con = dv.connect('dvh')  
+con = dv.connect('dvh') # gir større fleksiblitet, mer inituitiv modell og mulighet for feilmeldinger eller annen tilbakemelding til bruker ved etablering av connection  
 df = con.execute('select * from table')
 #eller?
-df = dv.read_sql('select * from table')
+df = dv.read_sql('select * from table', con=con)
+#eller med automagisk etablering av connection?
+df = dv.read_sql('select * from table', source='dvh') # enklere kode?
 ```
   
 ## 3 - Bearbeide data  
