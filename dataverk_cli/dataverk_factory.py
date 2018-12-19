@@ -25,7 +25,7 @@ def get_datapackage_object(action: Action, args) -> type(DataverkBase):
     if action is Action.INIT:
         return DataverkInit(settings=create_settings_dict(args=args, envs=envs), envs=envs)
     elif action is Action.SCHEDULE:
-        return DataverkSchedule(update_schedule=args.update_schedule, settings=get_settings_dict(args.package_name), envs=envs)
+        return DataverkSchedule(args=args, settings=get_settings_dict(args.package_name), envs=envs)
     elif action is Action.DELETE:
         return DataverkDelete(settings=get_settings_dict(args.package_name), envs=envs)
     else:
