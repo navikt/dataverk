@@ -22,12 +22,12 @@ Opprette dataframes fra kilde
 ### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?
 ```python
 import dataverk as dv  
-con = dv.connect('dvh') # gir større fleksiblitet, mer inituitiv modell og mulighet for feilmeldinger eller annen tilbakemelding til bruker ved etablering av connection  
+con = dv.connect(source='dvh') # gir større fleksiblitet, mer inituitiv modell og mulighet for feilmeldinger eller annen tilbakemelding til bruker ved etablering av connection  
 df = con.execute('select * from table')
 #eller?
 df = dv.read_sql('select * from table', con=con)
-#eller med automagisk etablering av connection?
-df = dv.read_sql('select * from table', source='dvh') # enklere kode?
+#eller med automagisk etablering av connection (as-is)?
+df = dv.read_sql(source='dvh', 'select * from table' [,name=None] [,connector='Oracle'] [,description=""]) # enklere kode?
 ```
   
 ## 3 - Bearbeide data  
@@ -54,11 +54,11 @@ Datapackage-klassen i dataverk ?
 Fork av datapackage-py ?  
 - med støtte for df -> resource: 
 ```python
-add_resource(df,[description=markdown])
+add_resource(df,name=..., description=...) # description in markdown format
 ```
 - med støtte for views
 ```python
-add_view(title=..., type=..., resource=..., columns=... [,spec=...]  [,description=markdown]) 
+add_view(title=..., type=..., resource=..., columns=... ,description=... [spec=...])  # description in markdown format
 ```
 
 ## 5 - Publisere datapakken  
