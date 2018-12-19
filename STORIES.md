@@ -58,7 +58,7 @@ fork av data-cli?
   
 ## 6 - Schedulere datapipeline  
 ### Hva ØNSKER JEG Å GJØRE?  
-Sette notebook'en i "produksjon" - sette den til å kjøre på NAIS ved faste intervaller  
+Sette notebook'en i "produksjon" - sette den til å kjøre på NAIS (eller Travis?) ved faste intervaller  
 ### HVORDAN FORVENTER JEG Å KUNNE GJØRE DET?  
 Eksplisitt kommando i dataverk-scriptet?  
 Som en del av publiseringen ?  
