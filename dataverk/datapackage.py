@@ -1,7 +1,5 @@
 import pandas as pd
-import os
 import json
-import errno
 import datetime
 import uuid
 from dataverk.connectors import OracleConnector
@@ -116,7 +114,7 @@ class Datapackage:
 
         return {
             'name': filename,
-            'path': 'data/' + filename + '.csv',
+            'path': 'resources/' + filename + '.csv',
             'format': 'csv',
             'mediatype': 'text/csv',
             'schema': {'fields': fields}
@@ -191,7 +189,7 @@ class Datapackage:
 
             json.dump(self.datapackage_metadata, outfile, indent=2, sort_keys=True)
 
-            data_path = self.dir_path.joinpath('data/')
+            data_path = self.dir_path.joinpath('resources/')
             if not data_path.exists():
                 data_path.mkdir()
 

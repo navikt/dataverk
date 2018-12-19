@@ -32,6 +32,25 @@ class DataverkInit(DataverkBase):
             if os.path.exists(str(templates_path)):
                 rmtree(str(templates_path))
 
+    def _edit_package_metadata(self):
+        '''  Tilpasser metadata fil til datapakken
+        '''
+
+        try:
+            with open(os.path.join(self.settings["package_name"], 'METADATA.json'), 'r') as metadatafile:
+                package_metadata = json.load(metadatafile)
+        except OSError:
+            raise OSError(f'Finner ikke METADATA.json fil')
+
+        package_metadata['Datapakke_navn'] = self.settings["package_name"]
+        package_metadata['Bucket_navn'] = 'nav-opendata'
+
+        try:
+            with open(os.path.join(self.settings["package_name"], 'METADATA.json'), 'w') as metadatafile:
+                json.dump(package_metadata, metadatafile, indent=2)
+        except OSError:
+            raise OSError(f'Finner ikke METADATA.json fil')
+
     def _write_settings_file(self, path: str):
         try:
             with open(os.path.join(path, 'settings.json'), 'w') as settings_file:

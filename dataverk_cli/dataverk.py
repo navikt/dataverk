@@ -3,6 +3,7 @@ import argparse
 from . import dataverk_create_env_file, __version__
 from .dataverk_base import Action
 from .dataverk_factory import get_datapackage_object
+from .dataverk_notebook2script import notebook2script
 from .dataverk_publish import publish_datapackage
 
 
@@ -57,13 +58,13 @@ def main():
     parser_init.add_argument('--vault-service-account', dest="vault_service_account", action='store', metavar='<service account>',
                               default=None, help="Vault service account")
 
-    # Update command
+    # Schedule command
     parser_schedule = sub_arg_parser.add_parser('schedule', add_help=False)
     parser_schedule.add_argument('-v', '--version', action='version', version=__version__,
-                              help="Viser programversjon")
+                                 help="Viser programversjon")
     parser_schedule.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
-    parser_schedule.add_argument('--schedule', dest="schedule", action='store', metavar='<oppdateringsfrekvens>',
-                              default=None, help="Navn på datapakke sommmm ønskes oppdatert")
+    parser_schedule.add_argument('--update-schedule', dest="update_schedule", action='store', metavar='<oppdateringsfrekvens>',
+                                 default=None, help="Navn på datapakke sommmm ønskes oppdatert")
 
     # Delete command
     parse_delete = sub_arg_parser.add_parser('delete', add_help=False)
@@ -73,10 +74,16 @@ def main():
     parse_delete.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
                               default=None, help="Navn på datapakke som ønskes fjernet")
 
+    # Notebook2script command
+    parse_notebook2script = sub_arg_parser.add_parser('notebook2scripts', add_help=False)
+    parse_notebook2script.add_argument('-v', '--version', action='version', version=__version__,
+                              help="Viser programversjon")
+    parse_notebook2script.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
+
     # Publish command
     parse_publish = sub_arg_parser.add_parser('publish', add_help=False)
     parse_publish.add_argument('-v', '--version', action='version', version=__version__,
-                              help="Viser programversjon")
+                               help="Viser programversjon")
     parse_publish.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
 
     args = arg_parser.parse_args()
@@ -92,6 +99,8 @@ def main():
     elif args.command == 'delete':
         dp = get_datapackage_object(action=Action.DELETE, args=args)
         dp.run()
+    elif args.comand == "notebook2script":
+        notebook2script()
     elif args.command == "publish":
         publish_datapackage()
 

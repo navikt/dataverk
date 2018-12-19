@@ -36,20 +36,7 @@ class Instantiation(Base):
 
     # Input arguments wrong type
     # ==========================
-
-    def test_init_normal_case(self):
-        new_rep = dataverk_init.NewRepoCreator("testrep")
-        self.assertEqual(new_rep.name, "testrep")
-
-    def test_init_bad_input_type(self):
-        for _input in self.bad_repo_name_inputs:
-            with self.subTest(_input=_input):
-                with self.assertRaises(Exception) as cm:
-                    res = dataverk_init.NewRepoCreator(_input)
-
-
-
-
+    pass
 
     # Input arguments outside constraints
     # ===================================

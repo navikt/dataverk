@@ -1,13 +1,11 @@
 import os
 import json
-import yaml
 
 from . import settings_loader, settings_creator
 from dataverk.utils.env_store import EnvStore
 from abc import ABC
 from enum import Enum
 from shutil import rmtree
-from string import Template
 
 
 class Action(Enum):
@@ -45,48 +43,6 @@ class DataverkBase(ABC):
                 return True
 
         return False
-
-    def _edit_package_metadata(self):
-        '''  Tilpasser metadata fil til datapakken
-        '''
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'METADATA.json'), 'r') as metadatafile:
-                package_metadata = json.load(metadatafile)
-        except OSError:
-            raise OSError(f'Finner ikke METADATA.json fil')
-
-        package_metadata['Datapakke_navn'] = self.settings["package_name"]
-        package_metadata['Bucket_navn'] = 'nav-opendata'
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'METADATA.json'), 'w') as metadatafile:
-                json.dump(package_metadata, metadatafile, indent=2)
-        except OSError:
-            raise OSError(f'Finner ikke METADATA.json fil')
-
-    def _edit_cronjob_config(self):
-        ''' Tilpasser cronjob config fil til datapakken
-        '''
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'cronjob.yaml'), 'r') as yamlfile:
-                cronjob_config = yaml.load(yamlfile)
-        except OSError:
-            raise OSError(f'Finner ikke cronjob.yaml fil')
-
-        cronjob_config['metadata']['name'] = self.settings["package_name"]
-        cronjob_config['metadata']['namespace'] = self.settings["nais_namespace"]
-
-        cronjob_config['spec']['schedule'] = self.settings["update_schedule"]
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self.settings["package_name"] + '-cronjob'
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = 'repo.adeo.no:5443/' + self.settings["package_name"]
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'cronjob.yaml'), 'w') as yamlfile:
-                yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
-        except OSError:
-            raise OSError(f'Finner ikke cronjob.yaml fil')
 
     def _print_datapipeline_config(self):
         print("\n-------------Datapakke-----------------------------" +

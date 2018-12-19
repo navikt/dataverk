@@ -1,5 +1,8 @@
 import jenkins
 import os
+import json
+import yaml
+
 from dataverk_cli.dataverk_base import DataverkBase
 from dataverk.utils.env_store import EnvStore
 from xml.etree import ElementTree
@@ -16,6 +19,29 @@ class DataverkSchedule(DataverkBase):
         self.jenkins_server = jenkins.Jenkins(self.settings["jenkins"]["url"],
                                               username=self.envs['USER_IDENT'],
                                               password=self.envs['PASSWORD'])
+
+    def _edit_cronjob_config(self):
+        ''' Tilpasser cronjob config fil til datapakken
+        '''
+
+        try:
+            with open(os.path.join(self.settings["package_name"], 'cronjob.yaml'), 'r') as yamlfile:
+                cronjob_config = yaml.load(yamlfile)
+        except OSError:
+            raise OSError(f'Finner ikke cronjob.yaml fil')
+
+        cronjob_config['metadata']['name'] = self.settings["package_name"]
+        cronjob_config['metadata']['namespace'] = self.settings["nais_namespace"]
+
+        cronjob_config['spec']['schedule'] = self.settings["update_schedule"]
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self.settings["package_name"] + '-cronjob'
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = 'repo.adeo.no:5443/' + self.settings["package_name"]
+
+        try:
+            with open(os.path.join(self.settings["package_name"], 'cronjob.yaml'), 'w') as yamlfile:
+                yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
+        except OSError:
+            raise OSError(f'Finner ikke cronjob.yaml fil')
 
     def _edit_jenkins_job_config(self):
         xml = ElementTree.parse(os.path.join(self.settings["package_name"], 'jenkins_config.xml'))
@@ -96,7 +122,7 @@ class DataverkSchedule(DataverkBase):
         self._create_jenkins_job()
 
     def run(self):
-        if self.args.schedule is None:
+        if self.args.update_schedule is None:
             self.settings["update_schedule"] = input("Skriv inn ønsket oppdateringsschedule for datapakken "
                                                      "(format: \"<minutt> <time> <dag i måned> <måned> <ukedag>\", "
                                                      "f.eks. \"0 12 * * 2,4\" vil gi <Hver tirsdag og torsdag kl 12.00 UTC>): ")
