@@ -1,19 +1,19 @@
-
 import os
 from io import BytesIO
 from datetime import timedelta
-from dataverk.connectors.base import BaseConnector
+from dataverk.connectors.bucket_storage_base import BucketStorageConnector
+from collections.abc import Mapping
 
 
-class AzureStorageConnector(BaseConnector):
+class AzureStorageConnector(BucketStorageConnector):
     """Azure Storage connector"""
-    
-    def __init__(self, encrypted=True):
+
+    def __init__(self, bucket_name: str, settings: Mapping, encrypted=True):
         """Init"""
 
-        super(self.__class__, self).__init__(encrypted=encrypted)
+        super(self.__class__, self).__init__(settings=settings, encrypted=encrypted)
 
-        try: 
+        try:
             # AZURE_STORAGE_ACCOUNT_NAME must be set: os.environ['AZURE_STORAGE_ACCOUNT_NAME'] = "..."
             # AZURE_STORAGE_ACCOUNT_KEY must be set: os.environ['AZURE_STORAGE_ACCOUNT_KEY'] = "..."
             self.account = account
@@ -21,8 +21,7 @@ class AzureStorageConnector(BaseConnector):
         except Exception as ex:
             print(ex)
 
-
-    def write(self, source_string, destination_blob_name, fmt, metadata={}):
+    def write(self, source_string: str, destination_blob_name: str, fmt: str, metadata: dict = {}):
         """Write json to a bucket."""
         try:
 
@@ -35,8 +34,7 @@ class AzureStorageConnector(BaseConnector):
             print(ex)
             self.log(f'{self.__class__}: Error writing json file {name} to google storage')
 
-
-    def read(self, blob_name):
+    def read(self, blob_name: str):
         """Downloads a blob from the bucket."""
         blob = self.bucket.blob(blob_name)
         self.log(f'Blob {blob_name} read to string to string')
@@ -44,35 +42,33 @@ class AzureStorageConnector(BaseConnector):
         blob.download_to_file(string_buffer)
         return string_buffer.getvalue()
 
-
-    def upload_blob(self, source_file_name, destination_blob_name):
+    def upload_blob(self, source_file_name: str, destination_blob_name: str):
         """Uploads a file to the bucket."""
         blob = self.bucket.blob(destination_blob_name)
         blob.upload_from_filename(source_file_name)
-        blob.make_public() # offentlig tilgjengelig for nedlasting
-        self.log(f'{self.__class__}: File {source_file_name} uploded to {destination_blob_name}')        
+        blob.make_public()  # offentlig tilgjengelig for nedlasting
+        self.log(f'{self.__class__}: File {source_file_name} uploded to {destination_blob_name}')
 
-    def delete_blob(self, blob_name):
+    def delete_blob(self, blob_name: str):
         """Deletes a blob from the bucket."""
         blob = self.bucket.blob(blob_name)
         blob.delete()
         self.log(f'{self.__class__}: Blob{blob_name} in bucket {blob.bucket.name} deleted')
 
-    def download_blob(self, blob_name, destination_file_name):
+    def download_blob(self, blob_name: str, destination_file_name: str):
         """Downloads a blob from the bucket."""
         blob = self.bucket.blob(blob_name)
         blob.download_to_filename(destination_file_name)
         self.log(f'{self.__class__}: Blob{blob_name} downloaded to {destination_file_name}')
 
-    def _make_blob_public(self, blob_name):
+    def _make_blob_public(self, blob_name: str):
         """Makes a blob publicly accessible."""
         blob = self.bucket.blob(blob_name)
         blob.make_public()
         self.log(f'{self.__class__}: Making blob{blob_name} public')
         return blob.public_url
-       
 
-    def get_blob_metadata(self, blob_name, format='markdown'):
+    def get_blob_metadata(self, blob_name: str, format: str = 'markdown'):
         """Prints out a blob's metadata."""
         blob = self.bucket.get_blob(blob_name)
 
@@ -102,22 +98,21 @@ class AzureStorageConnector(BaseConnector):
             items.append(f'Content-disposition: _{blob.content_disposition}_\n\n')
             items.append(f'Content-encoding: _{blob.content_encoding}_\n\n')
             items.append(f'Content-language: _{blob.content_language}_\n\n')
-            #items.append(f'Metadata: _{blob.metadata}_\n\n')
-            
+            # items.append(f'Metadata: _{blob.metadata}_\n\n')
+
             items.append(f'### Metadata:\n\n')
 
             if blob.metadata is not None:
-                for key, value in blob.metadata.items():  
+                for key, value in blob.metadata.items():
                     items.append(f'{key}: _{value}_')
                     items.append(f'\n\n')
-                        
+
             return ''.join(items)
 
         if format == 'object':
             return blob
 
-
-    def _get_signed_url(self, blob_name,ttl=1):
+    def _get_signed_url(self, blob_name, ttl=1):
         """Generates a signed URL for a blob.
         Note that this method requires a service account key file.
         """
