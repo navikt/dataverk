@@ -3,7 +3,7 @@
 # =================
 import os
 from unittest import TestCase
-from dataverk_setup_scripts import datapackage_create
+from dataverk_cli import dataverk_init
 from shutil import rmtree
 
 # Common input parameters
@@ -47,15 +47,15 @@ class Instantiation(Base):
         for input_type in wrong_input_param_types:
             with self.subTest(msg="Wrong input parameter type in CreateDataPackage class instantiation", _input=input_type):
                 with self.assertRaises(TypeError):
-                    datapackage_create.CreateDataPackage(name=input_type,
-                                                         github_project="https://github.com/navikt/datasett.git",
-                                                         update_schedule="0 12 * * 1")
-                    datapackage_create.CreateDataPackage(name="ny-datapakke",
-                                                         github_project=input_type,
-                                                         update_schedule="0 12 * * 1")
-                    datapackage_create.CreateDataPackage(name="ny-datapakke",
-                                                         github_project="https://github.com/navikt/datasett.git",
-                                                         update_schedule=input_type)
+                    dataverk_init.CreateDataPackage(name=input_type,
+                                                    github_project="https://github.com/navikt/datasett.git",
+                                                    update_schedule="0 12 * * 1")
+                    dataverk_init.CreateDataPackage(name="ny-datapakke",
+                                                    github_project=input_type,
+                                                    update_schedule="0 12 * * 1")
+                    dataverk_init.CreateDataPackage(name="ny-datapakke",
+                                                    github_project="https://github.com/navikt/datasett.git",
+                                                    update_schedule=input_type)
 
     # Input arguments outside constraints
     # ===================================

@@ -1,4 +1,3 @@
-import jenkins
 import os
 import json
 import yaml
@@ -9,16 +8,15 @@ from abc import ABC
 from enum import Enum
 from shutil import rmtree
 from string import Template
-from xml.etree import ElementTree
 
 
 class Action(Enum):
-    CREATE = 1
-    UPDATE = 2
+    INIT = 1
+    SCHEDULE = 2
     DELETE = 3
 
 
-class BaseDataPackage(ABC):
+class DataverkBase(ABC):
     ''' Abstrakt baseklasse for dataverk scripts.
     '''
 
@@ -28,10 +26,6 @@ class BaseDataPackage(ABC):
         self.settings = settings
         self.github_project = self._get_github_url()
         self.envs = envs
-
-        self.jenkins_server = jenkins.Jenkins(self.settings["jenkins"]["url"],
-                                              username=self.envs['USER_IDENT'],
-                                              password=self.envs['PASSWORD'])
 
     def _verify_class_init_arguments(self, settings, envs):
         if not isinstance(settings, dict):
@@ -94,42 +88,7 @@ class BaseDataPackage(ABC):
         except OSError:
             raise OSError(f'Finner ikke cronjob.yaml fil')
 
-    def _edit_jenkins_file(self):
-        ''' Tilpasser Jenkinsfile til datapakken
-        '''
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'Jenkinsfile'), 'r') as jenkinsfile:
-                jenkins_config = jenkinsfile.read()
-        except OSError:
-            raise OSError(f'Finner ikke Jenkinsfile')
-
-        template = Template(jenkins_config)
-        jenkins_config = template.safe_substitute(package_name=self.settings["package_name"],
-                                                  package_repo=self.github_project,
-                                                  package_path=self.settings["package_name"])
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'Jenkinsfile'), 'w') as jenkinsfile:
-                jenkinsfile.write(jenkins_config)
-        except OSError:
-            raise OSError(f'Finner ikke Jenkinsfile')
-
-    def _edit_jenkins_job_config(self):
-        xml = ElementTree.parse(os.path.join(self.settings["package_name"], 'jenkins_config.xml'))
-        xml_root = xml.getroot()
-
-        for elem in xml_root.getiterator():
-            if elem.tag == 'scriptPath':
-                elem.text = self.settings["package_name"] + '/Jenkinsfile'
-            elif elem.tag == 'projectUrl':
-                elem.text = self.github_project
-            elif elem.tag == 'url':
-                elem.text = self.github_project
-
-        xml.write(os.path.join(self.settings["package_name"], 'jenkins_config.xml'))
-
-    def _print_datapackage_config(self):
+    def _print_datapipeline_config(self):
         print("\n-------------Datapakke-----------------------------" +
               "\nDatapakkenavn: " + self.settings["package_name"] +
               "\ngithub repo: " + self.github_project +
@@ -139,6 +98,9 @@ class BaseDataPackage(ABC):
 
     def _get_github_url(self):
         return os.popen('git config --get remote.origin.url').read().strip()
+
+    def run(self):
+        raise NotImplementedError("Abstrakt metode, må implementeres av subklasse")
 
 
 def create_settings_dict(args, envs: EnvStore):

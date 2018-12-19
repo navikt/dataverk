@@ -3,7 +3,7 @@
 # =================
 import os
 from unittest import TestCase
-from dataverk_setup_scripts.settings_creator import SettingsCreator
+from dataverk_cli.settings_creator import SettingsCreator
 from shutil import rmtree
 
 # Common input parameters

@@ -1,12 +1,17 @@
-from .datapackage_base import BaseDataPackage
+import jenkins
+from .dataverk_base import DataverkBase
 from dataverk.utils.env_store import EnvStore
 from shutil import rmtree
 
 
-class DeleteDataPackage(BaseDataPackage):
+class DataverkDelete(DataverkBase):
 
     def __init__(self, settings: dict, envs: EnvStore):
         super().__init__(settings=settings, envs=envs)
+
+        self.jenkins_server = jenkins.Jenkins(self.settings["jenkins"]["url"],
+                                              username=self.envs['USER_IDENT'],
+                                              password=self.envs['PASSWORD'])
 
     def _delete(self):
         ''' Fjerner datapakken og jenkinsjobben

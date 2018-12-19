@@ -45,7 +45,7 @@ class PublishDataPackage:
         try:
             es = ElasticsearchConnector(settings=self.package_settings, host="elastic_private")
             id = self.package_settings["package_name"]
-            js = return {
+            js = {
             'name':  id,
             'title':  self.datapackage_json.get('Datapakke_navn',''),
             'description':  self.datapackage_json.get('Datapakke_navn',''),

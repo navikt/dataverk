@@ -1,15 +1,15 @@
 import os
 
-from .datapackage_base import Action, BaseDataPackage, create_settings_dict, get_settings_dict
-from .datapackage_create import CreateDataPackage
-from .datapackage_update import UpdateDataPackage
-from .datapackage_delete import DeleteDataPackage
+from .dataverk_base import Action, DataverkBase, create_settings_dict, get_settings_dict
+from .dataverk_init import DataverkInit
+from .dataverk_schedule import DataverkSchedule
+from .dataverk_delete import DataverkDelete
 from dataverk.utils.env_store import EnvStore
 from dataverk.utils import resource_discoverer
 from pathlib import Path
 
 
-def get_datapackage_object(action: Action, args) -> type(BaseDataPackage):
+def get_datapackage_object(action: Action, args) -> type(DataverkBase):
     if not os.popen('git rev-parse --is-inside-work-tree').read().strip():
         raise Exception(f'dataverk create/update/delete må kjøres fra et git repository')
 
@@ -22,11 +22,11 @@ def get_datapackage_object(action: Action, args) -> type(BaseDataPackage):
 
     envs = EnvStore(path=Path(resource_files['.env']))
 
-    if action is Action.CREATE:
-        return CreateDataPackage(settings=create_settings_dict(args=args, envs=envs), envs=envs)
-    elif action is Action.UPDATE:
-        return UpdateDataPackage(settings=get_settings_dict(args.package_name), envs=envs)
+    if action is Action.INIT:
+        return DataverkInit(settings=create_settings_dict(args=args, envs=envs), envs=envs)
+    elif action is Action.SCHEDULE:
+        return DataverkSchedule(update_schedule=args.update_schedule, settings=get_settings_dict(args.package_name), envs=envs)
     elif action is Action.DELETE:
-        return DeleteDataPackage(settings=get_settings_dict(args.package_name), envs=envs)
+        return DataverkDelete(settings=get_settings_dict(args.package_name), envs=envs)
     else:
         raise Exception(f'Invalid script parameter "action={action}" for get_datapackage_object()')

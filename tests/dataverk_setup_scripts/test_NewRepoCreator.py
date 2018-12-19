@@ -3,7 +3,7 @@
 # =================
 import unittest
 from unittest import mock
-from dataverk_setup_scripts import dataverk_init
+from dataverk_cli import dataverk_init
 
 # Common input parameters
 # =======================
