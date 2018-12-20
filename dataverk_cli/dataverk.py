@@ -63,8 +63,10 @@ def main():
     parser_schedule.add_argument('-v', '--version', action='version', version=__version__,
                                  help="Viser programversjon")
     parser_schedule.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
-    parser_schedule.add_argument('--update-schedule', dest="update_schedule", action='store', metavar='<oppdateringsfrekvens>',
-                                 default=None, help="Navn på datapakke sommmm ønskes oppdatert")
+    parser_schedule.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
+                                 default=None, help="Navn på datapakke som ønskes schedulert")
+    parser_schedule.add_argument('--update-schedule', dest="update_schedule", action='store', metavar='<update schedule>',
+                                 default=None, help="Oppdateringsfrekvens for datapakke")
 
     # Delete command
     parse_delete = sub_arg_parser.add_parser('delete', add_help=False)
@@ -75,7 +77,7 @@ def main():
                               default=None, help="Navn på datapakke som ønskes fjernet")
 
     # Notebook2script command
-    parse_notebook2script = sub_arg_parser.add_parser('notebook2scripts', add_help=False)
+    parse_notebook2script = sub_arg_parser.add_parser('notebook2script', add_help=False)
     parse_notebook2script.add_argument('-v', '--version', action='version', version=__version__,
                               help="Viser programversjon")
     parse_notebook2script.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
@@ -99,7 +101,7 @@ def main():
     elif args.command == 'delete':
         dp = get_datapackage_object(action=Action.DELETE, args=args)
         dp.run()
-    elif args.comand == "notebook2script":
+    elif args.command == "notebook2script":
         notebook2script()
     elif args.command == "publish":
         publish_datapackage()

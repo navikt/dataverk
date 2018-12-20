@@ -9,7 +9,7 @@ def get_notebook_path():
     """
     Return the full path of the jupyter notebook.
     """
-    return os.path.join(os.path.dirname(os.path.realpath(__file__)), 'sql', 'etl.ipynb')
+    return os.path.join(os.getcwd(), 'etl.ipynb')
 
 
 def is_export(cell):

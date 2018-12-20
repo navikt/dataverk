@@ -123,11 +123,15 @@ class DataverkSchedule(DataverkBase):
 
     def run(self):
         if self.args.update_schedule is None:
-            self.settings["update_schedule"] = input("Skriv inn ønsket oppdateringsschedule for datapakken "
+            update_schedule = input("Skriv inn ønsket oppdateringsschedule for datapakken "
                                                      "(format: \"<minutt> <time> <dag i måned> <måned> <ukedag>\", "
                                                      "f.eks. \"0 12 * * 2,4\" vil gi <Hver tirsdag og torsdag kl 12.00 UTC>): ")
+            if not update_schedule:
+                update_schedule = "* * 31 2 *"  # Default value Feb 31 (i.e. never)
         else:
-            self.settings["update_schedule"] = self.args.update_schedule
+            update_schedule = self.args.update_schedule
+
+        self.settings["update_schedule"] = update_schedule
 
         self._print_datapipeline_config()
         res = input(f'Vil du opprette datapakken sette opp pipeline for datapakken over? [j/n] ')
