@@ -8,7 +8,7 @@ from pathlib import Path
 import os
 import requests
 import json
-from dataverk.utils import file
+from dataverk.utils import file_functions
 
 
 _settings_store_ref = None  # SettingsStore ref for create_singleton_settings_store()
@@ -24,7 +24,7 @@ def singleton_settings_store_factory(settings_file_path: Path, env_store: Mappin
     """
     global _settings_store_ref
     if _settings_store_ref is None:
-        settings = file.json_to_dict(settings_file_path)
+        settings = file_functions.json_to_dict(settings_file_path)
         settings_dict = _create_settings_dict(settings, env_store)
         _settings_store_ref = SettingsStore(settings_dict)
     return _settings_store_ref
@@ -38,7 +38,7 @@ def settings_store_factory(settings_file_path: Path, env_store: Mapping) -> Mapp
      :return: Ferdig konfigurert SettingsStore Objekt
      """
 
-    settings = file.json_to_dict(settings_file_path)
+    settings = file_functions.json_to_dict(settings_file_path)
     return _create_settings_store(settings, env_store)
 
 def _create_settings_store(settings: Mapping, env_store: Mapping) -> Mapping:

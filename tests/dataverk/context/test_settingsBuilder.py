@@ -7,7 +7,7 @@ from dataverk.context.settings_classes import SettingsBuilder
 from collections.abc import Mapping
 import json
 from dataverk.utils import resource_discoverer
-from dataverk.utils import file
+from dataverk.utils import file_functions
 
 # Common input parameters
 # =======================
@@ -33,7 +33,7 @@ class Base(unittest.TestCase):
         self.files = resource_discoverer.search_for_files(start_path=Path(__file__).parent.joinpath("static"),
                                                           file_names=('testfile_settings.json', '.env'), levels=1)
 
-        self.basic_settings_builder = SettingsBuilder(file.json_to_dict(self.files['testfile_settings.json']),
+        self.basic_settings_builder = SettingsBuilder(file_functions.json_to_dict(self.files['testfile_settings.json']),
                                                       env_store={})
         self.test_file_settings_dict = json.loads(self._read_file(self.files['testfile_settings.json']))
 
