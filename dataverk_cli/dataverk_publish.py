@@ -24,7 +24,7 @@ class PublishDataPackage:
         except KeyError:
             self.env_store = None
 
-        self.package_settings = settings.create_settings_store(settings_file_path=Path(self.resource_files["settings.json"]),
+        self.package_settings = settings.settings_store_factory(settings_file_path=Path(self.resource_files["settings.json"]),
                                                                env_store=self.env_store)
         self.datapackage_json = self.read_datapackage_json()
 
