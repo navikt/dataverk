@@ -4,10 +4,10 @@ import datetime
 import uuid
 from dataverk.connectors import OracleConnector
 from dataverk.utils import resource_discoverer
-from dataverk.utils import settings
+from dataverk.context import settings
 from dataverk.utils.validators import validate_bucket_name, validate_datapackage_name
 from pathlib import Path
-from dataverk.utils import EnvStore
+from dataverk.context import EnvStore
 
 
 class Datapackage:
@@ -30,7 +30,7 @@ class Datapackage:
         except KeyError:
             env_store = None
 
-        self.settings = settings.create_settings_store(settings_file_path=Path(self.resource_files["settings.json"]),
+        self.settings = settings.singleton_settings_store_factory(settings_file_path=Path(self.resource_files["settings.json"]),
                                                        env_store=env_store)
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):

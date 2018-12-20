@@ -4,7 +4,7 @@ from .dataverk_base import Action, DataverkBase, create_settings_dict, get_setti
 from .dataverk_init import DataverkInit
 from .dataverk_schedule import DataverkSchedule
 from .dataverk_delete import DataverkDelete
-from dataverk.utils.env_store import EnvStore
+from dataverk.context.env_store import EnvStore
 from dataverk.utils import resource_discoverer
 from pathlib import Path
 

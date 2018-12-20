@@ -3,8 +3,8 @@ import urllib3
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from dataverk.connectors.bucket_connector_factory import get_storage_connector, BucketType
 from dataverk.utils.resource_discoverer import search_for_files
-from dataverk.utils.env_store import EnvStore
-from dataverk.utils import settings
+from dataverk.context.env_store import EnvStore
+from dataverk.context import settings
 from dataverk.utils import publish_data
 from pathlib import Path
 

@@ -1,10 +1,9 @@
 import jenkins
 import os
-import json
 import yaml
 
 from dataverk_cli.dataverk_base import DataverkBase
-from dataverk.utils.env_store import EnvStore
+from dataverk.context.env_store import EnvStore
 from xml.etree import ElementTree
 from string import Template
 from shutil import rmtree

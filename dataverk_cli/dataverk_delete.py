@@ -1,6 +1,6 @@
 import jenkins
 from .dataverk_base import DataverkBase
-from dataverk.utils.env_store import EnvStore
+from dataverk.context.env_store import EnvStore
 from shutil import rmtree
 
 

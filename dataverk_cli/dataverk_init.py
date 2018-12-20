@@ -4,8 +4,9 @@ import json
 from shutil import rmtree
 from distutils.dir_util import copy_tree
 from . import settings_loader
+
 from .dataverk_base import DataverkBase
-from dataverk.utils.env_store import EnvStore
+from dataverk.context.env_store import EnvStore
 
 
 class DataverkInit(DataverkBase):
