@@ -51,7 +51,7 @@ class DataverkSchedule(DataverkBase):
         '''
 
         jenkins_base_config_path = Path(self._package_name).joinpath("jenkins_base_config.xml")
-        # Setter in github repo i jenkins_base_config.xml
+        # Setter inn github repo i jenkins_base_config.xml
         self._scheduler.edit_jenkins_file(jenkins_base_config_path, tag_val_map={"github_repo": self.github_project})
         self._scheduler.create_new_jenkins_job(jenkins_base_config_path)
 
