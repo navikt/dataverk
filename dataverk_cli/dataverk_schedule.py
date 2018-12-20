@@ -7,7 +7,8 @@ from dataverk.context.env_store import EnvStore
 from xml.etree import ElementTree
 from string import Template
 from shutil import rmtree
-
+from .jenkins_job_scheduler import JenkinsJobScheduler
+from pathlib import Path
 
 class DataverkSchedule(DataverkBase):
 
@@ -15,105 +16,49 @@ class DataverkSchedule(DataverkBase):
         super().__init__(settings=settings, envs=envs)
 
         self.args = args
-        self.jenkins_server = jenkins.Jenkins(self.settings["jenkins"]["url"],
-                                              username=self.envs['USER_IDENT'],
-                                              password=self.envs['PASSWORD'])
+        self._scheduler = JenkinsJobScheduler(settings_store=settings, env_store=envs)
+        self._package_name = settings["package_name"]
 
     def _edit_cronjob_config(self):
         ''' Tilpasser cronjob config fil til datapakken
         '''
 
-        try:
-            with open(os.path.join(self.settings["package_name"], 'cronjob.yaml'), 'r') as yamlfile:
-                cronjob_config = yaml.load(yamlfile)
-        except OSError:
-            raise OSError(f'Finner ikke cronjob.yaml fil')
-
-        cronjob_config['metadata']['name'] = self.settings["package_name"]
-        cronjob_config['metadata']['namespace'] = self.settings["nais_namespace"]
-
-        cronjob_config['spec']['schedule'] = self.settings["update_schedule"]
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self.settings["package_name"] + '-cronjob'
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = 'repo.adeo.no:5443/' + self.settings["package_name"]
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'cronjob.yaml'), 'w') as yamlfile:
-                yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
-        except OSError:
-            raise OSError(f'Finner ikke cronjob.yaml fil')
+        cronjob_file_path = Path(self._package_name).joinpath("cronjob.yaml")
+        image_endepunkt = 'repo.adeo.no:5443/'
+        self._scheduler.edit_cronjob_config(cronjob_file_path, image_endepunkt)
 
     def _edit_jenkins_job_config(self):
-        xml = ElementTree.parse(os.path.join(self.settings["package_name"], 'jenkins_config.xml'))
-        xml_root = xml.getroot()
-
-        for elem in xml_root.getiterator():
-            if elem.tag == 'scriptPath':
-                elem.text = self.settings["package_name"] + '/Jenkinsfile'
-            elif elem.tag == 'projectUrl':
-                elem.text = self.github_project
-            elif elem.tag == 'url':
-                elem.text = self.github_project
-
-        xml.write(os.path.join(self.settings["package_name"], 'jenkins_config.xml'))
+        config_file_path = Path(self._package_name).joinpath("jenkins_config.xml")
+        tag_value = {"scriptPath": self._package_name + '/Jenkinsfile',
+                     "projectUrl": self.github_project,
+                     "url": self.github_project}
+        self._scheduler.edit_jenkins_job_config(config_file_path, tag_val_map=tag_value)
 
     def _edit_jenkins_file(self):
         ''' Tilpasser Jenkinsfile til datapakken
         '''
 
-        try:
-            with open(os.path.join(self.settings["package_name"], 'Jenkinsfile'), 'r') as jenkinsfile:
-                jenkins_config = jenkinsfile.read()
-        except OSError:
-            raise OSError(f'Finner ikke Jenkinsfile')
+        jenkinsfile_path = Path(self._package_name).joinpath("Jenkinsfile")
+        tag_value = {"package_name": self._package_name,
+                     "package_repo": self.github_project,
+                     "package_path": self._package_name}
 
-        template = Template(jenkins_config)
-        jenkins_config = template.safe_substitute(package_name=self.settings["package_name"],
-                                                  package_repo=self.github_project,
-                                                  package_path=self.settings["package_name"])
+        self._scheduler.edit_jenkins_file(jenkinsfile_path, tag_val_map=tag_value)
 
-        try:
-            with open(os.path.join(self.settings["package_name"], 'Jenkinsfile'), 'w') as jenkinsfile:
-                jenkinsfile.write(jenkins_config)
-        except OSError:
-            raise OSError(f'Finner ikke Jenkinsfile')
 
     def _create_jenkins_job(self):
         ''' Tilpasser jenkins konfigurasjonsfil og setter opp ny jenkins jobb for datapakken
         '''
 
-        try:
-            with open(os.path.join(self.settings["package_name"], 'jenkins_base_config.xml'), 'r') as jenkins_config:
-                config = jenkins_config.read()
-        except OSError:
-            raise OSError(f'Finner ikke jenkins_base_config.xml')
-
-        template = Template(config)
-        jenkins_config = template.safe_substitute(github_repo=self.github_project)
-
-        try:
-            with open(os.path.join(self.settings["package_name"], 'jenkins_base_config.xml'), 'w') as jenkins_base_config:
-                jenkins_base_config.write(jenkins_config)
-        except OSError:
-            raise OSError(f'Finner ikke jenkins_base_config.xml')
-
-        xml_base = ElementTree.parse(os.path.join(self.settings["package_name"], 'jenkins_base_config.xml'))
-        xml_base_root = xml_base.getroot()
-        xml_base_config = ElementTree.tostring(xml_base_root, encoding='utf-8', method='xml').decode()
-
-        try:
-            self.jenkins_server.create_job(name=self.settings["package_name"], config_xml=xml_base_config)
-        except jenkins.JenkinsException:
-            raise jenkins.JenkinsException("Klarte ikke sette opp jenkinsjobb")
-
-        self.jenkins_server.build_job(name=self.settings["package_name"])
+        jenkins_base_config_path = Path(self._package_name).joinpath("jenkins_base_config.xml")
+        # Setter in github repo i jenkins_base_config.xml
+        self._scheduler.edit_jenkins_file(jenkins_base_config_path, tag_val_map={"github_repo": self.github_project})
+        self._scheduler.create_new_jenkins_job(jenkins_base_config_path)
 
         self._edit_jenkins_job_config()
 
-        xml = ElementTree.parse(os.path.join(self.settings["package_name"], 'jenkins_config.xml'))
-        xml_root = xml.getroot()
-        xml_config = ElementTree.tostring(xml_root, encoding='utf-8', method='xml').decode()
-
-        self.jenkins_server.reconfig_job(self.settings["package_name"], xml_config)
+        updated_jenkins_config_file_path = Path(self._package_name).joinpath("jenkins_config.xml")
+        self._scheduler.update_jenkins_job(updated_jenkins_config_file_path)
 
     def _schedule_job(self):
         self._edit_cronjob_config()
