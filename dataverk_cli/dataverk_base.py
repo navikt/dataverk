@@ -2,7 +2,7 @@ import os
 import json
 
 from . import settings_loader, settings_creator
-from dataverk.utils.env_store import EnvStore
+from dataverk.context.env_store import EnvStore
 from abc import ABC
 from enum import Enum
 from shutil import rmtree
