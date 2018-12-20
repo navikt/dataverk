@@ -3,7 +3,7 @@ from cryptography.fernet import Fernet
 from dataverk.connectors.google_storage import GoogleStorageConnector
 from dataverk.connectors.file_storage import FileStorageConnector
 from dataverk.connectors.base import BaseConnector
-from dataverk.utils.settings_builder import SettingsStore
+from dataverk.context.settings_classes import SettingsStore
 
 
 class StorageConnector(BaseConnector):

@@ -12,7 +12,7 @@ with Path("dataverk/VERSION").open("r") as fh:
 setup(
     name='dataverk',
     version=__version__,
-    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_setup_scripts'],
+    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_setup_scripts', 'dataverk.context'],
     python_requires='~=3.6',
     install_requires=[
         'cryptography==2.2.2',

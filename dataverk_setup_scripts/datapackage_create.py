@@ -8,7 +8,7 @@ from distutils.dir_util import copy_tree
 from xml.etree import ElementTree
 from . import settings_loader
 from .datapackage_base import BaseDataPackage
-from dataverk.utils.env_store import EnvStore
+from dataverk.context.env_store import EnvStore
 
 
 class CreateDataPackage(BaseDataPackage):

@@ -3,26 +3,76 @@
 """
 
 from collections.abc import Mapping
-from dataverk.utils.settings_builder import SettingsBuilder
+from dataverk.context.settings_classes import SettingsBuilder, SettingsStore
 from pathlib import Path
 import os
 import requests
 import json
+from dataverk.utils import file_functions
+from .env_store import EnvStore
+from dataverk.utils import resource_discoverer
+
+_settings_store_ref = None  # SettingsStore ref for create_singleton_settings_store()
 
 
-def create_settings_store(settings_file_path: Path, env_store: Mapping) -> Mapping:
-    """ Lager et nytt SettingsStore objekt fra en settings.json fil og modifiserer den basert på env variabler.
+def singleton_settings_store_factory(settings_file_path: Path=None, env_store: Mapping=None) -> Mapping:
+    """ Lager et nytt SettingsStore objekt om et ikke allerede har blitt laget. Hvis et SettingsStore objekt har blitt
+    laget returnerer den de istedet.
 
     :param settings_file_path: Path til settings.json filen
     :param env_store: EnvStore objekt
     :return: Ferdig konfigurert SettingsStore Objekt
     """
+    global _settings_store_ref
+    if _settings_store_ref is None:
+        resource_files = resource_discoverer.search_for_files(start_path=Path("."),
+                                                              file_names=('settings.json', '.env'), levels=1)
+        if settings_file_path is None:
+            settings_file_path = resource_files['settings.json']
+        if env_store is None:
+            env_store = EnvStore(resource_files['.env'])
 
-    _validate_params(settings_file_path=settings_file_path)
+        settings = file_functions.json_to_dict(settings_file_path)
+        settings_dict = _create_settings_dict(settings, env_store)
+        _settings_store_ref = SettingsStore(settings_dict)
+    return _settings_store_ref
+
+
+def settings_store_factory(settings_file_path: Path, env_store: Mapping) -> Mapping:
+    """ Lager et nytt SettingsStore objekt fra en settings.json fil og modifiserer den basert på env variabler.
+
+     :param settings_file_path: Path til settings.json filen
+     :param env_store: EnvStore objekt
+     :return: Ferdig konfigurert SettingsStore Objekt
+     """
+
+    settings = file_functions.json_to_dict(settings_file_path)
+    return _create_settings_store(settings, env_store)
+
+def _create_settings_store(settings: Mapping, env_store: Mapping) -> Mapping:
+    """
+
+    :param settings: Mapping av konfigurasjoner for dataverk
+    :param env_store: Mapping av miljø variabler
+    :return: Ferdig konfigurer Mapping object som samkjører miljø variabler og settings fil.
+    """
+
+    settings_dict = _create_settings_dict(settings, env_store)
+    return SettingsStore(settings_dict)
+
+
+def _create_settings_dict(settings, env_store: Mapping) -> Mapping:
+    """ Lager en settings dict fra en settings.json fil og modifiserer den basert på env variabler.
+
+    :param settings_file_path: Path til settings.json filen
+    :param env_store: EnvStore objekt
+    :return: Dictonary som inneholder key/value fra settings filen, env filen og env variabler
+    """
+
     if env_store is None:
         env_store = {}
-    settings_builder = SettingsBuilder(settings_file_path, env_store)
-    settings_builder = _set_env_specific_settings(env_store, settings_builder)
+    settings_builder = SettingsBuilder(settings, env_store)
+    _set_env_specific_settings(env_store, settings_builder)
     return settings_builder.build()
 
 
@@ -42,7 +92,6 @@ def _set_env_specific_settings(env_store: Mapping, settings_builder: SettingsBui
         settings_builder.apply(_set_config_path_fields)
     else:
         settings_builder.apply(_set_travis_fields)
-    return settings_builder
 
 
 def _set_vks_fields(settings_builder: SettingsBuilder) -> None:

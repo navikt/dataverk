@@ -4,7 +4,7 @@ from .datapackage_base import Action, BaseDataPackage, create_settings_dict, get
 from .datapackage_create import CreateDataPackage
 from .datapackage_update import UpdateDataPackage
 from .datapackage_delete import DeleteDataPackage
-from dataverk.utils.env_store import EnvStore
+from dataverk.context.env_store import EnvStore
 from dataverk.utils import resource_discoverer
 from pathlib import Path
 
