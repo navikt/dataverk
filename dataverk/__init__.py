@@ -1,7 +1,7 @@
 from . import connectors
 from . import utils
 from dataverk.context.settings import settings_store_factory
-from dataverk.api import get_path, read_sql, write_notebook, publish_datapackage, publish_datapackage_google_cloud, publish_datapackage_s3_nais, write_datapackage
+from dataverk.api import _current_dir, read_sql, write_notebook, publish_datapackage, publish_datapackage_google_cloud, publish_datapackage_s3_nais, write_datapackage
 from dataverk.datapackage import Datapackage
 from pathlib import Path
 
@@ -11,7 +11,7 @@ with version_file_path.open("r") as fh:
 
 __all__ = ['connectors',
            'utils',
-           'get_path',
+           '_current_dir',
            'read_sql',
            'write_notebook',
            'publish_datapackage_google_cloud',
