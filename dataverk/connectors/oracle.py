@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 
 from urllib import parse
 from dataverk.connectors import BaseConnector
-from dataverk.context.settings_classes import SettingsStore
+from collections.abc import Mapping
 
 # Oracle
 class OracleConnector(BaseConnector):
@@ -24,7 +24,7 @@ class OracleConnector(BaseConnector):
 
     """
 
-    def __init__(self, settings: SettingsStore, source=None):
+    def __init__(self, settings: Mapping, source=None):
         super(OracleConnector, self).__init__()
 
         self.settings = settings

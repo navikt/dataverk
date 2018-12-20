@@ -9,6 +9,8 @@ import uuid
 from .connectors import OracleConnector, ElasticsearchConnector
 from .utils import notebook2script, publish_data
 from .datapackage import Datapackage
+from dataverk.context import singleton_settings_store_factory
+from pathlib import Path
 
 def Datapackage():
     return Datapackage
@@ -42,8 +44,10 @@ def read_sql(source, sql, connector='Oracle'):
     Read pandas dataframe from SQL database 
     """
 
+    settings_store = singleton_settings_store_factory()
+
     if (connector == 'Oracle'):
-        conn = OracleConnector(source=source)
+        conn = OracleConnector(source=source, settings=settings_store)
 
         if is_sql_file(source):
             return conn.get_pandas_df(source) 
@@ -54,12 +58,16 @@ def read_sql(source, sql, connector='Oracle'):
             
         return conn.get_pandas_df(query)
 
+
 def to_sql(df, table, schema, sink, connector='Oracle'):
     """Write records in dataframe to a SQL database table"""
 
+    settings_store = singleton_settings_store_factory()
+
     if (connector == 'Oracle'):
-        conn = OracleConnector(source=sink)
+        conn = OracleConnector(source=sink, settings=settings_store)
         return conn.persist_pandas_df(table, schema, df)
+
 
 def _get_csv_schema(df, filename):
     fields = []

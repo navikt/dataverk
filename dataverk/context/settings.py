@@ -9,12 +9,13 @@ import os
 import requests
 import json
 from dataverk.utils import file_functions
-
+from .env_store import EnvStore
+from dataverk.utils import resource_discoverer
 
 _settings_store_ref = None  # SettingsStore ref for create_singleton_settings_store()
 
 
-def singleton_settings_store_factory(settings_file_path: Path, env_store: Mapping) -> Mapping:
+def singleton_settings_store_factory(settings_file_path: Path=None, env_store: Mapping=None) -> Mapping:
     """ Lager et nytt SettingsStore objekt om et ikke allerede har blitt laget. Hvis et SettingsStore objekt har blitt
     laget returnerer den de istedet.
 
@@ -24,6 +25,13 @@ def singleton_settings_store_factory(settings_file_path: Path, env_store: Mappin
     """
     global _settings_store_ref
     if _settings_store_ref is None:
+        resource_files = resource_discoverer.search_for_files(start_path=Path("."),
+                                                              file_names=('settings.json', '.env'), levels=1)
+        if settings_file_path is None:
+            settings_file_path = resource_files['settings.json']
+        if env_store is None:
+            env_store = EnvStore(resource_files['.env'])
+
         settings = file_functions.json_to_dict(settings_file_path)
         settings_dict = _create_settings_dict(settings, env_store)
         _settings_store_ref = SettingsStore(settings_dict)
