@@ -37,7 +37,7 @@ class SettingsBuilder:
         modifier(self)
 
     def build(self) -> Mapping:
-        return SettingsStore(self._mut_settings_store)
+        return self._mut_settings_store
     
     def _validate_params(self, settings_file_path: Path):
         if not isinstance(settings_file_path, Path):
@@ -102,6 +102,24 @@ class SettingsStore(Mapping):
     def __contains__(self, item):
         return item in self._settings_store
 
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class SettingsStoreSingleton(metaclass=Singleton, SettingsStore):
+    """ Klassen fungerer som en "single source of truth" for konfigurerbar data i Dataverk.
+        Opprettes første gang et Dataverk api kall utføres og fungerer deretter som en cache for senere kall.
+
+    """
+
+    def __init__(self, settings_dict: Mapping):
+        super().__init__(settings_dict=settings_dict)
 
 
 

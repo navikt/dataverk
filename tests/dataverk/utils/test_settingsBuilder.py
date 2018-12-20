@@ -3,7 +3,7 @@
 # =================
 import unittest
 from pathlib import Path
-from dataverk.utils.settings_builder import SettingsBuilder
+from dataverk.context.settings_classes import SettingsBuilder
 from collections.abc import Mapping
 import json
 from dataverk.utils import resource_discoverer

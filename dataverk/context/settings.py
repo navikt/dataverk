@@ -3,11 +3,27 @@
 """
 
 from collections.abc import Mapping
-from dataverk.utils.settings_builder import SettingsBuilder
+from dataverk.context.settings_classes import SettingsBuilder, SettingsStore
 from pathlib import Path
 import os
 import requests
 import json
+
+
+_settings_store_ref = None  # SettingsStore ref for create_singleton_settings_store()
+
+
+def create_singleton_settings_store(settings_file_path: Path, env_store: Mapping):
+    """ Lager et nytt SettingsStore objekt om et ikke allerede har blit laget
+
+    :param settings_file_path:
+    :param env_store:
+    :return:
+    """
+    if not _settings_store_ref:
+        settings_dict = _create_settings_dict(settings_file_path, env_store)
+        return SettingsStore(settings_dict)
+    return _settings_store_ref
 
 
 def create_settings_store(settings_file_path: Path, env_store: Mapping) -> Mapping:
@@ -16,6 +32,18 @@ def create_settings_store(settings_file_path: Path, env_store: Mapping) -> Mappi
     :param settings_file_path: Path til settings.json filen
     :param env_store: EnvStore objekt
     :return: Ferdig konfigurert SettingsStore Objekt
+    """
+
+    settings_dict = _create_settings_dict(settings_file_path, env_store)
+    return SettingsStore(settings_dict)
+
+
+def _create_settings_dict(settings_file_path: Path, env_store: Mapping) -> Mapping:
+    """ Lager en settings dict fra en settings.json fil og modifiserer den basert på env variabler.
+
+    :param settings_file_path: Path til settings.json filen
+    :param env_store: EnvStore objekt
+    :return: Dictonary som inneholder key/value fra settings filen, env filen og env variabler
     """
 
     _validate_params(settings_file_path=settings_file_path)

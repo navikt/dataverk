@@ -3,9 +3,7 @@
 # Import statements
 # =================
 from unittest import TestCase
-from pathlib import Path
-from dataverk.utils import resource_discoverer, env_store
-from dataverk.utils.settings_builder import SettingsStore
+from dataverk.context.settings_classes import SettingsStore
 
 
 # Common input parameters

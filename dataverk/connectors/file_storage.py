@@ -2,7 +2,7 @@ import os
 import json
 from dataverk.connectors.base import BaseConnector
 from dataverk.utils import write_file, read_file
-from dataverk.utils.settings_builder import SettingsStore
+from dataverk.context.settings_classes import SettingsStore
 
 
 

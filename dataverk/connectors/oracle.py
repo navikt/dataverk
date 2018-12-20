@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 
 from urllib import parse
 from dataverk.connectors import BaseConnector
-from dataverk.utils.settings_builder import SettingsStore
+from dataverk.context.settings_classes import SettingsStore
 
 # Oracle
 class OracleConnector(BaseConnector):

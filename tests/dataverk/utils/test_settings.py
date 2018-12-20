@@ -2,7 +2,7 @@
 # Import statements
 # =================
 import unittest
-from dataverk.utils import settings
+from dataverk.context import settings
 from pathlib import Path
 from dataverk.utils import resource_discoverer
 import os

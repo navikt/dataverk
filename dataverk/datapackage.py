@@ -1,15 +1,13 @@
 import pandas as pd
-import os
 import json
-import errno
 import datetime
 import uuid
 from dataverk.connectors import OracleConnector
 from dataverk.utils import resource_discoverer
-from dataverk.utils import settings
+from dataverk.context import settings
 from dataverk.utils.validators import validate_bucket_name, validate_datapackage_name
 from pathlib import Path
-from dataverk.utils import EnvStore
+from dataverk.context import EnvStore
 
 
 class Datapackage:
