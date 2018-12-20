@@ -36,7 +36,7 @@ class PublishDataPackage:
             raise OSError(f'No datapackage.json file found in datapackage')
 
     def _package_top_dir(self) -> Path:
-        return Path(".").parent
+        return Path(".").absolute()
 
     def _datapackage_key_prefix(self, datapackage_name: str):
         return datapackage_name + '/'

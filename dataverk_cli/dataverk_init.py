@@ -16,6 +16,37 @@ class DataverkInit(DataverkBase):
     def __init__(self, settings: dict, envs: EnvStore):
         super().__init__(settings=settings, envs=envs)
 
+
+    def run(self):
+        ''' Entrypoint for dataverk create
+        '''
+
+        if self._folder_exists_in_repo(self.settings["package_name"]):
+            raise NameError(f'En mappe med navn {self.settings["package_name"]} '
+                            f'eksisterer allerede i repo {self.github_project}')
+
+        res = input(f'Vil du opprette datapakken ({self.settings["package_name"]}) i {self.github_project}? [j/n] ')
+
+        if res in {'j', 'ja', 'y', 'yes'}:
+            try:
+                self._create()
+            except Exception:
+                if os.path.exists(self.settings["package_name"]):
+                    rmtree(self.settings["package_name"])
+                raise Exception(f'Klarte ikke generere datapakken {self.settings["package_name"]}')
+        else:
+            print(f'Datapakken {self.settings["package_name"]} ble ikke opprettet')
+
+    def _create(self):
+        ''' Oppretter ny datapakke med ønsket konfigurasjon
+        '''
+
+        self._create_datapackage_local()
+        self._write_settings_file(path=self.settings["package_name"])
+        self._edit_package_metadata()
+
+        print(f'Datapakken {self.settings["package_name"]} er opprettet')
+
     def _create_datapackage_local(self):
         ''' Lager mappestrukturen for datapakken lokalt og henter template filer
         '''
@@ -59,32 +90,5 @@ class DataverkInit(DataverkBase):
         except OSError:
             raise OSError(f'Klarte ikke å skrive settings fil for datapakke')
 
-    def _create(self):
-        ''' Oppretter ny datapakke med ønsket konfigurasjon
-        '''
 
-        self._create_datapackage_local()
-        self._write_settings_file(path=self.settings["package_name"])
-        self._edit_package_metadata()
 
-        print(f'Datapakken {self.settings["package_name"]} er opprettet')
-
-    def run(self):
-        ''' Entrypoint for dataverk create
-        '''
-
-        if self._folder_exists_in_repo(self.settings["package_name"]):
-            raise NameError(f'En mappe med navn {self.settings["package_name"]} '
-                            f'eksisterer allerede i repo {self.github_project}')
-
-        res = input(f'Vil du opprette datapakken ({self.settings["package_name"]}) i {self.github_project}? [j/n] ')
-
-        if res in {'j', 'ja', 'y', 'yes'}:
-            try:
-                self._create()
-            except Exception:
-                if os.path.exists(self.settings["package_name"]):
-                    rmtree(self.settings["package_name"])
-                raise Exception(f'Klarte ikke generere datapakken {self.settings["package_name"]}')
-        else:
-            print(f'Datapakken {self.settings["package_name"]} ble ikke opprettet')

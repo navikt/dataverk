@@ -18,15 +18,15 @@ class DataverkDelete(DataverkBase):
         '''
 
         self.jenkins_server.delete_job(self.settings["package_name"])
-        rmtree(self.settings["package_name"])
+        try:
+            rmtree(self.settings["package_name"])
+        except OSError:
+            print(f'Det finnes ingen datapakke med navn {self.settings["package_name"]} i repo {self.github_project}')
+
 
     def run(self):
         ''' Entrypoint for dataverk delete
         '''
-
-        if not self._folder_exists_in_repo(self.settings["package_name"]):
-            raise NameError(f'Det finnes ingen datapakke med navn {self.settings["package_name"]} '
-                            f'i repo {self.github_project}')
 
         if not self.jenkins_server.job_exists(name=self.settings["package_name"]):
             raise NameError(f'Det finnes ingen jobber med navn {self.settings["package_name"]} '

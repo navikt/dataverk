@@ -11,14 +11,14 @@ from pathlib import Path
 
 def get_datapackage_object(action: Action, args) -> type(DataverkBase):
     if not os.popen('git rev-parse --is-inside-work-tree').read().strip():
-        raise Exception(f'dataverk create/update/delete må kjøres fra et git repository')
+        raise EnvironmentError(f'dataverk create/update/delete må kjøres fra et git repository')
 
     if not os.path.samefile(os.popen('git rev-parse --show-toplevel').read().strip(), os.getcwd()):
-        raise Exception(f'dataverk create/update/delete må kjøres fra topp-nivået i git repoet')
+        raise EnvironmentError(f'dataverk create/update/delete må kjøres fra topp-nivået i git repoet')
 
     resource_files = resource_discoverer.search_for_files(start_path=Path('.'), file_names=('.env',), levels=3)
     if '.env' not in resource_files:
-        raise Exception(f'.env fil må finnes i repo for å kunne kjøre dataverk create/update/delete')
+        raise FileNotFoundError(f'.env fil må finnes i repo for å kunne kjøre dataverk create/update/delete')
 
     envs = EnvStore(path=Path(resource_files['.env']))
 
@@ -29,4 +29,4 @@ def get_datapackage_object(action: Action, args) -> type(DataverkBase):
     elif action is Action.DELETE:
         return DataverkDelete(settings=get_settings_dict(args.package_name), envs=envs)
     else:
-        raise Exception(f'Invalid script parameter "action={action}" for get_datapackage_object()')
+        raise ValueError(f'Invalid script parameter "action={action}" for get_datapackage_object()')
