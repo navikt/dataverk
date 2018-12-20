@@ -15,6 +15,7 @@ class Datapackage:
     def __init__(self, resource_files: dict=None, search_start_path: str="."):
         self.is_public = False
         self.resources = {}
+        self.views = []
         self.dir_path = self._package_top_dir()
         self.datapackage_metadata = self._create_datapackage()
 
@@ -45,6 +46,17 @@ class Datapackage:
         self.resources[dataset_name] = df
         self.datapackage_metadata['Datasett'][dataset_name] = dataset_description
 
+    def add_view(self, name: str, resource: str, columns: None, view_type: str="Simple", title: str="", description: str=""):
+        if columns is None: columns = [] 
+        view = {
+            'name': name,
+            'type': view_type,
+            'resource': resource,
+            'columns': columns,
+            'title': title
+        }
+        self.views.append[view]
+
     def _verify_update_metadata_input_types(self, key, value):
         if not isinstance(key, str):
             raise TypeError(f'Key must be of type string')
@@ -54,9 +66,6 @@ class Datapackage:
     def update_metadata(self, key: str, value: str):
         self._verify_update_metadata_input_types(key, value)
         self.datapackage_metadata[key] = value
-
-    def add_view(self):
-        pass
 
     def _package_top_dir(self) -> Path:
         return Path(".").parent.absolute()
@@ -186,6 +195,8 @@ class Datapackage:
                 resources.append(self._get_csv_schema(df, filename))
 
             self.datapackage_metadata['resources'] = resources
+
+            self.datapackage_metadata['views'] = json.dumps(self.views)
 
             json.dump(self.datapackage_metadata, outfile, indent=2, sort_keys=True)
 
