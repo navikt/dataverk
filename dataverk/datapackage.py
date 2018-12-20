@@ -30,7 +30,7 @@ class Datapackage:
         except KeyError:
             env_store = None
 
-        self.settings = settings.create_settings_store(settings_file_path=Path(self.resource_files["settings.json"]),
+        self.settings = settings.singleton_settings_store_factory(settings_file_path=Path(self.resource_files["settings.json"]),
                                                        env_store=env_store)
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):

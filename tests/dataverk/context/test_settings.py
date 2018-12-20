@@ -92,14 +92,25 @@ class MethodsReturnValues(Base):
     Tests values of methods against known values
     """
 
+    def test_create_singleton_settings_store__normal_case(self):
+        res = settings.singleton_settings_store_factory(self.files["testfile_settings.json"], {})
+        for key in self.test_file_settings_dict:
+            self.assertTrue(key in res, f" key={key} should be in {res}")
+
+    def test_create_singleton_settings_store__object_ref(self):
+        res = settings.singleton_settings_store_factory(self.files["testfile_settings.json"], {})
+        res2 = settings.singleton_settings_store_factory(self.files["testfile_settings.json"], {})
+        self.assertTrue(res is res2, f"{res} should be the same object as {res2}")
+
+
     def test_create_settings_store_normal_case(self):
-        res = settings.create_settings_store(self.files["testfile_settings.json"], {})
+        res = settings.settings_store_factory(self.files["testfile_settings.json"], {})
         for key in self.test_file_settings_dict:
             self.assertTrue(key in res, f" key={key} should be in {res}")
 
     def test_create_settings_store_CONFIG_PATH_SET(self):
         static_dir = str(self.files["testfile_settings.json"].parent)
-        res = settings.create_settings_store(self.files["testfile_settings.json"], {"CONFIG_PATH": static_dir})
+        res = settings.singleton_settings_store_factory(self.files["testfile_settings.json"], {"CONFIG_PATH": static_dir})
         test_dict = {**self.test_file_settings_dict, **self.dataverk_secrets_dict}
         for key in test_dict:
             self.assertTrue(key in res, f" key={key} should be in {res}")
@@ -107,7 +118,7 @@ class MethodsReturnValues(Base):
     def test_get_field__RUN_FROM_VDI_normal_case(self):
         # Should raise exception when trying to connect to the mock url endpoint
         with self.assertRaises((requests.exceptions.ConnectionError, requests.exceptions.HTTPError)) as cm:
-            testObject = settings.create_settings_store(Path(self.files["testfile_settings.json"]),
+            testObject = settings.settings_store_factory(Path(self.files["testfile_settings.json"]),
                                                         {"RUN_FROM_VDI": "True",
                                                          "USER_IDENT": "testuser",
                                                          "PASSWORD": "testpass"})

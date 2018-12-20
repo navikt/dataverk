@@ -1,5 +1,5 @@
 from .env_store import EnvStore
-from .settings import create_settings_store
+from .settings import settings_store_factory
 
 
-__all__ = [create_settings_store, EnvStore]
+__all__ = [settings_store_factory, EnvStore]

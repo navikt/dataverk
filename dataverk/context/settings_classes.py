@@ -11,13 +11,14 @@ class SettingsBuilder:
 
     """
 
-    def __init__(self, settings_file_path: Path, env_store: Mapping=None):
-        self._validate_params(settings_file_path)
+    def __init__(self, settings: Mapping, env_store: Mapping=None):
+
+
+
         if env_store is None:
             env_store = {}
-        self._settings_json = settings_file_path
         self._env_store = env_store
-        self._mut_settings_store = self._set_settings_data_store(settings_file_path)
+        self._mut_settings_store = settings
         self._set_common_settings_keys()
 
     @property
@@ -38,21 +39,6 @@ class SettingsBuilder:
 
     def build(self) -> Mapping:
         return self._mut_settings_store
-    
-    def _validate_params(self, settings_file_path: Path):
-        if not isinstance(settings_file_path, Path):
-            raise TypeError(f"settings_file_path: {settings_file_path} should be a Path object")
-
-        if not settings_file_path.is_file():
-            raise FileNotFoundError("The provided url does not resolve to a file")
-        if self._get_url_suffix(str(settings_file_path)) != "json":
-            raise FileNotFoundError("The provided url does not resolve to a json file")
-
-    def _get_url_suffix(self, url:str):
-        return url.split(".")[-1]
-
-    def _set_settings_data_store(self, settings_path):
-        return self._json_to_dict(settings_path)
 
     def _set_common_settings_keys(self):
 
@@ -63,19 +49,18 @@ class SettingsBuilder:
         if key not in store:
             store[key] = value
 
-    def _json_to_dict(self, path: Path):
-        return json.loads(self._read_file(path))
-
-    def _read_file(self, path: Path):
-        with path.open("r") as reader:
-            return reader.read()
-
     def _assert_fields_exist(self, field, *fields):
         if not field in self._mut_settings_store:
             raise KeyError("Field does not exist in Settings data store")
         for field in fields:
             if not field in self._mut_settings_store:
                 raise KeyError("Field does not exist in Settings data store")
+
+    def _assert_params(self, env_store, settings):
+        if not isinstance(env_store, Mapping):
+            raise TypeError(f"env_store({env_store}) should be of type Mapping")
+        if not isinstance(settings, Mapping):
+            raise TypeError(f"settings({settings}) should be of type Mapping")
 
 
 class SettingsStore(Mapping):
@@ -102,24 +87,6 @@ class SettingsStore(Mapping):
     def __contains__(self, item):
         return item in self._settings_store
 
-
-class Singleton(type):
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-
-class SettingsStoreSingleton(metaclass=Singleton, SettingsStore):
-    """ Klassen fungerer som en "single source of truth" for konfigurerbar data i Dataverk.
-        Opprettes første gang et Dataverk api kall utføres og fungerer deretter som en cache for senere kall.
-
-    """
-
-    def __init__(self, settings_dict: Mapping):
-        super().__init__(settings_dict=settings_dict)
 
 
 

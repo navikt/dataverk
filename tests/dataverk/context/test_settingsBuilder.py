@@ -7,10 +7,11 @@ from dataverk.context.settings_classes import SettingsBuilder
 from collections.abc import Mapping
 import json
 from dataverk.utils import resource_discoverer
+from dataverk.utils import file
 
 # Common input parameters
 # =======================
-bad_type_settings_file_paths = ("", 1, "/", object(), None, {"test": "test"}, ())
+bad_type_settings_file_paths = ("", 1, "/", object(), None, ())
 bad_value_settings_file_paths = (Path(""), Path("/"), Path("doesnotexist.json"), Path("."))
 
 bad_modifiers_type = (object(), "", 1, (), {})
@@ -32,7 +33,7 @@ class Base(unittest.TestCase):
         self.files = resource_discoverer.search_for_files(start_path=Path(__file__).parent.joinpath("static"),
                                                           file_names=('testfile_settings.json', '.env'), levels=1)
 
-        self.basic_settings_builder = SettingsBuilder(settings_file_path=self.files['testfile_settings.json'],
+        self.basic_settings_builder = SettingsBuilder(file.json_to_dict(self.files['testfile_settings.json']),
                                                       env_store={})
         self.test_file_settings_dict = json.loads(self._read_file(self.files['testfile_settings.json']))
 
@@ -59,16 +60,11 @@ class Instantiation(Base):
         for input_type in self.bad_type_settings_file_paths:
             with self.subTest(msg="Wrong settings_file_path type param in SettingsBuilder", _input=input_type):
                 with self.assertRaises(TypeError):
-                    SettingsBuilder(settings_file_path=input_type, env_store={"test": "test"})
+                    SettingsBuilder(settings=input_type, env_store={"test": "test"})
 
 
     # Input arguments outside constraints
     # ===================================
-    def test_init__bad_settings_file_path_value(self):
-        for input_type in self.bad_value_settings_file_paths:
-            with self.subTest(msg="Wrong value for settings_file_path Path param in SettingsBuilder", _input=input_type):
-                with self.assertRaises(FileNotFoundError):
-                    SettingsBuilder(settings_file_path=input_type, env_store={"test": "test"})
 
 
 class MethodsInput(Base):
