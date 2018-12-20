@@ -34,7 +34,7 @@ def singleton_settings_store_factory(settings_file_path: Path=None, env_store: M
             if env_path is not None:
                 env_store = EnvStore(env_path)
             else:
-                env_store = {}
+                env_store = {} # Lager et tomt Mapping object
 
         settings = file_functions.json_to_dict(settings_file_path)
         settings_dict = _create_settings_dict(settings, env_store)
@@ -52,6 +52,7 @@ def settings_store_factory(settings_file_path: Path, env_store: Mapping) -> Mapp
 
     settings = file_functions.json_to_dict(settings_file_path)
     return _create_settings_store(settings, env_store)
+
 
 def _create_settings_store(settings: Mapping, env_store: Mapping) -> Mapping:
     """
