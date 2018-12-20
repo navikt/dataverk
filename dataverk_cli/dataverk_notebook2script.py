@@ -21,7 +21,7 @@ def is_export(cell):
 
 def notebook2script():
     fname = get_notebook_path()
-    main_dic = json.load(open(fname,'r'))
+    main_dic = json.load(open(fname,'r', encoding="utf-8"))
     cells = main_dic['cells']
     code_cells = [c for c in cells if is_export(c)]
     module = '''
@@ -34,7 +34,7 @@ def notebook2script():
     fname_out = f'{number}.py'
     # remove trailing spaces
     module = re.sub(r' +$', '', module, flags=re.MULTILINE)
-    with open(fname_out,'w') as f: 
+    with open(fname_out,'w', encoding="utf-8") as f:
         f.write(module[:-2])
     print(f"Converted to {fname_out}")
 
