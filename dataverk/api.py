@@ -12,27 +12,16 @@ from .datapackage import Datapackage
 from dataverk.context import singleton_settings_store_factory
 from pathlib import Path
 
+
 def Datapackage():
     return Datapackage
 
 def write_notebook():
     notebook2script()
 
-def get_path():
-    if not 'current_path' in globals():
-        path = os.getcwd()
-    return os.path.abspath(os.path.join(path, os.pardir))
-    
-    """     try:
-        get_ipython
-        path = os.dir
-        return os.pardir
-    except:
-        try:
-            path = os.path.dirname(os.path.realpath(__file__))
-            return os.path.abspath(os.path.join(path, os.pardir))
-        except:
-            return '.' """
+
+def _current_dir() -> Path:
+    return Path(".").absolute()
 
 def is_sql_file(source):
     if '.sql' in source:
@@ -52,7 +41,7 @@ def read_sql(source, sql, connector='Oracle'):
         if is_sql_file(source):
             return conn.get_pandas_df(source) 
 
-        path = get_path()
+        path = _current_dir()
         with open(os.path.join(path, sql)) as f:  
                 query = f.read()
             
@@ -92,7 +81,7 @@ def _create_datapackage(datasets):
     today = datetime.date.today().strftime('%Y-%m-%d')
     guid = uuid.uuid4().hex
     resources = []
-    dir_path = get_path()
+    dir_path = _current_dir()
     for filename, df in datasets.items():
         # TODO bruk Parquet i stedet for csv?
         resources.append(_get_csv_schema(df,filename))
@@ -151,7 +140,7 @@ def _create_datapackage(datasets):
 
         
 def write_datapackage(datasets):
-    dir_path = get_path()
+    dir_path = _current_dir()
     with open(dir_path + '/datapackage.json', 'w') as outfile:
         dp = _create_datapackage(datasets)
         status = dp
@@ -187,7 +176,7 @@ def publish_datapackage(datasets, destination='nais'):
     return ValueError('destination not valid')
 
 def publish_datapackage_google_cloud(datasets):
-    dir_path = get_path()
+    dir_path = _current_dir()
     bucket_name, datapackage_name = write_datapackage(datasets)
 
     publish_data.publish_google_cloud(dir_path=dir_path,
@@ -201,7 +190,7 @@ def publish_datapackage_google_cloud(datasets):
 
 
 def publish_datapackage_s3_nais(datasets):
-    dir_path = get_path()
+    dir_path = _current_dir()
     bucket_name, datapackage_name = write_datapackage(datasets)
 
     publish_data.publish_s3_nais(dir_path=dir_path,
