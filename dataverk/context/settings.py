@@ -30,7 +30,11 @@ def singleton_settings_store_factory(settings_file_path: Path=None, env_store: M
         if settings_file_path is None:
             settings_file_path = resource_files['settings.json']
         if env_store is None:
-            env_store = EnvStore(resource_files['.env'])
+            env_path = resource_files.get(".env")
+            if env_path is not None:
+                env_store = EnvStore(env_path)
+            else:
+                env_store = {}
 
         settings = file_functions.json_to_dict(settings_file_path)
         settings_dict = _create_settings_dict(settings, env_store)
