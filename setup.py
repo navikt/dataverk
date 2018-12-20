@@ -42,7 +42,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'dataverk = dataverk_cli.dataverk:main'
+            'dataverk-cli = dataverk_cli.dataverk:main'
         ]
     },
     package_data={'dataverk': ['VERSION']},
