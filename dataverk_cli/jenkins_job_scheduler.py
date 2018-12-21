@@ -40,9 +40,7 @@ class JenkinsJobScheduler:
         ''' Setter opp ny jenkins jobb for datapakken
         '''
 
-        xml_base = ElementTree.parse(config_file_path)
-        xml_base_root = xml_base.getroot()
-        xml_base_config = ElementTree.tostring(xml_base_root, encoding='utf-8', method='xml').decode()
+        xml_base_config = self._read_xml_file(config_file_path=config_file_path)
         package_name = self._settings_store["package_name"]
 
         try:
@@ -57,15 +55,19 @@ class JenkinsJobScheduler:
         :return: None
         """
 
-        xml_base = ElementTree.parse(config_file_path)
-        xml_base_root = xml_base.getroot()
-        xml_base_config = ElementTree.tostring(xml_base_root, encoding='utf-8', method='xml').decode()
+        xml_base_config = self._read_xml_file(config_file_path=config_file_path)
         package_name = self._settings_store["package_name"]
 
         try:
             self._jenkins_server.reconfig_job(name=package_name, config_xml=xml_base_config)
         except jenkins.JenkinsException:
             raise jenkins.JenkinsException(f"Klarte ikke rekonfigurere jenkinsjobb for package_name({package_name})")
+
+    def _read_xml_file(self, config_file_path: Path):
+        xml_base = ElementTree.parse(config_file_path)
+        xml_base_root = xml_base.getroot()
+
+        return ElementTree.tostring(xml_base_root, encoding='utf-8', method='xml').decode()
 
     def delete_jenkins_job(self):
         self._jenkins_server.delete_job(self._settings_store["package_name"])

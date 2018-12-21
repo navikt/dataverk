@@ -17,6 +17,10 @@ class DataverkSchedule(DataverkBase):
         self._package_name = settings["package_name"]
 
     def run(self):
+        if self._args.package_name is None:
+            raise ValueError(f'For å kjøre <dataverk-cli schedule> må pakkenavn angis (-p, --package-name). '
+                             f'F.eks. <dataverk-cli schedule --package-name min-pakke')
+
         if not self._datapackage_exists_in_remote_repo():
             raise FileNotFoundError(f'Datapakken må eksistere i remote repositoriet før man kan eksekvere <dataverk-cli'
                                     f' schedule>. Kjør git add->commit->push av datapakken og prøv på nytt.')

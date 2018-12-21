@@ -35,6 +35,6 @@ def get_datapackage_object(action: Action, args) -> type(DataverkBase):
     elif action is Action.SCHEDULE:
         return DataverkSchedule(args=args, settings=get_settings_dict(args.package_name), envs=envs)
     elif action is Action.DELETE:
-        return DataverkDelete(settings=get_settings_dict(args.package_name), envs=envs)
+        return DataverkDelete(package_name=args.package_name, settings=get_settings_dict(args.package_name), envs=envs)
     else:
         raise ValueError(f'Invalid script parameter "action={action}" for get_datapackage_object()')
