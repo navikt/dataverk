@@ -6,7 +6,7 @@ import datetime
 import errno
 import uuid
 
-from .connectors import OracleConnector, ElasticsearchConnector
+from .connectors import OracleConnector, ElasticsearchConnector, SQLiteConnector
 from .utils import notebook2script, publish_data
 from .datapackage import Datapackage
 from dataverk.context import singleton_settings_store_factory
@@ -33,29 +33,46 @@ def read_sql(source, sql, connector='Oracle'):
     Read pandas dataframe from SQL database 
     """
 
-    settings_store = singleton_settings_store_factory()
-
     if (connector == 'Oracle'):
+        settings_store = singleton_settings_store_factory()
         conn = OracleConnector(source=source, settings=settings_store)
 
-        if is_sql_file(source):
-            return conn.get_pandas_df(source) 
+        if is_sql_file(sql):
+            path = _current_dir()
+            with open(os.path.join(path, sql)) as f:  
+                    query = f.read()
+                
+            return conn.get_pandas_df(query)
 
-        path = _current_dir()
-        with open(os.path.join(path, sql)) as f:  
-                query = f.read()
-            
-        return conn.get_pandas_df(query)
+        else:     
+            return conn.get_pandas_df(sql) 
+
+    if (connector == 'SQLite'):
+        conn = SQLiteConnector(source=source)
+
+        if is_sql_file(sql):
+            path = _current_dir()
+            with open(os.path.join(path, sql)) as f:  
+                    query = f.read()
+                
+            return conn.get_pandas_df(query)
+
+        else:     
+            return conn.get_pandas_df(sql)         
 
 
-def to_sql(df, table, schema, sink, connector='Oracle'):
+def to_sql(df, table, sink=None, schema=None, connector='Oracle'):
     """Write records in dataframe to a SQL database table"""
 
-    settings_store = singleton_settings_store_factory()
-
     if (connector == 'Oracle'):
+        settings_store = singleton_settings_store_factory()
         conn = OracleConnector(source=sink, settings=settings_store)
         return conn.persist_pandas_df(table, schema, df)
+
+    # TODO: handle also not in-memory db
+    if (connector == 'SQLite'):
+        conn = SQLiteConnector(source=sink)
+        return conn.persist_pandas_df(table, df)
 
 
 def _get_csv_schema(df, filename):

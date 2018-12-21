@@ -30,8 +30,12 @@ class Datapackage:
         except KeyError:
             env_store = None
 
-        self.settings = settings.singleton_settings_store_factory(settings_file_path=Path(self.resource_files["settings.json"]),
+        try: 
+            self.settings = settings.singleton_settings_store_factory(settings_file_path=Path(self.resource_files["settings.json"]),
                                                        env_store=env_store)
+        except:
+            self.settings = None
+            pass
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
@@ -90,6 +94,17 @@ class Datapackage:
                 with path.joinpath(sql).open(mode='r') as f:
                     query = f.read()
                 df = conn.get_pandas_df(query)
+
+        elif connector == 'SQLite':
+            conn = SQLiteConnector()
+            if self._is_sql_file(source):
+                df = conn.get_pandas_df(source)
+            else:
+                path = self._package_top_dir()
+                with path.joinpath(sql).open(mode='r') as f:
+                    query = f.read()
+                df = conn.get_pandas_df(query)
+
         else:
             raise TypeError(f'Connector type {connector} is not supported')
 
@@ -105,9 +120,13 @@ class Datapackage:
     def to_sql(self, df, table, schema, sink, connector='Oracle'):
         """Write records in dataframe to a SQL database table"""
 
-        if (connector == 'Oracle'):
+        if connector == 'Oracle':
             conn = OracleConnector(source=sink, settings=self.settings)
             return conn.persist_pandas_df(table, schema, df)
+
+        elif connector == 'SQLlite':
+            conn = SQLiteConnector()
+            return conn.persist_pandas_df(table, df)
 
     def _get_csv_schema(self, df, filename):
         fields = []
