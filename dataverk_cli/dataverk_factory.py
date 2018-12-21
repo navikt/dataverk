@@ -9,16 +9,24 @@ from dataverk.utils import resource_discoverer
 from pathlib import Path
 
 
-def get_datapackage_object(action: Action, args) -> type(DataverkBase):
-    if not os.popen('git rev-parse --is-inside-work-tree').read().strip():
-        raise Exception(f'dataverk create/update/delete må kjøres fra et git repository')
+def _is_in_git_repo():
+    return os.popen('git rev-parse --is-inside-work-tree').read().strip()
 
-    if not os.path.samefile(os.popen('git rev-parse --show-toplevel').read().strip(), os.getcwd()):
-        raise Exception(f'dataverk create/update/delete må kjøres fra topp-nivået i git repoet')
+
+def _is_in_repo_root():
+    return os.path.samefile(os.popen('git rev-parse --show-toplevel').read().strip(), os.getcwd())
+
+
+def get_datapackage_object(action: Action, args) -> type(DataverkBase):
+    if not _is_in_git_repo():
+        raise Exception(f'dataverk-cli init/schedule/delete må kjøres fra et git repository')
+
+    if not _is_in_repo_root():
+        raise Exception(f'dataverk-cli init/schedule/delete må kjøres fra topp-nivået i git repoet')
 
     resource_files = resource_discoverer.search_for_files(start_path=Path('.'), file_names=('.env',), levels=3)
     if '.env' not in resource_files:
-        raise Exception(f'.env fil må finnes i repo for å kunne kjøre dataverk create/update/delete')
+        raise Exception(f'.env fil må finnes i repo for å kunne kjøre dataverk-cli init/schedule/delete')
 
     envs = EnvStore(path=Path(resource_files['.env']))
 

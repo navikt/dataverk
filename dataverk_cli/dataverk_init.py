@@ -66,8 +66,30 @@ class DataverkInit(DataverkBase):
         self._create_datapackage_local()
         self._write_settings_file(path=self.settings["package_name"])
         self._edit_package_metadata()
+        self._edit_jenkinsfile()
 
         print(f'Datapakken {self.settings["package_name"]} er opprettet')
+
+    def _edit_jenkinsfile(self):
+        ''' Tilpasser Jenkinsfile til datapakken
+        '''
+
+        try:
+            with open(os.path.join(self.settings["package_name"], 'Jenkinsfile'), 'r') as jenkinsfile:
+                jenkins_config = jenkinsfile.read()
+        except OSError:
+            raise OSError(f'Finner ikke Jenkinsfile')
+
+        template = Template(jenkins_config)
+        jenkins_config = template.safe_substitute(package_name=self.settings["package_name"],
+                                                  package_repo=self.github_project,
+                                                  package_path=self.settings["package_name"])
+
+        try:
+            with open(os.path.join(self.settings["package_name"], 'Jenkinsfile'), 'w') as jenkinsfile:
+                jenkinsfile.write(jenkins_config)
+        except OSError:
+            raise OSError(f'Finner ikke Jenkinsfile')
 
     def run(self):
         ''' Entrypoint for dataverk create
