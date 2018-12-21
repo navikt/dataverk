@@ -19,14 +19,14 @@ def _is_in_repo_root():
 
 def get_datapackage_object(action: Action, args) -> type(DataverkBase):
     if not _is_in_git_repo():
-        raise Exception(f'dataverk-cli init/schedule/delete må kjøres fra et git repository')
+        raise EnvironmentError(f'dataverk-cli init/schedule/delete må kjøres fra et git repository')
 
     if not _is_in_repo_root():
-        raise Exception(f'dataverk-cli init/schedule/delete må kjøres fra topp-nivået i git repoet')
+        raise EnvironmentError(f'dataverk-cli init/schedule/delete må kjøres fra topp-nivået i git repoet')
 
     resource_files = resource_discoverer.search_for_files(start_path=Path('.'), file_names=('.env',), levels=3)
     if '.env' not in resource_files:
-        raise Exception(f'.env fil må finnes i repo for å kunne kjøre dataverk-cli init/schedule/delete')
+        raise FileNotFoundError(f'.env fil må finnes i repo for å kunne kjøre dataverk-cli init/schedule/delete')
 
     envs = EnvStore(path=Path(resource_files['.env']))
 
@@ -37,4 +37,4 @@ def get_datapackage_object(action: Action, args) -> type(DataverkBase):
     elif action is Action.DELETE:
         return DataverkDelete(settings=get_settings_dict(args.package_name), envs=envs)
     else:
-        raise Exception(f'Invalid script parameter "action={action}" for get_datapackage_object()')
+        raise ValueError(f'Invalid script parameter "action={action}" for get_datapackage_object()')

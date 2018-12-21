@@ -3,8 +3,9 @@ import json
 
 from shutil import rmtree
 from distutils.dir_util import copy_tree
+from pathlib import Path
+from string import Template
 from . import settings_loader
-
 from .dataverk_base import DataverkBase
 from dataverk.context.env_store import EnvStore
 
@@ -15,6 +16,39 @@ class DataverkInit(DataverkBase):
 
     def __init__(self, settings: dict, envs: EnvStore):
         super().__init__(settings=settings, envs=envs)
+
+        self._package_name = settings["package_name"]
+
+    def run(self):
+        ''' Entrypoint for dataverk init
+        '''
+
+        if self._folder_exists_in_repo(self._package_name):
+            raise NameError(f'En mappe med navn {self._package_name} '
+                            f'eksisterer allerede i repo {self.github_project}')
+
+        res = input(f'Vil du opprette datapakken ({self._package_name}) i {self.github_project}? [j/n] ')
+
+        if res in {'j', 'ja', 'y', 'yes'}:
+            try:
+                self._create()
+            except Exception:
+                if os.path.exists(self._package_name):
+                    rmtree(self._package_name)
+                raise Exception(f'Klarte ikke generere datapakken {self._package_name}')
+        else:
+            print(f'Datapakken {self._package_name} ble ikke opprettet')
+
+    def _create(self):
+        ''' Oppretter ny datapakke med ønsket konfigurasjon
+        '''
+
+        self._create_datapackage_local()
+        self._write_settings_file()
+        self._edit_package_metadata()
+        self._edit_jenkinsfile()
+
+        print(f'Datapakken {self.settings["package_name"]} er opprettet')
 
     def _create_datapackage_local(self):
         ''' Lager mappestrukturen for datapakken lokalt og henter template filer
@@ -33,80 +67,57 @@ class DataverkInit(DataverkBase):
             if os.path.exists(str(templates_path)):
                 rmtree(str(templates_path))
 
+    def _write_settings_file(self):
+
+        settings_file_path = Path(self._package_name).joinpath('settings.json')
+
+        try:
+            with settings_file_path.open('w') as settings_file:
+                json.dump(self.settings, settings_file, indent=2)
+        except OSError:
+            raise OSError(f'Klarte ikke å skrive settings fil for datapakke')
+
     def _edit_package_metadata(self):
         '''  Tilpasser metadata fil til datapakken
         '''
 
+        metadata_file_path = Path(self._package_name).joinpath("METADATA.json")
+
         try:
-            with open(os.path.join(self.settings["package_name"], 'METADATA.json'), 'r') as metadatafile:
+            with metadata_file_path.open('r') as metadatafile:
                 package_metadata = json.load(metadatafile)
         except OSError:
-            raise OSError(f'Finner ikke METADATA.json fil')
+            raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
 
         package_metadata['Datapakke_navn'] = self.settings["package_name"]
         package_metadata['Bucket_navn'] = 'nav-opendata'
 
         try:
-            with open(os.path.join(self.settings["package_name"], 'METADATA.json'), 'w') as metadatafile:
+            with metadata_file_path.open('w') as metadatafile:
                 json.dump(package_metadata, metadatafile, indent=2)
         except OSError:
-            raise OSError(f'Finner ikke METADATA.json fil')
-
-    def _write_settings_file(self, path: str):
-        try:
-            with open(os.path.join(path, 'settings.json'), 'w') as settings_file:
-                json.dump(self.settings, settings_file, indent=2)
-        except OSError:
-            raise OSError(f'Klarte ikke å skrive settings fil for datapakke')
-
-    def _create(self):
-        ''' Oppretter ny datapakke med ønsket konfigurasjon
-        '''
-
-        self._create_datapackage_local()
-        self._write_settings_file(path=self.settings["package_name"])
-        self._edit_package_metadata()
-        self._edit_jenkinsfile()
-
-        print(f'Datapakken {self.settings["package_name"]} er opprettet')
+            raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
 
     def _edit_jenkinsfile(self):
         ''' Tilpasser Jenkinsfile til datapakken
         '''
 
+        jenkinsfile_path = Path(self._package_name).joinpath("Jenkinsfile")
+        tag_value = {"package_name": self._package_name,
+                     "package_repo": self.github_project,
+                     "package_path": self._package_name}
+
         try:
-            with open(os.path.join(self.settings["package_name"], 'Jenkinsfile'), 'r') as jenkinsfile:
+            with jenkinsfile_path.open('r') as jenkinsfile:
                 jenkins_config = jenkinsfile.read()
         except OSError:
-            raise OSError(f'Finner ikke Jenkinsfile')
+            raise OSError(f'Finner ikke Jenkinsfile på Path({jenkinsfile_path})')
 
         template = Template(jenkins_config)
-        jenkins_config = template.safe_substitute(package_name=self.settings["package_name"],
-                                                  package_repo=self.github_project,
-                                                  package_path=self.settings["package_name"])
+        jenkins_config = template.safe_substitute(**tag_value)
 
         try:
-            with open(os.path.join(self.settings["package_name"], 'Jenkinsfile'), 'w') as jenkinsfile:
+            with jenkinsfile_path.open('w') as jenkinsfile:
                 jenkinsfile.write(jenkins_config)
         except OSError:
-            raise OSError(f'Finner ikke Jenkinsfile')
-
-    def run(self):
-        ''' Entrypoint for dataverk create
-        '''
-
-        if self._folder_exists_in_repo(self.settings["package_name"]):
-            raise NameError(f'En mappe med navn {self.settings["package_name"]} '
-                            f'eksisterer allerede i repo {self.github_project}')
-
-        res = input(f'Vil du opprette datapakken ({self.settings["package_name"]}) i {self.github_project}? [j/n] ')
-
-        if res in {'j', 'ja', 'y', 'yes'}:
-            try:
-                self._create()
-            except Exception:
-                if os.path.exists(self.settings["package_name"]):
-                    rmtree(self.settings["package_name"])
-                raise Exception(f'Klarte ikke generere datapakken {self.settings["package_name"]}')
-        else:
-            print(f'Datapakken {self.settings["package_name"]} ble ikke opprettet')
+            raise OSError(f'Finner ikke Jenkinsfile på Path{jenkinsfile_path})')

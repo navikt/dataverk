@@ -25,7 +25,7 @@ class PublishDataPackage:
             self.env_store = None
 
         self.package_settings = settings.settings_store_factory(settings_file_path=Path(self.resource_files["settings.json"]),
-                                                               env_store=self.env_store)
+                                                                env_store=self.env_store)
         self.datapackage_json = self.read_datapackage_json()
 
     def read_datapackage_json(self):
@@ -36,7 +36,7 @@ class PublishDataPackage:
             raise OSError(f'No datapackage.json file found in datapackage')
 
     def _package_top_dir(self) -> Path:
-        return Path(".").parent
+        return Path(".").absolute()
 
     def _datapackage_key_prefix(self, datapackage_name: str):
         return datapackage_name + '/'
