@@ -8,6 +8,7 @@ from string import Template
 from . import settings_loader
 from .dataverk_base import DataverkBase
 from dataverk.context.env_store import EnvStore
+import yaml
 
 
 class DataverkInit(DataverkBase):
@@ -47,6 +48,7 @@ class DataverkInit(DataverkBase):
         self._write_settings_file()
         self._edit_package_metadata()
         self._edit_jenkinsfile()
+        self._edit_cronjob_config()
 
         print(f'Datapakken {self.settings["package_name"]} er opprettet')
 
@@ -121,3 +123,31 @@ class DataverkInit(DataverkBase):
                 jenkinsfile.write(jenkins_config)
         except OSError:
             raise OSError(f'Finner ikke Jenkinsfile på Path{jenkinsfile_path})')
+
+    def _edit_cronjob_config(self) -> None:
+        """
+        :return: None
+        """
+
+        cronjob_file_path = Path(self._package_name).joinpath("cronjob.yaml")
+
+        try:
+            with cronjob_file_path.open('r') as yamlfile:
+                cronjob_config = yaml.load(yamlfile)
+        except OSError:
+            raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')
+
+        cronjob_config['metadata']['name'] = self.settings["package_name"]
+        cronjob_config['metadata']['namespace'] = self.settings["nais_namespace"]
+
+        # cronjob_config['spec']['schedule'] = self.settings["update_schedule"] # Todo: Denne må passes som parameter i jenkins_config.xml når jobben lages/oppdateres med <dataverk-cli schedule>.
+                                                                                # Todo: Ellers så må vi kjøre github-push->"dataverk-cli schedule"->github-push for at jenkinsjobben skal ha siste versjon av cronjob.yaml.
+                                                                                # Todo: Vet ikke ennå hvordan dette best kan gjøres
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self.settings["package_name"] + '-cronjob'
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = self.settings["image_endpoint"] + self.settings["package_name"]
+
+        try:
+            with cronjob_file_path.open('w') as yamlfile:
+                yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
+        except OSError:
+            raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')

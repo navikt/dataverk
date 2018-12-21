@@ -57,15 +57,7 @@ class DataverkSchedule(DataverkBase):
         ''' Setter opp schedulering av job for datapakken
         '''
 
-        self._edit_cronjob_config()
         self._configure_jenkins_job()
-
-    def _edit_cronjob_config(self):
-        ''' Tilpasser cronjob config fil til datapakken
-        '''
-
-        cronjob_file_path = Path(self._package_name).joinpath("cronjob.yaml")
-        self._scheduler.edit_cronjob_config(cronjob_file_path, self.settings["image_endpoint"])
 
     def _configure_jenkins_job(self):
         ''' Tilpasser jenkins konfigurasjonsfil og setter opp ny jenkins jobb for datapakken
