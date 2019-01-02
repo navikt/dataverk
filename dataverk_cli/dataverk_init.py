@@ -50,19 +50,19 @@ class DataverkInit(DataverkBase):
         self._edit_jenkinsfile()
         self._edit_cronjob_config()
 
-        print(f'Datapakken {self.settings["package_name"]} er opprettet')
+        print(f'Datapakken {self._package_name} er opprettet')
 
     def _create_datapackage_local(self):
         ''' Lager mappestrukturen for datapakken lokalt og henter template filer
         '''
 
-        os.mkdir(self.settings["package_name"])
+        os.mkdir(self._package_name)
 
         templates_path = ""
         try:
             templates_loader = settings_loader.GitSettingsLoader(url=self.envs["TEMPLATES_REPO"])
             templates_path = templates_loader.download_to(".")
-            copy_tree(os.path.join(str(templates_path), 'file_templates'), self.settings["package_name"])
+            copy_tree(os.path.join(str(templates_path), 'file_templates'), self._package_name)
         except OSError:
             raise OSError(f'Templates mappe eksisterer ikke.')
         finally:
@@ -91,7 +91,7 @@ class DataverkInit(DataverkBase):
         except OSError:
             raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
 
-        package_metadata['Datapakke_navn'] = self.settings["package_name"]
+        package_metadata['Datapakke_navn'] = self._package_name
         package_metadata['Bucket_navn'] = 'nav-opendata'
 
         try:
@@ -137,14 +137,10 @@ class DataverkInit(DataverkBase):
         except OSError:
             raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')
 
-        cronjob_config['metadata']['name'] = self.settings["package_name"]
+        cronjob_config['metadata']['name'] = self._package_name
         cronjob_config['metadata']['namespace'] = self.settings["nais_namespace"]
-
-        # cronjob_config['spec']['schedule'] = self.settings["update_schedule"] # Todo: Denne må passes som parameter i jenkins_config.xml når jobben lages/oppdateres med <dataverk-cli schedule>.
-                                                                                # Todo: Ellers så må vi kjøre github-push->"dataverk-cli schedule"->github-push for at jenkinsjobben skal ha siste versjon av cronjob.yaml.
-                                                                                # Todo: Vet ikke ennå hvordan dette best kan gjøres
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self.settings["package_name"] + '-cronjob'
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = self.settings["image_endpoint"] + self.settings["package_name"]
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self._package_name + '-cronjob'
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = self.settings["image_endpoint"] + self._package_name
 
         try:
             with cronjob_file_path.open('w') as yamlfile:
