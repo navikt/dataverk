@@ -1,4 +1,5 @@
 import subprocess
+import yaml
 
 from dataverk_cli.dataverk_base import DataverkBase
 from dataverk.context.env_store import EnvStore
@@ -34,6 +35,8 @@ class DataverkSchedule(DataverkBase):
                 self._schedule_job()
             except Exception:
                 raise Exception(f'Klarte ikke sette opp pipeline for datapakke {self._package_name}')
+            print(f'Jobb for datapakke {self._package_name} er satt opp/rekonfigurert. For å fullføre oppsett av pipeline må'
+                  f' endringer pushes til remote repository')
         else:
             print(f'Pipeline for datapakke {self._package_name} ble ikke opprettet')
 
@@ -62,6 +65,7 @@ class DataverkSchedule(DataverkBase):
         '''
 
         self._configure_jenkins_job()
+        self._edit_cronjob_config_schedule()
 
     def _configure_jenkins_job(self):
         ''' Tilpasser jenkins konfigurasjonsfil og setter opp ny jenkins jobb for datapakken
@@ -81,3 +85,24 @@ class DataverkSchedule(DataverkBase):
                      "projectUrl": self.github_project,
                      "url": self.github_project}
         self._scheduler.edit_jenkins_job_config(config_file_path, tag_val_map=tag_value)
+
+    def _edit_cronjob_config_schedule(self) -> None:
+        """
+        :return: None
+        """
+
+        cronjob_file_path = Path(self._package_name).joinpath("cronjob.yaml")
+
+        try:
+            with cronjob_file_path.open('r') as yamlfile:
+                cronjob_config = yaml.load(yamlfile)
+        except OSError:
+            raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')
+
+        cronjob_config['spec']['schedule'] = self.settings["update_schedule"]
+
+        try:
+            with cronjob_file_path.open('w') as yamlfile:
+                yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
+        except OSError:
+            raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')
