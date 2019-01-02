@@ -2,20 +2,32 @@ import jenkins
 from collections.abc import Mapping
 from xml.etree import ElementTree
 from pathlib import Path
+from .scheduler import Scheduler
 
 
-class JenkinsJobScheduler:
+class JenkinsJobScheduler(Scheduler):
     """ Implementer methoder for å håndtere skedulering av jobber for dataverk
 
     """
 
     def __init__(self, settings_store: Mapping, env_store: Mapping):
-        self._settings_store = settings_store
-        self._env_store = env_store
+        super().__init__(settings_store, env_store)
 
         self._jenkins_server = jenkins.Jenkins(url=self._settings_store["jenkins"]["url"],
                                                username=self._env_store['USER_IDENT'],
                                                password=self._env_store['PASSWORD'])
+
+    def job_exist(self, job_name):
+        return self.jenkins_job_exists()
+
+    def create_job(self, job_name, config):
+        self.create_new_jenkins_job(config_file_path=config)
+
+    def update_job(self, job_name, config):
+        self.update_jenkins_job(config_file_path=config)
+
+    def delete_job(self, job_name):
+        self.delete_jenkins_job()
 
     def jenkins_job_exists(self):
         return self._jenkins_server.job_exists(name=self._settings_store["package_name"])

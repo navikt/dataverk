@@ -4,7 +4,7 @@ import yaml
 from dataverk_cli.dataverk_base import DataverkBase
 from dataverk.context.env_store import EnvStore
 from dataverk.utils.validators import validate_cronjob_schedule
-from .jenkins_job_scheduler import JenkinsJobScheduler
+from dataverk_cli.scheduling.jenkins_job_scheduler import JenkinsJobScheduler
 from pathlib import Path
 
 

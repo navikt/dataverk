@@ -1,6 +1,5 @@
-import jenkins
 from .dataverk_base import DataverkBase
-from .jenkins_job_scheduler import JenkinsJobScheduler
+from dataverk_cli.scheduling.jenkins_job_scheduler import JenkinsJobScheduler
 from dataverk.context.env_store import EnvStore
 from shutil import rmtree
 

@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
+from collections import Mapping
 from enum import Enum
+from .jenkins_job_scheduler import JenkinsJobScheduler
 
 
 class Schedulers(Enum):
@@ -8,24 +9,10 @@ class Schedulers(Enum):
     CIRCLE_CI = 3
 
 
-def create_scheduler(scheduler: Schedulers):
-    pass
-
-
-class Scheduler(ABC):
-    """ Abstrakt base klasse for CI jobb skedulerings tjenester
-
-        Definerer en kontrakt for alle CI jobb skedulerings tjeneste wrappers.
-    """
-
-    @abstractmethod
-    def create_job(self, job_name, config):
-        raise NotImplementedError()
-
-    def update_job(self, job_name, config):
-        raise NotImplementedError()
-
-    def delete_job(self, job_name):
-        raise NotImplementedError()
-
-
+def create_scheduler(scheduler: Schedulers, settings_store: Mapping, env_store: Mapping=None):
+    if env_store is None:
+        env_store = {}
+    if scheduler is Schedulers.JENKINS:
+        return JenkinsJobScheduler(settings_store, env_store)
+    else:
+        raise KeyError(f"Scheduler({scheduler}) could not be found")
