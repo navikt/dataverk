@@ -1,5 +1,1 @@
-print ("init")
-
-
-
-
+print('init')

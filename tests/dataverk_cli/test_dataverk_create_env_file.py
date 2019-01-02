@@ -3,7 +3,7 @@
 # =================
 import unittest
 import os
-from dataverk_setup_scripts import dataverk_create_env_file
+from dataverk_cli import dataverk_create_env_file
 
 # Common input parameters
 # =======================

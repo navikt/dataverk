@@ -24,8 +24,8 @@ class PublishDataPackage:
         except KeyError:
             self.env_store = None
 
-        self.package_settings = settings.create_settings_store(settings_file_path=Path(self.resource_files["settings.json"]),
-                                                               env_store=self.env_store)
+        self.package_settings = settings.settings_store_factory(settings_file_path=Path(self.resource_files["settings.json"]),
+                                                                env_store=self.env_store)
         self.datapackage_json = self.read_datapackage_json()
 
     def read_datapackage_json(self):
@@ -36,7 +36,7 @@ class PublishDataPackage:
             raise OSError(f'No datapackage.json file found in datapackage')
 
     def _package_top_dir(self) -> Path:
-        return Path(".").parent
+        return Path(".").absolute()
 
     def _datapackage_key_prefix(self, datapackage_name: str):
         return datapackage_name + '/'
@@ -45,12 +45,13 @@ class PublishDataPackage:
         try:
             es = ElasticsearchConnector(settings=self.package_settings, host="elastic_private")
             id = self.package_settings["package_name"]
-            js = return {
-            'name':  id,
-            'title':  self.datapackage_json.get('Datapakke_navn',''),
-            'description':  self.datapackage_json.get('Datapakke_navn',''),
-            'metadata': json.dumps(self.datapackage_json)
-            }
+            js = json.dumps(self.datapackage_json)
+            # {
+            # 'name':  id,
+            # 'title':  self.datapackage_json.get('Datapakke_navn',''),
+            # 'description':  self.datapackage_json.get('Datapakke_navn',''),
+            # 'metadata': json.dumps(self.datapackage_json)
+            # }
             es.write(id, js)
         except urllib3.exceptions.LocationValueError as err:
             print(f'write to elastic search failed, host_uri could not be resolved')

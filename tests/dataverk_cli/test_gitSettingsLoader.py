@@ -1,27 +1,22 @@
+
 # -*- coding: utf-8 -*-
 # Import statements
 # =================
-import os
-from unittest import TestCase
-from dataverk_setup_scripts.settings_creator import SettingsCreator
-from shutil import rmtree
-
+import unittest
+from dataverk_cli.settings_loader import GitSettingsLoader
 # Common input parameters
 # =======================
+local_temp_dir = "/Users/sondre/Development/dataverk_dev_temp"
 
 # Base classes
 # ============
-class Base(TestCase):
+class Base(unittest.TestCase):
     """
     Base class for tests
 
     This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
     def setUp(self):
-        self.settings_creator_object = SettingsCreator(args=())
-        pass
-
-    def tearDown(self):
         pass
 
 
@@ -34,6 +29,10 @@ class Instantiation(Base):
     Tests include: instantiation with args of wrong type, instantiation with input values outside constraints, etc.
     """
     pass
+    # def test_init_normal_case(self): # Todo: skal vi pulle repoet i en unittest?
+    #     loader = GitSettingsLoader("https://github.com/navikt/dataverk_settings.git")
+    #     print(loader.download_to(local_temp_dir))
+
 
     # Input arguments wrong type
     # ==========================
@@ -63,8 +62,6 @@ class MethodsInput(Base):
 
     Tests include: passing invalid input, etc.
     """
-
-    # Input arguments valid
     pass
 
 

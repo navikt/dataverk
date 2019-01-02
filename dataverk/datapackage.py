@@ -51,7 +51,8 @@ class Datapackage:
         self.datapackage_metadata['Datasett'][dataset_name] = dataset_description
 
     def add_view(self, name: str, resource: str, columns: None, view_type: str="Simple", title: str="", description: str=""):
-        if columns is None: columns = [] 
+        if columns is None:
+            columns = []
         view = {
             'name': name,
             'type': view_type,
@@ -142,7 +143,7 @@ class Datapackage:
 
         return {
             'name': filename,
-            'path': 'data/' + filename + '.csv',
+            'path': 'resources/' + filename + '.csv',
             'format': 'csv',
             'mediatype': 'text/csv',
             'schema': {'fields': fields}
