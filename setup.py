@@ -16,7 +16,6 @@ setup(
     python_requires='~=3.6',
     install_requires=[
         'cryptography==2.2.2',
-        'idna==2.7',
         'requests==2.19.1',
         'prometheus_client==0.4.0',
         'SQLAlchemy==1.2.10',
