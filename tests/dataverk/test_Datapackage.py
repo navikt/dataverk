@@ -60,9 +60,10 @@ class Instantiation(Base):
         self.assertEqual(datapackage.is_public, False)
 
 
-    def test_class_instantiation_without_settings_file(self):
-        with self.assertRaises(KeyError):
-            Datapackage(resource_files={})
+    #def test_class_instantiation_without_settings_file(self):
+        #with self.assertRaises(KeyError):
+        #    Datapackage(resource_files={})
+
 
     # Input arguments outside constraints
     # ===================================

@@ -1,15 +1,13 @@
 import pandas as pd
-import os
 import json
-import errno
 import datetime
 import uuid
 from dataverk.connectors import OracleConnector
 from dataverk.utils import resource_discoverer
-from dataverk.utils import settings
+from dataverk.context import settings
 from dataverk.utils.validators import validate_bucket_name, validate_datapackage_name
 from pathlib import Path
-from dataverk.utils import EnvStore
+from dataverk.context import EnvStore
 
 
 class Datapackage:
@@ -17,6 +15,7 @@ class Datapackage:
     def __init__(self, resource_files: dict=None, search_start_path: str="."):
         self.is_public = False
         self.resources = {}
+        self.views = []
         self.dir_path = self._package_top_dir()
         self.datapackage_metadata = self._create_datapackage()
 
@@ -31,8 +30,12 @@ class Datapackage:
         except KeyError:
             env_store = None
 
-        self.settings = settings.create_settings_store(settings_file_path=Path(self.resource_files["settings.json"]),
+        try: 
+            self.settings = settings.singleton_settings_store_factory(settings_file_path=Path(self.resource_files["settings.json"]),
                                                        env_store=env_store)
+        except:
+            self.settings = None
+            pass
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
@@ -47,6 +50,18 @@ class Datapackage:
         self.resources[dataset_name] = df
         self.datapackage_metadata['Datasett'][dataset_name] = dataset_description
 
+    def add_view(self, name: str, resource: str, columns: None, view_type: str="Simple", title: str="", description: str=""):
+        if columns is None:
+            columns = []
+        view = {
+            'name': name,
+            'type': view_type,
+            'resource': resource,
+            'columns': columns,
+            'title': title
+        }
+        self.views.append[view]
+
     def _verify_update_metadata_input_types(self, key, value):
         if not isinstance(key, str):
             raise TypeError(f'Key must be of type string')
@@ -56,9 +71,6 @@ class Datapackage:
     def update_metadata(self, key: str, value: str):
         self._verify_update_metadata_input_types(key, value)
         self.datapackage_metadata[key] = value
-
-    def add_view(self):
-        pass
 
     def _package_top_dir(self) -> Path:
         return Path(".").parent.absolute()
@@ -83,6 +95,17 @@ class Datapackage:
                 with path.joinpath(sql).open(mode='r') as f:
                     query = f.read()
                 df = conn.get_pandas_df(query)
+
+        elif connector == 'SQLite':
+            conn = SQLiteConnector()
+            if self._is_sql_file(source):
+                df = conn.get_pandas_df(source)
+            else:
+                path = self._package_top_dir()
+                with path.joinpath(sql).open(mode='r') as f:
+                    query = f.read()
+                df = conn.get_pandas_df(query)
+
         else:
             raise TypeError(f'Connector type {connector} is not supported')
 
@@ -98,9 +121,13 @@ class Datapackage:
     def to_sql(self, df, table, schema, sink, connector='Oracle'):
         """Write records in dataframe to a SQL database table"""
 
-        if (connector == 'Oracle'):
+        if connector == 'Oracle':
             conn = OracleConnector(source=sink, settings=self.settings)
             return conn.persist_pandas_df(table, schema, df)
+
+        elif connector == 'SQLlite':
+            conn = SQLiteConnector()
+            return conn.persist_pandas_df(table, df)
 
     def _get_csv_schema(self, df, filename):
         fields = []
@@ -116,7 +143,7 @@ class Datapackage:
 
         return {
             'name': filename,
-            'path': 'data/' + filename + '.csv',
+            'path': 'resources/' + filename + '.csv',
             'format': 'csv',
             'mediatype': 'text/csv',
             'schema': {'fields': fields}
@@ -189,9 +216,11 @@ class Datapackage:
 
             self.datapackage_metadata['resources'] = resources
 
+            self.datapackage_metadata['views'] = json.dumps(self.views)
+
             json.dump(self.datapackage_metadata, outfile, indent=2, sort_keys=True)
 
-            data_path = self.dir_path.joinpath('data/')
+            data_path = self.dir_path.joinpath('resources/')
             if not data_path.exists():
                 data_path.mkdir()
 
