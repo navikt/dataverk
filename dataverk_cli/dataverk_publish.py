@@ -45,13 +45,12 @@ class PublishDataPackage:
         try:
             es = ElasticsearchConnector(settings=self.package_settings, host="elastic_private")
             id = self.package_settings["package_name"]
-            js = json.dumps(self.datapackage_json)
-            # {
-            # 'name':  id,
-            # 'title':  self.datapackage_json.get('Datapakke_navn',''),
-            # 'description':  self.datapackage_json.get('Datapakke_navn',''),
-            # 'metadata': json.dumps(self.datapackage_json)
-            # }
+            js = {
+                'name':  id,
+                'title':  self.datapackage_json.get('Datapakke_navn', ''),
+                'description':  self.datapackage_json.get('Datapakke_navn', ''),
+                'metadata': self.datapackage_json
+            }
             es.write(id, js)
         except urllib3.exceptions.LocationValueError as err:
             print(f'write to elastic search failed, host_uri could not be resolved')
@@ -61,7 +60,7 @@ class PublishDataPackage:
         return self.package_settings["bucket_storage_connections"][bucket_type]["publish"].lower() == "true"
 
     def publish(self):
-        ''' - Iterates through all bucket storage conenctions in the settings.json file and publishes the datapackage
+        ''' - Iterates through all bucket storage connections in the settings.json file and publishes the datapackage
             - Updates ES index with metadata for the datapackage
 
         :return: None
