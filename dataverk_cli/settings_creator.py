@@ -3,7 +3,7 @@ import os
 import functools
 
 from dataverk.utils.validators import validate_datapackage_name, validate_cronjob_schedule
-from abc import ABC
+from abc import ABC, abstractmethod
 
 
 SETTINGS_TEMPLATE = {
@@ -46,13 +46,17 @@ class SettingsCreator(ABC):
         self.args = args
         self.settings = {}
 
+    @abstractmethod
     def _handle_missing_argument(self, arg: str):
-        raise NotImplementedError("Abstrakt metode")
+        raise NotImplementedError()
 
     def _prompt_for_user_input(self, arg):
         return input(f'Skriv inn ønsket {arg}: ')
 
     def _set_settings_param(self, keys_tuple: tuple, value: str):
+        if not isinstance(value, str):
+            raise TypeError("Settings parameters must be of type string")
+
         functools.reduce(lambda settings_dict, key: settings_dict.setdefault(key, {}),
                          keys_tuple[:-1], self.settings)[keys_tuple[-1]] = value
 
@@ -104,6 +108,7 @@ class SettingsCreatorUseDefaults(SettingsCreator):
         super().__init__(args)
 
         self.default_settings_path = default_settings_path
+
         with open(os.path.join(self.default_settings_path, 'settings.json'), 'r') as settings_file:
             self.default_settings = json.load(settings_file)
         self.settings = self.default_settings
@@ -126,8 +131,10 @@ def get_settings_creator(args, default_settings_path: str=None) -> type(Settings
     if args.prompt_missing_args:
         return SettingsCreatorNoDefaults(args=args)
     elif default_settings_path is not None:
+        if not isinstance(default_settings_path, str):
+            raise TypeError("settingsfile path must be of type string")
         return SettingsCreatorUseDefaults(args=args, default_settings_path=default_settings_path)
     else:
-        raise Exception(f'Klarte ikke generere settings.json filen. '
-                        f'-p flagg (--prompt-missing-args) er ikke satt og det finnes ingen default settings.json å '
-                        f'hente verdier fra.')
+        raise FileNotFoundError(f'Klarte ikke generere settings.json filen. '
+                                f'-p flagg (--prompt-missing-args) er ikke satt og det finnes ingen default settings.json å '
+                                f'hente verdier fra.')
