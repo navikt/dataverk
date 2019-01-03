@@ -60,7 +60,7 @@ class Datapackage:
             'columns': columns,
             'title': title
         }
-        self.views.append[view]
+        self.views.append(view)
 
     def _verify_update_metadata_input_types(self, key, value):
         if not isinstance(key, str):
