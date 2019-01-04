@@ -14,7 +14,7 @@ class DataverkSchedule(DataverkBase):
         super().__init__(settings=settings, envs=envs)
 
         self._args = args
-        self._scheduler = scheduler_factory.create_scheduler(settings_store=settings)
+        self._scheduler = scheduler_factory.create_scheduler(settings_store=settings, env_store=envs)
         self._package_name = settings["package_name"]
         self._cronjob_file_path = Path(self._package_name).joinpath("cronjob.yaml")
 

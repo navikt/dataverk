@@ -9,10 +9,11 @@ class Schedulers(Enum):
     CIRCLE_CI = 3
 
 
-def create_scheduler(settings_store: Mapping, env_store: Mapping=None):
+def create_scheduler(settings_store: Mapping, env_store: Mapping):
 
     if env_store is None:
-        env_store = {}
+        raise TypeError("env_store cannot be None")
+
     if settings_store is None:
         raise TypeError("settings_store cannot be None")
 

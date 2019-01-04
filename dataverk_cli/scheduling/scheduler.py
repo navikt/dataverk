@@ -9,10 +9,8 @@ class Scheduler(ABC):
         Definerer en kontrakt for alle CI jobb skedulerings tjeneste wrappers.
     """
 
-    def __init__(self, settings_store: Mapping, env_store: Mapping=None):
+    def __init__(self, settings_store: Mapping, env_store: Mapping):
         self._env_store = env_store
-        if env_store is None:
-            self._env_store = {}
         self._settings_store = settings_store
 
     @abstractmethod

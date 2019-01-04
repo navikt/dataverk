@@ -12,7 +12,8 @@ with Path("dataverk/VERSION").open("r") as fh:
 setup(
     name='dataverk',
     version=__version__,
-    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_cli', 'dataverk.context'],
+    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_cli', 'dataverk.context',
+              'dataverk_cli.scheduling', 'dataverk_cli.cli_utils'],
     python_requires='~=3.6',
     install_requires=[
         'cryptography==2.2.2',
