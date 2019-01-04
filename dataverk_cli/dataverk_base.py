@@ -6,7 +6,7 @@ from dataverk.context.env_store import EnvStore
 from abc import ABC, abstractmethod
 from enum import Enum
 from shutil import rmtree
-
+from collections.abc import Mapping
 
 class Action(Enum):
     INIT = 1
@@ -18,7 +18,7 @@ class DataverkBase(ABC):
     ''' Abstrakt baseklasse for dataverk scripts.
     '''
 
-    def __init__(self, settings: dict, envs: EnvStore):
+    def __init__(self, settings: Mapping, envs: Mapping):
         self._verify_class_init_arguments(settings, envs)
 
         self.settings = settings
