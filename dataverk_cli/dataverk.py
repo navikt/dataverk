@@ -5,7 +5,7 @@ from .dataverk_base import Action
 from .dataverk_factory import get_datapackage_object
 from .dataverk_notebook2script import notebook2script
 from .dataverk_publish import publish_datapackage
-from . import commands
+from dataverk_cli.cli_utils import commands
 
 
 def main():

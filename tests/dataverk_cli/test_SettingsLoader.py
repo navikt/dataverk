@@ -4,7 +4,7 @@ from unittest import TestCase
 # -*- coding: utf-8 -*-
 # Import statements
 # =================
-from dataverk_cli.settings_loader import SettingsLoader
+from dataverk_cli.cli_utils.settings_loader import SettingsLoader
 from pathlib import Path
 
 # Common input parameters

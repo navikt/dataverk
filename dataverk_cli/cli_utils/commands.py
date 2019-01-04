@@ -1,7 +1,7 @@
 """ Kommando parsers for dataverk-cli
 """
 
-from . import __version__
+from dataverk_cli import __version__
 
 
 def add_create_env_file_command(sub_arg_parser):

@@ -5,7 +5,7 @@ from shutil import rmtree
 from distutils.dir_util import copy_tree
 from pathlib import Path
 from string import Template
-from . import settings_loader
+from dataverk_cli.cli_utils import settings_loader
 from .dataverk_base import DataverkBase
 from .cli_utils import user_input
 from dataverk.context.env_store import EnvStore

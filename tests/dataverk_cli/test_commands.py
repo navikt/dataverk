@@ -3,7 +3,7 @@
 # =================
 import unittest
 import argparse
-from dataverk_cli import commands
+from dataverk_cli.cli_utils import commands
 
 
 # Common input parameters
