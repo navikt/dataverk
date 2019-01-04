@@ -20,10 +20,6 @@ class DataverkDelete(DataverkBase):
             raise ValueError(f'For å kjøre <dataverk-cli delete> må pakkenavn angis (-p, --package-name). '
                              f'F.eks. <dataverk-cli delete --package-name min-pakke')
 
-        if not self._scheduler.jenkins_job_exists():
-            raise NameError(f'Det finnes ingen jobber med navn {self._package_name} '
-                            f'på jenkins serveren.')
-
         print(f'Fjerning av datapakke {self._package_name} i {self.github_project}')
 
         res = input(f'Er du sikker på at du ønsker å fjerne datapakken {self._package_name} '
@@ -31,6 +27,7 @@ class DataverkDelete(DataverkBase):
 
         if res in {'j', 'ja', 'y', 'yes'}:
             self._delete()
+            print(f'Datapakken {self._package_name} er fjernet fra {self.github_project}')
         else:
             print(f'Datapakken {self._package_name} ble ikke fjernet')
 
@@ -38,7 +35,12 @@ class DataverkDelete(DataverkBase):
         ''' Fjerner datapakken og jenkinsjobben
         '''
 
-        self._scheduler.delete_jenkins_job()
+        if self._scheduler.jenkins_job_exists():
+            self._scheduler.delete_jenkins_job()
+        else:
+            print(f'Det finnes ingen jobber med navn {self._package_name} '
+                  f'på jenkins serveren.')
+
         try:
             rmtree(self._package_name)
         except OSError:
