@@ -80,3 +80,8 @@ class MethodsReturnValues(Base):
         res = self.parser.parse_args(("schedule", "--package-name", "test"))
         self.assertEqual(res.package_name, "test")
 
+    def test_init__normal_case(self):
+        commands.add_init_command(self.sub_parser)
+        res = self.parser.parse_args(("init", "--package-name", "test"))
+        self.assertEqual(res.package_name, "test")
+

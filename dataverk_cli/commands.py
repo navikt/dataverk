@@ -16,7 +16,6 @@ def add_create_env_file_command(sub_arg_parser):
 
 
 def add_init_command(sub_arg_parser):
-    # Init command
     parser_init = sub_arg_parser.add_parser('init', add_help=False)
     parser_init.add_argument('-v', '--version', action='version', version=__version__,
                               help="Viser programversjon")
