@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/navikt/dataverk.svg?style=svg&circle-token=3e5fd8de41d8dd24ce2546d0e5800ce06926add0)](https://circleci.com/gh/navikt/dataverk)
+
 # Dataverk 
 
 ### Get started
