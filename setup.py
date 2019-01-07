@@ -17,7 +17,7 @@ setup(
     python_requires='~=3.6',
     install_requires=[
         'cryptography==2.3',
-        'requests==2.20.0'
+        'requests==2.20.0',
         'prometheus_client==0.4.0',
         'SQLAlchemy==1.2.10',
         'pyjstat==1.0.1',
@@ -30,7 +30,7 @@ setup(
         'protobuf==3.6.1',
         'pyarrow>=0.10.0',
         'python-jenkins==1.3.0',
-        'pyyaml==4.2'
+        'pyyaml==4.2',
         'elasticsearch==6.3.0',
         'google-api-core==0.1.4',
         'google-auth==1.5.0',
