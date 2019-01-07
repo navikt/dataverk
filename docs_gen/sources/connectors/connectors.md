@@ -444,11 +444,11 @@ persist_pandas_df(table, schema=None, df=None, chunksize=10000)
 
 ----
 
-<span style="float:right;">[[source]](https://github.com/navikt/dataverk/blob/master/dataverk/connectors/google_storage.py#L10)</span>
+<span style="float:right;">[[source]](https://github.com/navikt/dataverk/blob/master/dataverk/connectors/google_storage.py#L11)</span>
 ## GoogleStorageConnector class
 
 ```python
-dataverk.connectors.google_storage.GoogleStorageConnector(settings, encrypted=True)
+dataverk.connectors.google_storage.GoogleStorageConnector(bucket_name, settings, encrypted=True)
 ```
 
 Google Storage connector

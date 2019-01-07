@@ -46,6 +46,7 @@ Dataverk
 
 url | beskrivelse
 ----| -----------
+[frictionlessdata.io](https://frictionlessdata.io/) | Frictionless data
 [git lfs](https://git-lfs.github.com/) | Github Large File Storage
 [dvc.org](https://dvc.org) | Data Science Version Control 
 [quilt (github)](https://github.com/quiltdata) | Quilt - Version and deploy data

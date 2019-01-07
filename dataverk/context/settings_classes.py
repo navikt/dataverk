@@ -87,6 +87,20 @@ class SettingsStore(Mapping):
     def __contains__(self, item):
         return item in self._settings_store
 
+    def get(self, key):
+        if not isinstance(key, str):
+            raise ValueError("field should be a str")
+        return self._settings_store.get(key)
+
+    def keys(self):
+        return self._settings_store.keys()
+
+    def values(self):
+        return self._settings_store.values()
+
+    def items(self):
+        return self._settings_store.items()
+
 
 
 
