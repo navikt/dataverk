@@ -21,7 +21,6 @@
 
 
 
-
 ## Metoder for tilgang til datasett. 
 
 ### Forbindelser (source & sink med kryptering)
