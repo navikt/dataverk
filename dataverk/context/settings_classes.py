@@ -17,7 +17,7 @@ class SettingsBuilder:
 
         if env_store is None:
             env_store = {}
-        self._env_store = env_store
+        self._settings_store = env_store
         self._mut_settings_store = settings
         self._set_common_settings_keys()
 
@@ -27,7 +27,7 @@ class SettingsBuilder:
 
     @property
     def env_store(self):
-        return self._env_store
+        return self._settings_store
 
     def apply(self, modifier):
         """ public metode som gir eksterne funskjoner tilgang til å endre, berike og/eller fjerne felter i settings_store
@@ -86,6 +86,20 @@ class SettingsStore(Mapping):
 
     def __contains__(self, item):
         return item in self._settings_store
+
+    def get(self, key):
+        if not isinstance(key, str):
+            raise ValueError("field should be a str")
+        return self._settings_store.get(key)
+
+    def keys(self):
+        return self._settings_store.keys()
+
+    def values(self):
+        return self._settings_store.values()
+
+    def items(self):
+        return self._settings_store.items()
 
 
 

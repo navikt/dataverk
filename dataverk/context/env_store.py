@@ -4,8 +4,15 @@ from collections.abc import Mapping
 
 
 class EnvStore(Mapping):
+    """
+    Mapping object for storing and easy accessing of Environment variables
+    """
 
-    def __init__(self, path: Path, env_setter=environ):
+    def __init__(self, path: Path, env_setter=None):
+
+        if env_setter is None:
+            env_setter = environ
+
         tmp_dict = {}
         with path.open("r") as reader:
             envs = reader.readlines()
@@ -37,10 +44,13 @@ class EnvStore(Mapping):
         return self._env_store.keys()
 
     def values(self):
+        return self._env_store.values()
+
+    def items(self):
         return self._env_store.items()
 
     def __contains__(self, o: object) -> bool:
-        return super().__contains__(o)
+        return self._env_store.__contains__(o)
 
     def __len__(self) -> int:
         return len(self._env_store)

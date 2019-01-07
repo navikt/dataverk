@@ -17,7 +17,7 @@ pages:
   - FAQ: getting-started/faq.md
 - API: api.md
 - Datapackage: datapackage.md
-- Copnnectors:
-  - Connectors: connectors/connectors.md
+- Copnnectors: connectors/connectors.md
 - Utils: utils.md
+- Context: context.md
 - Contributing: contributing.md
