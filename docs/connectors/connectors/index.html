@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Copnnectors - Dataverk Dokumentasjon</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/highlight.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Copnnectors";
+    var mkdocs_page_input_path = "connectors/connectors.md";
+    var mkdocs_page_url = "/connectors/connectors/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js"></script>
+  <script src="../../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script> 
+  
+  <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', '', 'dataverk.io');
+      ga('send', 'pageview');
+  </script>
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Dataverk Dokumentasjon</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Getting started</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../../getting-started/installation/">Installation</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../../getting-started/faq/">FAQ</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../../api/">API</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../../datapackage/">Datapackage</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Copnnectors</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#baseconnector-class">BaseConnector class</a></li>
+    
+
+    <li class="toctree-l2"><a href="#baseconnector-methods">BaseConnector methods</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#get_pandas_df">get_pandas_df</a></li>
+        
+            <li><a class="toctree-l3" href="#get_user">get_user</a></li>
+        
+            <li><a class="toctree-l3" href="#is_authorized">is_authorized</a></li>
+        
+            <li><a class="toctree-l3" href="#log">log</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#jsonstatconnector-class">JSONStatConnector class</a></li>
+    
+
+    <li class="toctree-l2"><a href="#jsonstatconnector-methods">JSONStatConnector methods</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#get_pandas_df_1">get_pandas_df</a></li>
+        
+            <li><a class="toctree-l3" href="#get_user_1">get_user</a></li>
+        
+            <li><a class="toctree-l3" href="#is_authorized_1">is_authorized</a></li>
+        
+            <li><a class="toctree-l3" href="#log_1">log</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#storageconnector-class">StorageConnector class</a></li>
+    
+
+    <li class="toctree-l2"><a href="#storageconnector-methods">StorageConnector methods</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#get_blob_metadata">get_blob_metadata</a></li>
+        
+            <li><a class="toctree-l3" href="#get_pandas_df_2">get_pandas_df</a></li>
+        
+            <li><a class="toctree-l3" href="#get_user_2">get_user</a></li>
+        
+            <li><a class="toctree-l3" href="#is_authorized_2">is_authorized</a></li>
+        
+            <li><a class="toctree-l3" href="#log_2">log</a></li>
+        
+            <li><a class="toctree-l3" href="#read">read</a></li>
+        
+            <li><a class="toctree-l3" href="#write">write</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#filestorageconnector-class">FileStorageConnector class</a></li>
+    
+
+    <li class="toctree-l2"><a href="#filestorageconnector-methods">FileStorageConnector methods</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#delete">delete</a></li>
+        
+            <li><a class="toctree-l3" href="#download">download</a></li>
+        
+            <li><a class="toctree-l3" href="#get_blob_metadata_1">get_blob_metadata</a></li>
+        
+            <li><a class="toctree-l3" href="#get_pandas_df_3">get_pandas_df</a></li>
+        
+            <li><a class="toctree-l3" href="#get_user_3">get_user</a></li>
+        
+            <li><a class="toctree-l3" href="#is_authorized_3">is_authorized</a></li>
+        
+            <li><a class="toctree-l3" href="#log_3">log</a></li>
+        
+            <li><a class="toctree-l3" href="#read_1">read</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#downloads-a-blob-from-the-bucket">Downloads a blob from the bucket.</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#write_1">write</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#oracleconnector-class">OracleConnector class</a></li>
+    
+
+    <li class="toctree-l2"><a href="#oracleconnector-methods">OracleConnector methods</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#get_pandas_df_4">get_pandas_df</a></li>
+        
+            <li><a class="toctree-l3" href="#get_user_4">get_user</a></li>
+        
+            <li><a class="toctree-l3" href="#is_authorized_4">is_authorized</a></li>
+        
+            <li><a class="toctree-l3" href="#log_4">log</a></li>
+        
+            <li><a class="toctree-l3" href="#persist_pandas_df">persist_pandas_df</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#googlestorageconnector-class">GoogleStorageConnector class</a></li>
+    
+
+    <li class="toctree-l2"><a href="#googlestorageconnector-methods">GoogleStorageConnector methods</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#delete_blob">delete_blob</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#deletes-a-blob-from-the-bucket">Deletes a blob from the bucket.</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#download_blob">download_blob</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#downloads-a-blob-from-the-bucket_1">Downloads a blob from the bucket.</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#get_blob_metadata_2">get_blob_metadata</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#prints-out-a-blobs-metadata">Prints out a blob's metadata.</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#get_pandas_df_5">get_pandas_df</a></li>
+        
+            <li><a class="toctree-l3" href="#get_user_5">get_user</a></li>
+        
+            <li><a class="toctree-l3" href="#is_authorized_5">is_authorized</a></li>
+        
+            <li><a class="toctree-l3" href="#log_5">log</a></li>
+        
+            <li><a class="toctree-l3" href="#read_2">read</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#downloads-a-blob-from-the-bucket_2">Downloads a blob from the bucket.</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#upload_blob">upload_blob</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#uploads-a-file-to-the-bucket">Uploads a file to the bucket.</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#write_2">write</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#write-string-to-a-bucket">Write string to a bucket.</a></li>
+    
+
+    <li class="toctree-l2"><a href="#elasticsearchconnector-class">ElasticsearchConnector class</a></li>
+    
+
+    <li class="toctree-l2"><a href="#elasticsearchconnector-methods">ElasticsearchConnector methods</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#get">get</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#retrieve-document-by-id-from-elastic-index">Retrieve document by id from elastic index</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#get_pandas_df_6">get_pandas_df</a></li>
+        
+            <li><a class="toctree-l3" href="#get_user_6">get_user</a></li>
+        
+            <li><a class="toctree-l3" href="#is_authorized_6">is_authorized</a></li>
+        
+            <li><a class="toctree-l3" href="#log_6">log</a></li>
+        
+            <li><a class="toctree-l3" href="#search">search</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#search-elastic-index">Search elastic index</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#write_3">write</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#add-or-update-document">Add or update document</a></li>
+    
+
+    <li class="toctree-l2"><a href="#sqliteconnector-class">SQLiteConnector class</a></li>
+    
+
+    <li class="toctree-l2"><a href="#sqliteconnector-methods">SQLiteConnector methods</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#get_pandas_df_7">get_pandas_df</a></li>
+        
+        </ul>
+    
+
+    <li class="toctree-l2"><a href="#get-pandas-dataframe">Get Pandas dataframe</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#get_user_7">get_user</a></li>
+        
+            <li><a class="toctree-l3" href="#is_authorized_7">is_authorized</a></li>
+        
+            <li><a class="toctree-l3" href="#log_7">log</a></li>
+        
+            <li><a class="toctree-l3" href="#persist_pandas_df_1">persist_pandas_df</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../../utils/">Utils</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../../context/">Context</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../../contributing/">Contributing</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Dataverk Dokumentasjon</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Copnnectors</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/navikt/dataverk/edit/master/docs/connectors/connectors.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><span style="float:right;"><a href="https://github.com/navikt/dataverk/blob/master/dataverk/connectors/base.py#L11">[source]</a></span></p>
+<h2 id="baseconnector-class">BaseConnector class</h2>
+<pre><code class="python">dataverk.connectors.base.BaseConnector(encrypted=True)
+</code></pre>
+
+<p>Common connection methods</p>
+<hr />
+<h2 id="baseconnector-methods">BaseConnector methods</h2>
+<h3 id="get_pandas_df">get_pandas_df</h3>
+<pre><code class="python">get_pandas_df(query)
+</code></pre>
+
+<p>Get Pandas</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<h3 id="get_user">get_user</h3>
+<pre><code class="python">dataverk.utils.get_user()
+</code></pre>
+
+<p>Get currently logged in user</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="is_authorized">is_authorized</h3>
+<pre><code class="python">dataverk.utils.is_authorized(user=None)
+</code></pre>
+
+<p>Check if is user is authorized to access data source</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="log">log</h3>
+<pre><code class="python">log(message)
+</code></pre>
+
+<p>Logging util</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<p><span style="float:right;"><a href="https://github.com/navikt/dataverk/blob/master/dataverk/connectors/jsonstat.py#L8">[source]</a></span></p>
+<h2 id="jsonstatconnector-class">JSONStatConnector class</h2>
+<pre><code class="python">dataverk.connectors.jsonstat.JSONStatConnector()
+</code></pre>
+
+<p>JSONStat based connections</p>
+<hr />
+<h2 id="jsonstatconnector-methods">JSONStatConnector methods</h2>
+<h3 id="get_pandas_df_1">get_pandas_df</h3>
+<pre><code class="python">get_pandas_df(query)
+</code></pre>
+
+<p>Get Pandas dataframe</p>
+<hr />
+<h3 id="get_user_1">get_user</h3>
+<pre><code class="python">dataverk.utils.get_user()
+</code></pre>
+
+<p>Get currently logged in user</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="is_authorized_1">is_authorized</h3>
+<pre><code class="python">dataverk.utils.is_authorized(user=None)
+</code></pre>
+
+<p>Check if is user is authorized to access data source</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="log_1">log</h3>
+<pre><code class="python">log(message)
+</code></pre>
+
+<p>Logging util</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<p><span style="float:right;"><a href="https://github.com/navikt/dataverk/blob/master/dataverk/connectors/storage.py#L9">[source]</a></span></p>
+<h2 id="storageconnector-class">StorageConnector class</h2>
+<pre><code class="python">dataverk.connectors.storage.StorageConnector(settings, storage='gcs', encrypted=True)
+</code></pre>
+
+<p>Storage connection</p>
+<hr />
+<h2 id="storageconnector-methods">StorageConnector methods</h2>
+<h3 id="get_blob_metadata">get_blob_metadata</h3>
+<pre><code class="python">get_blob_metadata(blob_name, format='markdown')
+</code></pre>
+
+<p>Get metadata from blob storage</p>
+<hr />
+<h3 id="get_pandas_df_2">get_pandas_df</h3>
+<pre><code class="python">get_pandas_df(query)
+</code></pre>
+
+<p>Get Pandas</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<h3 id="get_user_2">get_user</h3>
+<pre><code class="python">dataverk.utils.get_user()
+</code></pre>
+
+<p>Get currently logged in user</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="is_authorized_2">is_authorized</h3>
+<pre><code class="python">dataverk.utils.is_authorized(user=None)
+</code></pre>
+
+<p>Check if is user is authorized to access data source</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="log_2">log</h3>
+<pre><code class="python">log(message)
+</code></pre>
+
+<p>Logging util</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<h3 id="read">read</h3>
+<pre><code class="python">read(blob_name, encrypted=None)
+</code></pre>
+
+<p>Download from blob storage</p>
+<hr />
+<h3 id="write">write</h3>
+<pre><code class="python">write(source_string, destination_blob_name, fmt='json', metadata={})
+</code></pre>
+
+<p>Upload to blob storage</p>
+<hr />
+<p><span style="float:right;"><a href="https://github.com/navikt/dataverk/blob/master/dataverk/connectors/file_storage.py#L9">[source]</a></span></p>
+<h2 id="filestorageconnector-class">FileStorageConnector class</h2>
+<pre><code class="python">dataverk.connectors.file_storage.FileStorageConnector(settings, encrypted=True, bucket=None)
+</code></pre>
+
+<p>File Storage connector</p>
+<hr />
+<h2 id="filestorageconnector-methods">FileStorageConnector methods</h2>
+<h3 id="delete">delete</h3>
+<pre><code class="python">delete(file_name)
+</code></pre>
+
+<hr />
+<h3 id="download">download</h3>
+<pre><code class="python">download(blob_name, destination_file_name)
+</code></pre>
+
+<hr />
+<h3 id="get_blob_metadata_1">get_blob_metadata</h3>
+<pre><code class="python">get_blob_metadata(blob_name, format='markdown')
+</code></pre>
+
+<p>Get a blob's metadata.</p>
+<hr />
+<h3 id="get_pandas_df_3">get_pandas_df</h3>
+<pre><code class="python">get_pandas_df(query)
+</code></pre>
+
+<p>Get Pandas</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<h3 id="get_user_3">get_user</h3>
+<pre><code class="python">dataverk.utils.get_user()
+</code></pre>
+
+<p>Get currently logged in user</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="is_authorized_3">is_authorized</h3>
+<pre><code class="python">dataverk.utils.is_authorized(user=None)
+</code></pre>
+
+<p>Check if is user is authorized to access data source</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="log_3">log</h3>
+<pre><code class="python">log(message)
+</code></pre>
+
+<p>Logging util</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<h3 id="read_1">read</h3>
+<pre><code class="python">read(file_name)
+</code></pre>
+
+<h2 id="downloads-a-blob-from-the-bucket">Downloads a blob from the bucket.</h2>
+<h3 id="write_1">write</h3>
+<pre><code class="python">write(source_string, destination_blob_name, fmt, metadata=None)
+</code></pre>
+
+<hr />
+<p><span style="float:right;"><a href="https://github.com/navikt/dataverk/blob/master/dataverk/connectors/oracle.py#L11">[source]</a></span></p>
+<h2 id="oracleconnector-class">OracleConnector class</h2>
+<pre><code class="python">dataverk.connectors.oracle.OracleConnector(settings, source=None)
+</code></pre>
+
+<p>Common oracle connector methods</p>
+<p>Troubleshooting:</p>
+<p>Note: Oracle instant client libraries required to be installed in order to use cx_Oracle</p>
+<p>Mac:</p>
+<p>´´´
+unzip instant client zip file from oracle to ~/opt/oracle/instantclient_12_2
+ln -s ~/opt/oracle/instantclient_12_2/libclntsh.dylib.12.1 /usr/local/lib/
+´´´</p>
+<hr />
+<h2 id="oracleconnector-methods">OracleConnector methods</h2>
+<h3 id="get_pandas_df_4">get_pandas_df</h3>
+<pre><code class="python">get_pandas_df(sql, arraysize=100000)
+</code></pre>
+
+<hr />
+<h3 id="get_user_4">get_user</h3>
+<pre><code class="python">dataverk.utils.get_user()
+</code></pre>
+
+<p>Get currently logged in user</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="is_authorized_4">is_authorized</h3>
+<pre><code class="python">dataverk.utils.is_authorized(user=None)
+</code></pre>
+
+<p>Check if is user is authorized to access data source</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="log_4">log</h3>
+<pre><code class="python">log(message)
+</code></pre>
+
+<p>Logging util</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<h3 id="persist_pandas_df">persist_pandas_df</h3>
+<pre><code class="python">persist_pandas_df(table, schema=None, df=None, chunksize=10000)
+</code></pre>
+
+<hr />
+<p><span style="float:right;"><a href="https://github.com/navikt/dataverk/blob/master/dataverk/connectors/google_storage.py#L11">[source]</a></span></p>
+<h2 id="googlestorageconnector-class">GoogleStorageConnector class</h2>
+<pre><code class="python">dataverk.connectors.google_storage.GoogleStorageConnector(bucket_name, settings, encrypted=True)
+</code></pre>
+
+<p>Google Storage connector</p>
+<hr />
+<h2 id="googlestorageconnector-methods">GoogleStorageConnector methods</h2>
+<h3 id="delete_blob">delete_blob</h3>
+<pre><code class="python">delete_blob(blob_name)
+</code></pre>
+
+<h2 id="deletes-a-blob-from-the-bucket">Deletes a blob from the bucket.</h2>
+<h3 id="download_blob">download_blob</h3>
+<pre><code class="python">download_blob(blob_name, destination_file_name)
+</code></pre>
+
+<h2 id="downloads-a-blob-from-the-bucket_1">Downloads a blob from the bucket.</h2>
+<h3 id="get_blob_metadata_2">get_blob_metadata</h3>
+<pre><code class="python">get_blob_metadata(blob_name, format='markdown')
+</code></pre>
+
+<h2 id="prints-out-a-blobs-metadata">Prints out a blob's metadata.</h2>
+<h3 id="get_pandas_df_5">get_pandas_df</h3>
+<pre><code class="python">get_pandas_df(query)
+</code></pre>
+
+<p>Get Pandas</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<h3 id="get_user_5">get_user</h3>
+<pre><code class="python">dataverk.utils.get_user()
+</code></pre>
+
+<p>Get currently logged in user</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="is_authorized_5">is_authorized</h3>
+<pre><code class="python">dataverk.utils.is_authorized(user=None)
+</code></pre>
+
+<p>Check if is user is authorized to access data source</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="log_5">log</h3>
+<pre><code class="python">log(message)
+</code></pre>
+
+<p>Logging util</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<h3 id="read_2">read</h3>
+<pre><code class="python">read(blob_name)
+</code></pre>
+
+<h2 id="downloads-a-blob-from-the-bucket_2">Downloads a blob from the bucket.</h2>
+<h3 id="upload_blob">upload_blob</h3>
+<pre><code class="python">upload_blob(source_file_name, destination_blob_name)
+</code></pre>
+
+<h2 id="uploads-a-file-to-the-bucket">Uploads a file to the bucket.</h2>
+<h3 id="write_2">write</h3>
+<pre><code class="python">write(source_string, destination_blob_name, fmt, metadata={})
+</code></pre>
+
+<h2 id="write-string-to-a-bucket">Write string to a bucket.</h2>
+<p><span style="float:right;"><a href="https://github.com/navikt/dataverk/blob/master/dataverk/connectors/elasticsearch.py#L8">[source]</a></span></p>
+<h2 id="elasticsearchconnector-class">ElasticsearchConnector class</h2>
+<pre><code class="python">dataverk.connectors.elasticsearch.ElasticsearchConnector(settings, host='elastic_private')
+</code></pre>
+
+<p>Elasticsearch connection</p>
+<hr />
+<h2 id="elasticsearchconnector-methods">ElasticsearchConnector methods</h2>
+<h3 id="get">get</h3>
+<pre><code class="python">get(id)
+</code></pre>
+
+<h2 id="retrieve-document-by-id-from-elastic-index">Retrieve document by id from elastic index</h2>
+<h3 id="get_pandas_df_6">get_pandas_df</h3>
+<pre><code class="python">get_pandas_df(query)
+</code></pre>
+
+<p>Get Pandas</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<h3 id="get_user_6">get_user</h3>
+<pre><code class="python">dataverk.utils.get_user()
+</code></pre>
+
+<p>Get currently logged in user</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="is_authorized_6">is_authorized</h3>
+<pre><code class="python">dataverk.utils.is_authorized(user=None)
+</code></pre>
+
+<p>Check if is user is authorized to access data source</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="log_6">log</h3>
+<pre><code class="python">log(message)
+</code></pre>
+
+<p>Logging util</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<h3 id="search">search</h3>
+<pre><code class="python">search(query)
+</code></pre>
+
+<h2 id="search-elastic-index">Search elastic index</h2>
+<h3 id="write_3">write</h3>
+<pre><code class="python">write(id, doc)
+</code></pre>
+
+<h2 id="add-or-update-document">Add or update document</h2>
+<p><span style="float:right;"><a href="https://github.com/navikt/dataverk/blob/master/dataverk/connectors/sqlite.py#L5">[source]</a></span></p>
+<h2 id="sqliteconnector-class">SQLiteConnector class</h2>
+<pre><code class="python">dataverk.connectors.sqlite.SQLiteConnector(source=':memory:')
+</code></pre>
+
+<hr />
+<h2 id="sqliteconnector-methods">SQLiteConnector methods</h2>
+<h3 id="get_pandas_df_7">get_pandas_df</h3>
+<pre><code class="python">get_pandas_df(query)
+</code></pre>
+
+<h2 id="get-pandas-dataframe">Get Pandas dataframe</h2>
+<h3 id="get_user_7">get_user</h3>
+<pre><code class="python">dataverk.utils.get_user()
+</code></pre>
+
+<p>Get currently logged in user</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="is_authorized_7">is_authorized</h3>
+<pre><code class="python">dataverk.utils.is_authorized(user=None)
+</code></pre>
+
+<p>Check if is user is authorized to access data source</p>
+<p>Inherited from AuthMixin class </p>
+<hr />
+<h3 id="log_7">log</h3>
+<pre><code class="python">log(message)
+</code></pre>
+
+<p>Logging util</p>
+<p>Method inherited from BaseConnector</p>
+<hr />
+<h3 id="persist_pandas_df_1">persist_pandas_df</h3>
+<pre><code class="python">persist_pandas_df(table, df)
+</code></pre>
+
+<p>Persist Pandas dataframe</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../utils/" class="btn btn-neutral float-right" title="Utils">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../../datapackage/" class="btn btn-neutral" title="Datapackage"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/navikt/dataverk/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../../datapackage/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../../utils/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/require.js"></script>
+      <script src="../../search/search.js"></script>
+
+</body>
+</html>
