@@ -1,7 +1,7 @@
 import os
 import json
 
-from . import settings_loader, settings_creator
+from dataverk_cli.cli_utils import settings_creator, settings_loader
 from dataverk.context.env_store import EnvStore
 from abc import ABC, abstractmethod
 from enum import Enum

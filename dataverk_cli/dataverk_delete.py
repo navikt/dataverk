@@ -2,6 +2,7 @@ from .dataverk_base import DataverkBase
 from dataverk_cli.scheduling.jenkins_job_scheduler import JenkinsJobScheduler
 from dataverk.context.env_store import EnvStore
 from shutil import rmtree
+from .cli_utils import user_input
 
 
 class DataverkDelete(DataverkBase):
@@ -22,10 +23,8 @@ class DataverkDelete(DataverkBase):
 
         print(f'Fjerning av datapakke {self._package_name} i {self.github_project}')
 
-        res = input(f'Er du sikker på at du ønsker å fjerne datapakken {self._package_name} '
-                    f'fra repository {self.github_project}? [j/n] ')
-
-        if res in {'j', 'ja', 'y', 'yes'}:
+        if user_input.cli_question(f'Er du sikker på at du ønsker å fjerne datapakken {self._package_name} '
+                    f'fra repository {self.github_project}? [j/n] '):
             self._delete()
             print(f'Datapakken {self._package_name} er fjernet fra {self.github_project}')
         else:
