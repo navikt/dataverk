@@ -16,8 +16,8 @@ setup(
               'dataverk_cli.scheduling', 'dataverk_cli.cli_utils'],
     python_requires='~=3.6',
     install_requires=[
-        'cryptography==2.2.2',
-        'requests==2.19.1',
+        'cryptography==2.3',
+        'requests==2.20.0'
         'prometheus_client==0.4.0',
         'SQLAlchemy==1.2.10',
         'pyjstat==1.0.1',
@@ -27,12 +27,10 @@ setup(
         'numpy==1.15.2',
         'fire==0.1.3',
         'cx_Oracle==7.0.0',
-         #'Flask==1.0.2',
         'protobuf==3.6.1',
         'pyarrow>=0.10.0',
         'python-jenkins==1.3.0',
-        'PyYAML==3.13',
-         #'python-snappy==0.5.3',
+        'pyyaml==4.2'
         'elasticsearch==6.3.0',
         'google-api-core==0.1.4',
         'google-auth==1.5.0',
