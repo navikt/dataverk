@@ -30,7 +30,7 @@ setup(
         'protobuf==3.6.1',
         'pyarrow>=0.10.0',
         'python-jenkins==1.3.0',
-        'pyyaml==4.2',
+        'pyyaml==4.2b1',
         'elasticsearch==6.3.0',
         'google-api-core==0.1.4',
         'google-auth==1.5.0',
