@@ -1,12 +1,12 @@
 import os
 import json
 
-from . import settings_loader, settings_creator
+from dataverk_cli.cli_utils import settings_creator, settings_loader
 from dataverk.context.env_store import EnvStore
-from abc import ABC
+from abc import ABC, abstractmethod
 from enum import Enum
 from shutil import rmtree
-
+from collections.abc import Mapping
 
 class Action(Enum):
     INIT = 1
@@ -18,7 +18,7 @@ class DataverkBase(ABC):
     ''' Abstrakt baseklasse for dataverk scripts.
     '''
 
-    def __init__(self, settings: dict, envs: EnvStore):
+    def __init__(self, settings: Mapping, envs: Mapping):
         self._verify_class_init_arguments(settings, envs)
 
         self.settings = settings
@@ -55,8 +55,9 @@ class DataverkBase(ABC):
     def _get_github_url(self):
         return os.popen('git config --get remote.origin.url').read().strip()
 
+    @abstractmethod
     def run(self):
-        raise NotImplementedError("Abstrakt metode, må implementeres av subklasse")
+        raise NotImplementedError()
 
 
 def create_settings_dict(args, envs: EnvStore):

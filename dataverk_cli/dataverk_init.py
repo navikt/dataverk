@@ -5,8 +5,9 @@ from shutil import rmtree
 from distutils.dir_util import copy_tree
 from pathlib import Path
 from string import Template
-from . import settings_loader
+from dataverk_cli.cli_utils import settings_loader
 from .dataverk_base import DataverkBase
+from .cli_utils import user_input
 from dataverk.context.env_store import EnvStore
 import yaml
 
@@ -28,9 +29,7 @@ class DataverkInit(DataverkBase):
             raise NameError(f'En mappe med navn {self._package_name} '
                             f'eksisterer allerede i repo {self.github_project}')
 
-        res = input(f'Vil du opprette datapakken ({self._package_name}) i {self.github_project}? [j/n] ')
-
-        if res in {'j', 'ja', 'y', 'yes'}:
+        if user_input.cli_question(f'Vil du opprette datapakken ({self._package_name}) i {self.github_project}? [j/n] '):
             try:
                 self._create()
             except Exception:

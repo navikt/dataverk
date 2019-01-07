@@ -16,15 +16,6 @@ dataverk.api.write_datapackage(datasets)
 
 ----
 
-### get_path
-
-
-```python
-dataverk.api.get_path()
-```
-
-----
-
 ### is_sql_file
 
 
@@ -51,7 +42,7 @@ Read pandas dataframe from SQL database
 
 
 ```python
-dataverk.api.to_sql(df, table, schema, sink, connector='Oracle')
+dataverk.api.to_sql(df, table, sink=None, schema=None, connector='Oracle')
 ```
 
 

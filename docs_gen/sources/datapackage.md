@@ -1,8 +1,8 @@
-<span style="float:right;">[[source]](https://github.com/navikt/dataverk/blob/master/dataverk/datapackage.py#L15)</span>
+<span style="float:right;">[[source]](https://github.com/navikt/dataverk/blob/master/dataverk/datapackage.py#L13)</span>
 ## Datapackage class
 
 ```python
-dataverk.datapackage.Datapackage(public=False, resource_files=None, search_start_path='.')
+dataverk.datapackage.Datapackage(resource_files=None, search_start_path='.')
 ```
 
 
@@ -21,15 +21,7 @@ add_resource(df, dataset_name, dataset_description='')
 
 
 ```python
-add_view()
-```
-
----
-### publish
-
-
-```python
-publish(destination=['nais', 'gcs'])
+add_view(name, resource, columns, view_type='Simple', title='', description='')
 ```
 
 ---

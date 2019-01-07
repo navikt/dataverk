@@ -22,6 +22,7 @@ from dataverk.datapackage import Datapackage
 from dataverk import utils
 from dataverk.connectors import JSONStatConnector, StorageConnector, FileStorageConnector, GoogleStorageConnector, \
     SQLiteConnector, ElasticsearchConnector, BaseConnector, OracleConnector
+from dataverk.context import EnvStore, settings_classes, settings
 
 root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 
@@ -44,7 +45,6 @@ PAGES = [
         'page': 'api.md',
         'functions': [api.publish_datapackage,
                       api.write_datapackage,
-                      api.get_path,
                       api.is_sql_file,
                       api.read_sql,
                       api.to_sql,
@@ -68,9 +68,15 @@ PAGES = [
     {
         'page': 'utils.md',
         'functions': [utils.get_fylke_from_region],
-        'classes': [utils.create_settings_store,
-                    utils.AuthMixin,
+        'classes': [utils.AuthMixin,
                     utils.LoggerMixin]
+    },
+    {
+        'page': 'context.md',
+        'functions': [settings.singleton_settings_store_factory, settings.settings_store_factory],
+        'classes': [(EnvStore, '*'),
+                    (settings_classes.SettingsStore, '*'),
+                    (settings_classes.SettingsBuilder, '*')]
     }
 ]
 
@@ -297,6 +303,11 @@ def process_docstring(docstring):
     for i, code_block in enumerate(code_blocks):
         docstring = docstring.replace(
             '$CODE_BLOCK_%d' % i, code_block)
+
+    # Handle :param and :return
+    tags = (":param", ":return")
+    for tag in tags:
+        docstring = docstring.replace(tag, "<br>"+tag)
 
     return docstring
 
