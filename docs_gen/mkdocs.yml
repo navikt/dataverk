@@ -6,9 +6,12 @@ docs_dir: sources
 repo_url: https://github.com/navikt/dataverk
 site_url: https://github.com/navikt/dataverk.io
 site_description: 'Dokumentasjon for Dataverk, et åpne data bibliotek fra NAV'
+lang: no
 
 dev_addr: '0.0.0.0:8000'
 google_analytics: ['', 'dataverk.io']
+
+site_dir: ../docs/
 
 pages:
 - Home: index.md
