@@ -17,7 +17,7 @@ setup(
     python_requires='~=3.6',
     install_requires=[
         'cryptography==2.3',
-        'requests==2.20.0',
+        'requests==2.21.0',
         'prometheus_client==0.4.0',
         'SQLAlchemy==1.2.10',
         'pyjstat==1.0.1',
