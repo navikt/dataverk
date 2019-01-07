@@ -3,7 +3,7 @@
 # Import statements
 # =================
 import unittest
-from dataverk_cli.settings_loader import GitSettingsLoader
+
 # Common input parameters
 # =======================
 local_temp_dir = "/Users/sondre/Development/dataverk_dev_temp"
