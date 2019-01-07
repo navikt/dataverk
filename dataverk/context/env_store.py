@@ -50,7 +50,7 @@ class EnvStore(Mapping):
         return self._env_store.items()
 
     def __contains__(self, o: object) -> bool:
-        return self._env_store.__contains__(o)
+        return o in self._env_store
 
     def __len__(self) -> int:
         return len(self._env_store)
