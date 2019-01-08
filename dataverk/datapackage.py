@@ -8,6 +8,7 @@ from dataverk.context import settings
 from dataverk.utils.validators import validate_bucket_name, validate_datapackage_name
 from pathlib import Path
 from dataverk.context import EnvStore
+from collections.abc import MutableMapping, MutableSequence
 
 
 class Datapackage:
@@ -50,16 +51,19 @@ class Datapackage:
         self.resources[dataset_name] = df
         self.datapackage_metadata['Datasett'][dataset_name] = dataset_description
 
-    def add_view(self, name: str, resource: str, columns: None, view_type: str="Simple", title: str="", description: str=""):
-        if columns is None:
-            columns = []
-        view = {
-            'name': name,
-            'type': view_type,
-            'resource': resource,
-            'columns': columns,
-            'title': title
-        }
+    def add_view(self, name: str, title: str, resources: MutableSequence, spec_type: str="simple",
+                 spec: MutableMapping=None, type: str="", group: str="", series: MutableSequence=list()):
+        if spec is None:
+            spec = {"type": type,
+                    "group": group,
+                    "series": series}
+
+        view = {'name': name,
+                'title': title,
+                'resources': resources,
+                'specType': spec_type,
+                'spec': spec}
+
         self.views.append(view)
 
     def _verify_update_metadata_input_types(self, key, value):
