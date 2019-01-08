@@ -14,10 +14,10 @@ setup(
     version=__version__,
     packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_cli', 'dataverk.context',
               'dataverk_cli.scheduling', 'dataverk_cli.cli_utils'],
-    python_requires='~=3.6',
+    python_requires='>=3.6',
     install_requires=[
         'cryptography==2.3',
-        'requests==2.20.0',
+        'requests==2.21.0',
         'prometheus_client==0.4.0',
         'SQLAlchemy==1.2.10',
         'pyjstat==1.0.1',
@@ -63,7 +63,9 @@ setup(
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7'
+
     ],
 
 )
