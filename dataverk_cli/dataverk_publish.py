@@ -7,6 +7,7 @@ from dataverk.context.env_store import EnvStore
 from dataverk.context import settings
 from dataverk.utils import publish_data
 from pathlib import Path
+from datetime import datetime
 
 
 class PublishDataPackage:
@@ -26,6 +27,7 @@ class PublishDataPackage:
 
         self.package_settings = settings.settings_store_factory(settings_file_path=Path(self.resource_files["settings.json"]),
                                                                 env_store=self.env_store)
+
         self.datapackage_json = self.read_datapackage_json()
 
     def read_datapackage_json(self):
@@ -44,12 +46,21 @@ class PublishDataPackage:
     def _update_es_index(self):
         try:
             es = ElasticsearchConnector(settings=self.package_settings, host="elastic_private")
-            id = self.package_settings["package_name"]
+            id = self.datapackage_json["ID"]
+
             js = {
-                'name':  id,
-                'title':  self.datapackage_json.get('Tittel', ''),
-                'description':  self.datapackage_json.get('Tittel', ''),
-                'metadata': self.datapackage_json
+                'name': self.datapackage_json.get('ID', ''),
+                'title': self.datapackage_json.get('Tittel', ''),
+                'updated':datetime.now(),
+                'keywords': self.datapackage_json.get('Søkeord', []),
+                'accessRights': self.datapackage_json.get('Tilgangsnivå', ''),
+                'description': self.datapackage_json.get('Tittel', ''),
+                'publisher': self.datapackage_json.get('Eier', ''),
+                'geo': self.datapackage_json.get('Geografi', []),
+                'provenance': self.datapackage_json.get('Opphav', ''),
+                'uri': f'{self.package_settings["bucket_storage_connections"]["Dataverk_S3_MW"]["host"]}/'
+                       f'{self.datapackage_json["Bucket_navn"]}/'
+                       f'{self.datapackage_json["Tittel"]}/datapackage.json'
             }
             es.write(id, js)
         except urllib3.exceptions.LocationValueError as err:
