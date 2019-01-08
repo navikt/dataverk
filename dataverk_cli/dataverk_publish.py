@@ -47,8 +47,8 @@ class PublishDataPackage:
             id = self.package_settings["package_name"]
             js = {
                 'name':  id,
-                'title':  self.datapackage_json.get('Datapakke_navn', ''),
-                'description':  self.datapackage_json.get('Datapakke_navn', ''),
+                'title':  self.datapackage_json.get('Tittel', ''),
+                'description':  self.datapackage_json.get('Tittel', ''),
                 'metadata': self.datapackage_json
             }
             es.write(id, js)
@@ -71,7 +71,7 @@ class PublishDataPackage:
             if self._is_publish_set(bucket_type=bucket_type):
                 publish_data.upload_to_storage_bucket(dir_path=str(self._package_top_dir()),
                                                       conn=get_storage_connector(bucket_type=BucketType(bucket_type),
-                                                                                 bucket_name=self.datapackage_json.get("bucket_name"),
+                                                                                 bucket_name=self.datapackage_json.get("Bucket_navn"),
                                                                                  settings=self.package_settings,
                                                                                  encrypted=False),
                                                       datapackage_key_prefix=self._datapackage_key_prefix(

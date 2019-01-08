@@ -1,8 +1,7 @@
 import pandas as pd
 import json
 import datetime
-import uuid
-from dataverk.connectors import OracleConnector
+from dataverk.connectors import OracleConnector, SQLiteConnector
 from dataverk.utils import resource_discoverer
 from dataverk.context import settings
 from dataverk.utils.validators import validate_bucket_name, validate_datapackage_name
@@ -33,7 +32,7 @@ class Datapackage:
 
         try: 
             self.settings = settings.singleton_settings_store_factory(settings_file_path=Path(self.resource_files["settings.json"]),
-                                                       env_store=env_store)
+                                                                      env_store=env_store)
         except:
             self.settings = None
             pass
@@ -49,7 +48,6 @@ class Datapackage:
     def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str=""):
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
         self.resources[dataset_name] = df
-        self.datapackage_metadata['Datasett'][dataset_name] = dataset_description
 
     def add_view(self, name: str, title: str, resources: MutableSequence, spec_type: str="simple",
                  spec: MutableMapping=None, type: str="", group: str="", series: MutableSequence=list()):
@@ -155,29 +153,24 @@ class Datapackage:
 
     def _create_datapackage(self):
         today = datetime.date.today().strftime('%Y-%m-%d')
-        guid = uuid.uuid4().hex
 
         try:
             with self.dir_path.joinpath('LICENSE.md').open(mode='r', encoding="utf-8") as f:
                 license = f.read()
         except OSError:
             license = "No LICENSE file available"
-            pass
 
         try:   
             with self.dir_path.joinpath('README.md').open(mode='r', encoding="utf-8") as f:
                 readme = f.read()
         except OSError:
             readme = "No README file available"
-            pass
-
-        metadata = {}
 
         try:
             with self.dir_path.joinpath('METADATA.json').open(mode='r', encoding="utf-8") as f:
                 metadata = json.loads(f.read())
         except OSError:
-            pass
+            metadata = {}
 
         if metadata.get('Offentlig', False) is True:
             self.is_public = True
@@ -188,28 +181,17 @@ class Datapackage:
         metadata['Sist oppdatert'] = today
         metadata['Lisens'] = license
         metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav-opendata')
-        metadata['Datapakke_navn'] = metadata.get('Datapakke_navn', guid)
 
         validate_bucket_name(metadata["Bucket_navn"])
-        validate_datapackage_name(metadata["Datapakke_navn"])
+        validate_datapackage_name(metadata["Tittel"])
 
         with self.dir_path.joinpath('METADATA.json').open(mode='w', encoding="utf-8") as f:
             f.write(json.dumps(metadata, indent=2))
 
-        return {
-            'name': metadata.get('Id', ''),
-            'title': metadata.get('Tittel', ''),
-            'author': metadata.get('Opphav', ''),
-            'status': metadata.get('Tilgangsrettigheter', ''),
-            'Datasett': metadata.get('Datasett', {}),
-            'readme': readme,
-            'license': license,
-            'metadata': metadata,
-            'sources': metadata.get('Kilder', ''),
-            'last_updated': today,
-            'bucket_name': metadata['Bucket_navn'],
-            'datapackage_name': metadata['Datapakke_navn']
-        }
+        datapackage_metadata = {'Readme': readme}
+        datapackage_metadata.update(metadata)
+
+        return datapackage_metadata
 
     def write_datapackage(self):
         resources = []
@@ -220,7 +202,7 @@ class Datapackage:
 
             self.datapackage_metadata['resources'] = resources
 
-            self.datapackage_metadata['views'] = json.dumps(self.views)
+            self.datapackage_metadata['views'] = self.views
 
             json.dump(self.datapackage_metadata, outfile, indent=2, sort_keys=True)
 

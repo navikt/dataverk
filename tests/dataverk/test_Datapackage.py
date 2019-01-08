@@ -14,7 +14,7 @@ from dataverk.utils import resource_discoverer
 metadata_file_template = {
   "Sist oppdatert": "today",
   "Bucket_navn": "nav-bucket123",
-  "Datapakke_navn": "nav-datapakke123",
+  "Tittel": "nav-datapakke123",
   "Lisens": "Test license"
 }
 
@@ -75,7 +75,7 @@ class Instantiation(Base):
                 with open('METADATA.json', 'r') as metadata_file:
                     metadata = json.load(metadata_file)
                 with open('METADATA.json', 'w') as metadata_file:
-                    metadata["Datapakke_navn"] = datapackage_name
+                    metadata["Tittel"] = datapackage_name
                     json.dump(metadata, metadata_file)
                 with self.assertRaises(NameError):
                     Datapackage(resource_files=self.files)
