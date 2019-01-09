@@ -96,7 +96,7 @@ class ElasticsearchConnector(BaseConnector):
     def write(self, id, doc):
         """Add or update document"""
 
-        res = self.es.index(index=self.index, doc_type="json", id=id, body=doc)
+        res = self.es.index(index=self.index, doc_type="dp", id=id, body=doc)
         self.es.indices.refresh(index=self.index)
         self.log(f'{self.__class__}: Document {id} of type {self.index} indexed to elastic index: {self.index}.')
         return res

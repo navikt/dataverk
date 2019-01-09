@@ -1,5 +1,6 @@
 import os
 import json
+from uuid import uuid4
 
 from shutil import rmtree
 from distutils.dir_util import copy_tree
@@ -20,6 +21,7 @@ class DataverkInit(DataverkBase):
         super().__init__(settings=settings, envs=envs)
 
         self._package_name = settings["package_name"]
+        self._package_id = uuid4().hex
 
     def run(self):
         ''' Entrypoint for dataverk init
@@ -90,8 +92,9 @@ class DataverkInit(DataverkBase):
         except OSError:
             raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
 
-        package_metadata['Datapakke_navn'] = self._package_name
+        package_metadata['Tittel'] = self._package_name
         package_metadata['Bucket_navn'] = 'nav-opendata'
+        package_metadata['ID'] = self._package_id
 
         try:
             with metadata_file_path.open('w') as metadatafile:
