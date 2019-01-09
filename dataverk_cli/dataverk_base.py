@@ -7,6 +7,8 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from shutil import rmtree
 from collections.abc import Mapping
+from pathlib import Path
+
 
 class Action(Enum):
     INIT = 1
@@ -23,6 +25,7 @@ class DataverkBase(ABC):
 
         self.settings = settings
         self.github_project = self._get_github_url()
+        self.github_project_ssh = self._get_ssh_url()
         self.envs = envs
 
     def _verify_class_init_arguments(self, settings, envs):
@@ -54,6 +57,12 @@ class DataverkBase(ABC):
 
     def _get_github_url(self):
         return os.popen('git config --get remote.origin.url').read().strip()
+
+    def _get_ssh_url(self):
+        url_list = Path(self.github_project).parts
+        org_name = url_list[2]
+        repo_name = url_list[3]
+        return f'git@github.com:{org_name}/{repo_name}'
 
     @abstractmethod
     def run(self):

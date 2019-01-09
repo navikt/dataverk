@@ -108,7 +108,7 @@ class DataverkInit(DataverkBase):
 
         jenkinsfile_path = Path(self._package_name).joinpath("Jenkinsfile")
         tag_value = {"package_name": self._package_name,
-                     "package_repo": self.github_project,
+                     "package_repo": self.github_project_ssh,
                      "package_path": self._package_name}
 
         try:
