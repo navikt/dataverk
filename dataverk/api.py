@@ -140,19 +140,19 @@ def _create_datapackage(datasets):
         pass
     
     return {
-            'name':  metadata.get('Id',''),
-            'title':  metadata.get('Tittel',''),
-            'author':  metadata.get('Opphav',''),
-            'status':  metadata.get('Tilgangsrettigheter',''),
+            'name':  metadata.get('name',''),
+            'title':  metadata.get('title',''),
+            'author':  metadata.get('author',''),
+            'status':  metadata.get('status',''),
              # TODO: unødvendig med lisens her siden lisensen ligger i metadata?
             'license': license, 
             'readme': readme,
             'metadata': json.dumps( metadata ), 
-            'sources': metadata.get('Kilder',''),
+            'sources': metadata.get('sources',''),
             'last_updated': today,
             'resources': resources,
-            'bucket_name': metadata.get('Bucket_navn', 'default-bucket-nav'),
-            'datapackage_name': metadata.get('Datapakke_navn', guid)
+            'bucket_name': metadata.get('bucket_name', 'default-bucket-nav'),
+            'datapackage_name': metadata.get('datapackage_name', guid)
             }
 
         
