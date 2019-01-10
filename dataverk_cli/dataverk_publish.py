@@ -46,21 +46,21 @@ class PublishDataPackage:
     def _update_es_index(self):
         try:
             es = ElasticsearchConnector(settings=self.package_settings, host="elastic_private")
-            id = self.datapackage_json["ID"]
+            id = self.datapackage_json["id"]
 
             js = {
-                'name': self.datapackage_json.get('ID', ''),
-                'title': self.datapackage_json.get('Tittel', ''),
+                'name': self.datapackage_json.get('id', ''),
+                'title': self.datapackage_json.get('title', ''),
                 'updated':datetime.now(),
-                'keywords': self.datapackage_json.get('Søkeord', []),
-                'accessRights': self.datapackage_json.get('Tilgangsnivå', ''),
-                'description': self.datapackage_json.get('Tittel', ''),
-                'publisher': self.datapackage_json.get('Eier', ''),
-                'geo': self.datapackage_json.get('Geografi', []),
-                'provenance': self.datapackage_json.get('Opphav', ''),
+                'keywords': self.datapackage_json.get('keywords', []),
+                'accessRights': self.datapackage_json.get('accessRights', ''),
+                'description': self.datapackage_json.get('description', ''),
+                'publisher': self.datapackage_json.get('publisher', ''),
+                'geo': self.datapackage_json.get('geo', []),
+                'provenance': self.datapackage_json.get('provenance', ''),
                 'uri': f'{self.package_settings["bucket_storage_connections"]["Dataverk_S3_MW"]["host"]}/'
-                       f'{self.datapackage_json["Bucket_navn"]}/'
-                       f'{self.datapackage_json["Tittel"]}/datapackage.json'
+                       f'{self.datapackage_json["bucket_name"]}/'
+                       f'{self.datapackage_json["title"]}/datapackage.json'
             }
             es.write(id, js)
         except urllib3.exceptions.LocationValueError as err:

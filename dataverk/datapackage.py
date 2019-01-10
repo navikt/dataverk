@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import datetime
 from dataverk.connectors import OracleConnector, SQLiteConnector
-from dataverk.utils import resource_discoverer
+from dataverk.utils import resource_discoverer, notebook2script, get_notebook_name
 from dataverk.context import settings
 from dataverk.utils.validators import validate_bucket_name, validate_datapackage_name
 from pathlib import Path
@@ -172,23 +172,21 @@ class Datapackage:
         except OSError:
             metadata = {}
 
-        if metadata.get('Offentlig', False) is True:
-            self.is_public = True
-
-        if metadata.get('Public', False) is True:
+        if metadata.get('public', False) is True:
             self.is_public = True
      
-        metadata['Sist oppdatert'] = today
-        metadata['Lisens'] = license
-        metadata['Bucket_navn'] = metadata.get('Bucket_navn', 'default-bucket-nav-opendata')
+        metadata['last_updated'] = today
+        metadata['version'] = "0.0.1"
+        metadata['license'] = license
+        metadata['bucket_name'] = metadata.get('Bucket_navn', 'default-bucket-nav-opendata')
 
-        validate_bucket_name(metadata["Bucket_navn"])
-        validate_datapackage_name(metadata["Tittel"])
+        validate_bucket_name(metadata["bucket_name"])
+        validate_datapackage_name(metadata["title"])
 
         with self.dir_path.joinpath('METADATA.json').open(mode='w', encoding="utf-8") as f:
             f.write(json.dumps(metadata, indent=2))
 
-        datapackage_metadata = {'Readme': readme}
+        datapackage_metadata = {'readme': readme}
         datapackage_metadata.update(metadata)
 
         return datapackage_metadata
@@ -212,3 +210,10 @@ class Datapackage:
 
             for filename, df in self.resources.items():
                 df.to_csv(data_path.joinpath(filename + '.csv'), index=False, sep=';')
+
+        try: #convert etl.ipynb notebook to etl.py when run in notebook
+            shell = get_ipython().__class__.__name__
+            if shell == 'ZMQInteractiveShell':
+                notebook2script() 
+        except:
+            pass
