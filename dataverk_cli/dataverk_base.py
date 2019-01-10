@@ -17,8 +17,8 @@ class Action(Enum):
 
 
 class BucketStorage(Enum):
-    GITHUB = "https://raw.githubusercontent.com"
-    DATAVERK_S3 = "https://dataverk-s3-api.nais.preprod.local"
+    GITHUB = "Github"
+    DATAVERK_S3 = "Dataverk_S3"
 
 
 class DataverkBase(ABC):

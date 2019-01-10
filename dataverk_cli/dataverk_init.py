@@ -97,8 +97,8 @@ class DataverkInit(DataverkBase):
         except OSError:
             raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
 
-        package_metadata['Tittel'] = self._package_name
-        package_metadata['Bucket_navn'] = 'nav-opendata'
+        package_metadata['title'] = self._package_name
+        package_metadata['bucket_name'] = 'nav-opendata'
         package_metadata['id'] = self._package_id
         package_metadata['path'] = self._determine_bucket_path()
 
@@ -109,14 +109,15 @@ class DataverkInit(DataverkBase):
             raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
 
     def _determine_bucket_path(self):
-        for bucket_type in self.settings["bucket_storage_connections"].items():
+        buckets = self.settings["bucket_storage_connections"]
+        for bucket_type in self.settings["bucket_storage_connections"]:
             if self._is_publish_set(bucket_type=bucket_type):
-                if bucket_type == BucketStorage.GITHUB:
-                    return f'{bucket_type["host"]}/{self._org_name}/{self._package_name}/master/'
-                elif bucket_type == BucketStorage.DATAVERK_S3:
-                    return f'{bucket_type["host"]}/{bucket_type["bucket"]}/{self._package_name}'
+                if BucketStorage(bucket_type) == BucketStorage.GITHUB:
+                    return f'{buckets[bucket_type]["host"]}/{self._org_name}/{self._package_name}/master/'
+                elif BucketStorage(bucket_type) == BucketStorage.DATAVERK_S3:
+                    return f'{buckets[bucket_type]["host"]}/{buckets[bucket_type]["bucket"]}/{self._package_name}'
                 else:
-                    raise NameError(f'Unsupported bucket type')
+                    raise NameError(f'Unsupported bucket type: {bucket_type}')
 
     def _is_publish_set(self, bucket_type: str):
         return self.settings["bucket_storage_connections"][bucket_type]["publish"].lower() == "true"
