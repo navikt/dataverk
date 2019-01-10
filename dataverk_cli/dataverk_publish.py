@@ -58,9 +58,7 @@ class PublishDataPackage:
                 'publisher': self.datapackage_json.get('publisher', ''),
                 'geo': self.datapackage_json.get('geo', []),
                 'provenance': self.datapackage_json.get('provenance', ''),
-                'uri': f'{self.package_settings["bucket_storage_connections"]["Dataverk_S3_MW"]["host"]}/'
-                       f'{self.datapackage_json["bucket_name"]}/'
-                       f'{self.datapackage_json["title"]}/datapackage.json'
+                'uri': f'{self.datapackage_json.get("path", "")}/datapackage.json'
             }
             es.write(id, js)
         except urllib3.exceptions.LocationValueError as err:

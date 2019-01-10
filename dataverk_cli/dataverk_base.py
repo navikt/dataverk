@@ -16,6 +16,11 @@ class Action(Enum):
     DELETE = 3
 
 
+class BucketStorage(Enum):
+    GITHUB = "https://raw.githubusercontent.com"
+    DATAVERK_S3 = "https://dataverk-s3-api.nais.preprod.local"
+
+
 class DataverkBase(ABC):
     ''' Abstrakt baseklasse for dataverk scripts.
     '''
