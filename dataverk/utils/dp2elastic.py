@@ -7,8 +7,8 @@ def dp2elastic(dp = None, elasticdoc = None):
     path = path.rstrip('\/')
     path = f'{path}/datapackage.json'
     js = {
-                'name': dic.get('id', ''),
-                'title': dic.get('title', ''),
+                'id': dic.get('id', ''),
+                'title': dic.get('name', ''),
                 'updated': dic.get('updated', ''),
                 'keywords': dic.get('keywords', []),
                 'accessRights': dic.get('accessRights', ''),
@@ -21,7 +21,7 @@ def dp2elastic(dp = None, elasticdoc = None):
     fname_out = 'elasticdoc.json'
     with open(fname_out,'w') as f: 
         f.write(json.dumps(js))
-    print(f"{dp} converted to {fname_out}")
+    print(f"{fname_out} generated from datapackage.json")
 
 
 if __name__ == '__main__': fire.Fire(dp2elastic)
