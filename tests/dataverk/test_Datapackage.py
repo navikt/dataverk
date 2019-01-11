@@ -85,7 +85,7 @@ class Instantiation(Base):
                 with open('METADATA.json', 'r') as metadata_file:
                     metadata = json.load(metadata_file)
                 with open('METADATA.json', 'w') as metadata_file:
-                    metadata["Bucket_navn"] = bucket_name
+                    metadata["bucket_name"] = bucket_name
                     json.dump(metadata, metadata_file)
                 with self.assertRaises(NameError):
                     Datapackage(resource_files=self.files)
