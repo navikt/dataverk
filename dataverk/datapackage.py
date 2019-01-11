@@ -66,17 +66,6 @@ class Datapackage:
 
         self.views.append(view)
 
-    def add_table(self, name: str, resources: MutableSequence, row_limit: int):
-        table = {
-            "name": name,
-            "resources": resources,
-            "spec_type": "table",
-            "transform": {
-                "limit": row_limit
-            }
-        }
-        self.views.append(table)
-
     def _verify_update_metadata_input_types(self, key, value):
         if not isinstance(key, str):
             raise TypeError(f'Key must be of type string')
