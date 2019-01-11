@@ -49,7 +49,7 @@ class Datapackage:
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
         self.resources[dataset_name] = df
 
-    def add_view(self, name: str, title: str, resources: MutableSequence, spec_type: str="simple",
+    def add_view(self, name: str, title: str, resources: MutableSequence, description: str="", attribution: str="", spec_type: str="simple",
                  spec: MutableMapping=None, type: str="", group: str="", series: MutableSequence=list()):
         if spec is None:
             spec = {"type": type,
@@ -58,6 +58,8 @@ class Datapackage:
 
         view = {'name': name,
                 'title': title,
+                'description': description,
+                'attribution': attribution,
                 'resources': resources,
                 'specType': spec_type,
                 'spec': spec}

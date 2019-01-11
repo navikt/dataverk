@@ -133,7 +133,7 @@ def _create_datapackage(datasets):
     try:
         with open(os.path.join(dir_path, 'METADATA.json'),'w', encoding="utf-8") as f:
             metadata ['Sist oppdatert'] = today
-            metadata ['Lisens'] = license
+            #metadata ['Lisens'] = license
             metadata['Datapakke_navn'] = metadata.get('Datapakke_navn', guid)
             f.write(json.dumps( metadata , indent=2))
     except:
@@ -144,7 +144,6 @@ def _create_datapackage(datasets):
             'title':  metadata.get('title',''),
             'author':  metadata.get('author',''),
             'status':  metadata.get('status',''),
-             # TODO: unødvendig med lisens her siden lisensen ligger i metadata?
             'license': license, 
             'readme': readme,
             'metadata': json.dumps( metadata ), 
