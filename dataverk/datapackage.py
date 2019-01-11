@@ -209,7 +209,7 @@ class Datapackage:
                 data_path.mkdir()
 
             for filename, df in self.resources.items():
-                df.to_csv(data_path.joinpath(filename + '.csv'), index=False, sep=';')
+                df.to_csv(data_path.joinpath(filename + '.csv'), index=False, sep=',')
 
         try: #convert etl.ipynb notebook to etl.py when run in notebook
             shell = get_ipython().__class__.__name__
