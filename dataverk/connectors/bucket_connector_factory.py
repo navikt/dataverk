@@ -9,7 +9,7 @@ from enum import Enum
 
 class BucketType(Enum):
     AWS_S3 = "AWS_S3"
-    DATAVERK_S3 = "Dataverk_S3_MW"
+    DATAVERK_S3 = "Dataverk_S3"
     GCS = "google_cloud"
     AZURE = "azure"
 

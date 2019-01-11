@@ -51,16 +51,14 @@ class PublishDataPackage:
             js = {
                 'name': self.datapackage_json.get('id', ''),
                 'title': self.datapackage_json.get('title', ''),
-                'updated':datetime.now(),
+                'updated': datetime.now(),
                 'keywords': self.datapackage_json.get('keywords', []),
                 'accessRights': self.datapackage_json.get('accessRights', ''),
                 'description': self.datapackage_json.get('description', ''),
                 'publisher': self.datapackage_json.get('publisher', ''),
                 'geo': self.datapackage_json.get('geo', []),
                 'provenance': self.datapackage_json.get('provenance', ''),
-                'uri': f'{self.package_settings["bucket_storage_connections"]["Dataverk_S3_MW"]["host"]}/'
-                       f'{self.datapackage_json["bucket_name"]}/'
-                       f'{self.datapackage_json["title"]}/datapackage.json'
+                'uri': f'{self.datapackage_json.get("path", "")}/datapackage.json'
             }
             es.write(id, js)
         except urllib3.exceptions.LocationValueError as err:
@@ -82,7 +80,7 @@ class PublishDataPackage:
             if self._is_publish_set(bucket_type=bucket_type):
                 publish_data.upload_to_storage_bucket(dir_path=str(self._package_top_dir()),
                                                       conn=get_storage_connector(bucket_type=BucketType(bucket_type),
-                                                                                 bucket_name=self.datapackage_json.get("Bucket_navn"),
+                                                                                 bucket_name=self.datapackage_json.get("bucket_name"),
                                                                                  settings=self.package_settings,
                                                                                  encrypted=False),
                                                       datapackage_key_prefix=self._datapackage_key_prefix(

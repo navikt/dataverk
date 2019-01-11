@@ -7,7 +7,7 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 from string import Template
 from dataverk_cli.cli_utils import settings_loader
-from .dataverk_base import DataverkBase
+from .dataverk_base import DataverkBase, BucketStorage
 from .cli_utils import user_input
 from dataverk.context.env_store import EnvStore
 import yaml
@@ -22,6 +22,7 @@ class DataverkInit(DataverkBase):
 
         self._package_name = settings["package_name"]
         self._package_id = uuid4().hex
+        self._org_name = self._get_org_name()
 
     def run(self):
         ''' Entrypoint for dataverk init
@@ -40,6 +41,10 @@ class DataverkInit(DataverkBase):
                 raise Exception(f'Klarte ikke generere datapakken {self._package_name}')
         else:
             print(f'Datapakken {self._package_name} ble ikke opprettet')
+
+    def _get_org_name(self):
+        url_list = Path(self.github_project).parts
+        return url_list[2]
 
     def _create(self):
         ''' Oppretter ny datapakke med ønsket konfigurasjon
@@ -92,15 +97,30 @@ class DataverkInit(DataverkBase):
         except OSError:
             raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
 
-        package_metadata['Tittel'] = self._package_name
-        package_metadata['Bucket_navn'] = 'nav-opendata'
-        package_metadata['ID'] = self._package_id
+        package_metadata['title'] = self._package_name
+        package_metadata['bucket_name'] = 'nav-opendata'
+        package_metadata['id'] = self._package_id
+        package_metadata['path'] = self._determine_bucket_path()
 
         try:
             with metadata_file_path.open('w') as metadatafile:
                 json.dump(package_metadata, metadatafile, indent=2)
         except OSError:
             raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
+
+    def _determine_bucket_path(self):
+        buckets = self.settings["bucket_storage_connections"]
+        for bucket_type in self.settings["bucket_storage_connections"]:
+            if self._is_publish_set(bucket_type=bucket_type):
+                if BucketStorage(bucket_type) == BucketStorage.GITHUB:
+                    return f'{buckets[bucket_type]["host"]}/{self._org_name}/{self._package_name}/master/'
+                elif BucketStorage(bucket_type) == BucketStorage.DATAVERK_S3:
+                    return f'{buckets[bucket_type]["host"]}/{buckets[bucket_type]["bucket"]}/{self._package_name}'
+                else:
+                    raise NameError(f'Unsupported bucket type: {bucket_type}')
+
+    def _is_publish_set(self, bucket_type: str):
+        return self.settings["bucket_storage_connections"][bucket_type]["publish"].lower() == "true"
 
     def _edit_jenkinsfile(self):
         ''' Tilpasser Jenkinsfile til datapakken
