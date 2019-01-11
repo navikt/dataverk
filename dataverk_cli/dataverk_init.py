@@ -97,7 +97,8 @@ class DataverkInit(DataverkBase):
         except OSError:
             raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
 
-        package_metadata['title'] = self._package_name
+        package_metadata['datapackage_name'] = self._package_name
+        package_metadata['title'] = self._package_name # default
         package_metadata['bucket_name'] = 'nav-opendata'
         package_metadata['id'] = self._package_id
         package_metadata['path'] = self._determine_bucket_path()

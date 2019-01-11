@@ -49,8 +49,8 @@ class Datapackage:
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
         self.resources[dataset_name] = df
 
-    def add_view(self, name: str, title: str, resources: MutableSequence, description: str="", attribution: str="", spec_type: str="simple",
-                 spec: MutableMapping=None, type: str="", group: str="", series: MutableSequence=list()):
+    def add_view(self, name: str, resources: MutableSequence, title: str="", description: str="", attribution: str="", spec_type: str="simple",
+                 spec: MutableMapping=None, type: str="", group: str="", series: MutableSequence=list(), row_limit: int=500):
         if spec is None:
             spec = {"type": type,
                     "group": group,
@@ -62,7 +62,10 @@ class Datapackage:
                 'attribution': attribution,
                 'resources': resources,
                 'specType': spec_type,
-                'spec': spec}
+                'spec': spec,
+                'transform': {
+                    "limit": row_limit
+                }}
 
         self.views.append(view)
 
@@ -177,13 +180,13 @@ class Datapackage:
         if metadata.get('public', False) is True:
             self.is_public = True
      
-        metadata['last_updated'] = today
+        metadata['updated'] = today
         metadata['version'] = "0.0.1"
         metadata['license'] = license
-        metadata['bucket_name'] = metadata.get('Bucket_navn', 'default-bucket-nav-opendata')
+        metadata['bucket_name'] = metadata.get('bucket_name', 'default-bucket-nav-opendata')
 
         validate_bucket_name(metadata["bucket_name"])
-        validate_datapackage_name(metadata["title"])
+        validate_datapackage_name(metadata["datapackage_name"])
 
         with self.dir_path.joinpath('METADATA.json').open(mode='w', encoding="utf-8") as f:
             f.write(json.dumps(metadata, indent=2))
