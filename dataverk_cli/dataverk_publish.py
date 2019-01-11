@@ -51,7 +51,7 @@ class PublishDataPackage:
             js = {
                 'name': self.datapackage_json.get('id', ''),
                 'title': self.datapackage_json.get('title', ''),
-                'updated':datetime.now(),
+                'updated': datetime.now(),
                 'keywords': self.datapackage_json.get('keywords', []),
                 'accessRights': self.datapackage_json.get('accessRights', ''),
                 'description': self.datapackage_json.get('description', ''),
