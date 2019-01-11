@@ -13,7 +13,7 @@ from dataverk.utils import resource_discoverer
 # =======================
 metadata_file_template = {
   "Sist oppdatert": "today",
-  "Bucket_navn": "nav-bucket123",
+  "bucket_name": "nav-bucket123",
   "title": "nav-datapakke123",
   "Lisens": "Test license"
 }
