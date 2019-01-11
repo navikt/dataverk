@@ -11,6 +11,7 @@ def dp2elastic(dp = None, elasticdoc = None):
                 'title': dic.get('name', ''),
                 'updated': dic.get('updated', ''),
                 'keywords': dic.get('keywords', []),
+                'auth':  dic.get('auth',[]),
                 'accessRights': dic.get('accessRights', ''),
                 'description': dic.get('description', ''),
                 'publisher': dic.get('publisher', ''),
