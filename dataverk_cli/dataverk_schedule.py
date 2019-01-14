@@ -83,6 +83,7 @@ class DataverkSchedule(DataverkBase):
         config_file_path = Path(self._package_name).joinpath("jenkins_config.xml")
         tag_value = {"scriptPath": self._package_name + '/Jenkinsfile',
                      "projectUrl": self.github_project,
-                     "url": self.github_project}
+                     "url": self.github_project_ssh,
+                     "credentialsId": "datasett-ci"}
         self._scheduler.edit_jenkins_job_config(config_file_path, tag_val_map=tag_value)
 
