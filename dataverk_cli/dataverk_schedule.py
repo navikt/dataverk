@@ -1,44 +1,36 @@
 import subprocess
-import yaml
-
-from dataverk_cli.dataverk_base import DataverkBase
-from dataverk.utils.validators import validate_cronjob_schedule
-from dataverk_cli.scheduling import scheduler_factory, cronjob_utils
+import json
+from dataverk_cli.dataverk_base import DataverkBase, BucketStorage
+from dataverk_cli.scheduling import scheduler_factory
+from dataverk.context.env_store import EnvStore
+from dataverk.context.settings import SettingsStore
 from pathlib import Path
-from collections.abc import Mapping
-from .cli_utils import user_input
 
 
 class DataverkSchedule(DataverkBase):
-    def __init__(self, args, settings: Mapping, envs: Mapping):
+    def __init__(self, settings: SettingsStore, envs: EnvStore):
         super().__init__(settings=settings, envs=envs)
 
-        self._args = args
         self._scheduler = scheduler_factory.create_scheduler(settings_store=settings, env_store=envs)
         self._package_name = settings["package_name"]
-        self._cronjob_file_path = Path(self._package_name).joinpath("cronjob.yaml")
 
     def run(self):
-        if self._args.package_name is None:
-            raise ValueError(f'For å kjøre <dataverk-cli_utils schedule> må pakkenavn angis (-p, --package-name). '
-                             f'F.eks. <dataverk-cli_utils schedule --package-name min-pakke')
-
         if not self._datapackage_exists_in_remote_repo():
-            raise FileNotFoundError(f'Datapakken må eksistere i remote repositoriet før man kan eksekvere <dataverk-cli_utils'
-                                    f' schedule>. Kjør git add->commit->push av datapakken og prøv på nytt.')
+            raise FileNotFoundError(f'Datapakken må eksistere i remote repositoriet før man kan eksekvere '
+                                    f'<dataverk-cli schedule>. git add->commit->push av datapakken og prøv på nytt.')
 
-        self._set_update_schedule()
-        self._print_datapipeline_config()
+        try:
+            self._schedule_job()
+        except Exception:
+            raise Exception(f'Klarte ikke sette opp pipeline for datapakke {self._package_name}')
 
-        if user_input.cli_question('Vil du sette opp pipeline for datapakken over? [j/n] '):
-            try:
-                self._schedule_job()
-            except Exception:
-                raise Exception(f'Klarte ikke sette opp pipeline for datapakke {self._package_name}')
-            print(f'Jobb for datapakke {self._package_name} er satt opp/rekonfigurert. For å fullføre oppsett av pipeline må'
-                  f' endringer pushes til remote repository')
-        else:
-            print(f'Pipeline for datapakke {self._package_name} ble ikke opprettet')
+        print(f'Jobb for datapakke {self._package_name} er satt opp/rekonfigurert. '
+              f'For å fullføre oppsett av pipeline må endringer pushes til remote repository')
+
+    def _get_org_name(self):
+        url_list = Path(self.github_project).parts
+
+        return url_list[2]
 
     def _datapackage_exists_in_remote_repo(self):
         try:
@@ -47,43 +39,42 @@ class DataverkSchedule(DataverkBase):
         except subprocess.CalledProcessError:
             return False
 
-    def _set_update_schedule(self):
-        if self._args.update_schedule is None:
-            update_schedule = input("Skriv inn ønsket oppdateringsschedule for datapakken "
-                                    "(format: \"<minutt> <time> <dag i måned> <måned> <ukedag>\", "
-                                    "f.eks. \"0 12 * * 2,4\" vil gi <Hver tirsdag og torsdag kl 12.00 UTC>): ")
-            if not update_schedule:
-                update_schedule = "* * 31 2 *"  # Default value Feb 31 (i.e. never)
-        else:
-            update_schedule = self._args.update_schedule
-
-        validate_cronjob_schedule(update_schedule)
-        self.settings["update_schedule"] = update_schedule
-
     def _schedule_job(self):
         ''' Setter opp schedulering av job for datapakken
         '''
+        self._edit_package_metadata()
+        self._scheduler.configure_job()
 
-        self._configure_jenkins_job()
-        cronjob_utils.edit_cronjob_schedule(self._cronjob_file_path, self.settings["update_schedule"])
-
-    def _configure_jenkins_job(self):
-        ''' Tilpasser jenkins konfigurasjonsfil og setter opp ny jenkins jobb for datapakken
+    def _edit_package_metadata(self):
+        '''  Tilpasser metadata fil til datapakken
         '''
 
-        self._edit_jenkins_job_config()
+        metadata_file_path = Path(self._package_name).joinpath("METADATA.json")
 
-        config_file_path = Path(self._package_name).joinpath("jenkins_config.xml")
-        if self._scheduler.jenkins_job_exists():
-            self._scheduler.update_jenkins_job(config_file_path=config_file_path)
-        else:
-            self._scheduler.create_new_jenkins_job(config_file_path=config_file_path)
+        try:
+            with metadata_file_path.open('r') as metadatafile:
+                package_metadata = json.load(metadatafile)
+        except OSError:
+            raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
 
-    def _edit_jenkins_job_config(self):
-        config_file_path = Path(self._package_name).joinpath("jenkins_config.xml")
-        tag_value = {"scriptPath": self._package_name + '/Jenkinsfile',
-                     "projectUrl": self.github_project,
-                     "url": self.github_project_ssh,
-                     "credentialsId": "datasett-ci"}
-        self._scheduler.edit_jenkins_job_config(config_file_path, tag_val_map=tag_value)
+        package_metadata['path'] = self._determine_bucket_path()
 
+        try:
+            with metadata_file_path.open('w') as metadatafile:
+                json.dump(package_metadata, metadatafile, indent=2)
+        except OSError:
+            raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
+
+    def _determine_bucket_path(self):
+        buckets = self.settings["bucket_storage_connections"]
+        for bucket_type in self.settings["bucket_storage_connections"]:
+            if self._is_publish_set(bucket_type=bucket_type):
+                if BucketStorage(bucket_type) == BucketStorage.GITHUB:
+                    return f'{buckets[bucket_type]["host"]}/{self._get_org_name()}/{self._package_name}/master/'
+                elif BucketStorage(bucket_type) == BucketStorage.DATAVERK_S3:
+                    return f'{buckets[bucket_type]["host"]}/{buckets[bucket_type]["bucket"]}/{self._package_name}'
+                else:
+                    raise NameError(f'Unsupported bucket type: {bucket_type}')
+
+    def _is_publish_set(self, bucket_type: str):
+        return self.settings["bucket_storage_connections"][bucket_type]["publish"].lower() == "true"

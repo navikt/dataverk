@@ -29,8 +29,6 @@ class DataverkBase(ABC):
         self._verify_class_init_arguments(settings, envs)
 
         self.settings = settings
-        self.github_project = self._get_github_url()
-        self.github_project_ssh = self._get_ssh_url()
         self.envs = envs
 
     def _verify_class_init_arguments(self, settings, envs):
@@ -60,18 +58,18 @@ class DataverkBase(ABC):
               "\nNAIS namespace: " + self.settings["nais_namespace"] +
               "\n-------------------------------------------------\n")
 
-    def _get_github_url(self):
-        return os.popen('git config --get remote.origin.url').read().strip()
-
-    def _get_ssh_url(self):
-        url_list = Path(self.github_project).parts
-        org_name = url_list[2]
-        repo_name = url_list[3]
-        return f'git@github.com:{org_name}/{repo_name}'
-
     @abstractmethod
     def run(self):
         raise NotImplementedError()
+
+
+def remove_folder_structure(path: str):
+    rmtree(path=path, onerror=delete_rw_windows)
+
+
+def delete_rw_windows(action, name, exc):
+    os.chmod(name, 128)
+    os.remove(name)
 
 
 def create_settings_dict(args, envs: EnvStore):
@@ -85,7 +83,7 @@ def create_settings_dict(args, envs: EnvStore):
         settings = settings_creator_object.create_settings()
     finally:
         if os.path.exists(str(default_settings_path)):
-            rmtree(str(default_settings_path))
+            remove_folder_structure(str(default_settings_path))
 
     return settings
 

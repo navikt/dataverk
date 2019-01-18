@@ -1,7 +1,9 @@
 import jenkins
+import yaml
 from collections.abc import Mapping
 from xml.etree import ElementTree
 from pathlib import Path
+from string import Template
 from .scheduler import Scheduler
 
 
@@ -16,39 +18,40 @@ class JenkinsJobScheduler(Scheduler):
         self._jenkins_server = jenkins.Jenkins(url=self._settings_store["jenkins"]["url"],
                                                username=self._env_store['USER_IDENT'],
                                                password=self._env_store['PASSWORD'])
+        self._package_name = settings_store["package_name"]
 
     def job_exist(self, job_name):
-        return self.jenkins_job_exists()
+        return self._jenkins_server.job_exists(name=job_name)
 
-    def create_job(self, job_name, config):
-        self.create_new_jenkins_job(config_file_path=config)
+    def configure_job(self, job_name, config):
+        self._edit_jenkins_job_config()
 
-    def update_job(self, job_name, config):
-        self.update_jenkins_job(config_file_path=config)
+        config_file_path = Path(".").joinpath("jenkins_config.xml")
+        if self._jenkins_server.job_exists(name=self._package_name):
+            self._update_jenkins_job(config_file_path=config_file_path)
+        else:
+            self._create_new_jenkins_job(config_file_path=config_file_path)
 
     def delete_job(self, job_name):
-        self.delete_jenkins_job()
+        self._jenkins_server.delete_job(self._package_name)
 
-    def jenkins_job_exists(self):
-        return self._jenkins_server.job_exists(name=self._settings_store["package_name"])
+    def _edit_jenkins_job_config(self):
+        config_file_path = Path(".").joinpath("jenkins_config.xml")
+        tag_value = {"scriptPath": self._package_name + '/Jenkinsfile',
+                     "projectUrl": self.github_project,
+                     "url": self.github_project_ssh,
+                     "credentialsId": "datasett-ci"}
 
-    def edit_jenkins_job_config(self, file_path: Path, tag_val_map: Mapping) -> None:
-        """ Sett inn eller endre json config fil verdier
-
-        :param file_path: Path til jenkins job config filen
-        :param tag_val_map: key value mapping av tag som skal finnes og verdien som skal settes
-        :return: None
-        """
-        xml = ElementTree.parse(file_path)
+        xml = ElementTree.parse(config_file_path)
         xml_root = xml.getroot()
 
         for elem in xml_root.getiterator():
-            if elem.tag in tag_val_map:
-                elem.text = tag_val_map[elem.tag]
+            if elem.tag in tag_value:
+                elem.text = tag_value[elem.tag]
 
-        xml.write(file_path)
+        xml.write(config_file_path)
 
-    def create_new_jenkins_job(self, config_file_path: Path):
+    def _create_new_jenkins_job(self, config_file_path: Path):
         ''' Setter opp ny jenkins jobb for datapakken
         '''
 
@@ -60,7 +63,7 @@ class JenkinsJobScheduler(Scheduler):
         except jenkins.JenkinsException:
             raise jenkins.JenkinsException(f"Klarte ikke sette opp jenkinsjobb for package_name({package_name})")
 
-    def update_jenkins_job(self, config_file_path: Path) -> None:
+    def _update_jenkins_job(self, config_file_path: Path) -> None:
         """ Oppdaterer eksisterende Jenkins job
 
         :param config_file_path: Path til config fil
@@ -81,5 +84,52 @@ class JenkinsJobScheduler(Scheduler):
 
         return ElementTree.tostring(xml_base_root, encoding='utf-8', method='xml').decode()
 
-    def delete_jenkins_job(self):
-        self._jenkins_server.delete_job(self._settings_store["package_name"])
+    def _edit_jenkinsfile(self):
+        ''' Tilpasser Jenkinsfile til datapakken
+        '''
+
+        jenkinsfile_path = Path(self._package_name).joinpath("Jenkinsfile")
+        tag_value = {"package_name": self._package_name,
+                     "package_repo": self.github_project_ssh,
+                     "package_path": self._package_name}
+
+        try:
+            with jenkinsfile_path.open('r') as jenkinsfile:
+                jenkins_config = jenkinsfile.read()
+        except OSError:
+            raise OSError(f'Finner ikke Jenkinsfile på Path({jenkinsfile_path})')
+
+        template = Template(jenkins_config)
+        jenkins_config = template.safe_substitute(**tag_value)
+
+        try:
+            with jenkinsfile_path.open('w') as jenkinsfile:
+                jenkinsfile.write(jenkins_config)
+        except OSError:
+            raise OSError(f'Finner ikke Jenkinsfile på Path{jenkinsfile_path})')
+
+    def _edit_cronjob_config(self) -> None:
+        """
+        :return: None
+        """
+
+        cronjob_file_path = Path(".").joinpath("cronjob.yaml")
+
+        try:
+            with cronjob_file_path.open('r') as yamlfile:
+                cronjob_config = yaml.load(yamlfile)
+        except OSError:
+            raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')
+
+        cronjob_config['metadata']['name'] = self._package_name
+        cronjob_config['metadata']['namespace'] = self._settings_store["nais_namespace"]
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self._package_name + '-cronjob'
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = self._settings_store["image_endpoint"] + self._package_name
+        cronjob_config['spec']['schedule'] = self._settings_store["update_schedule"]
+        #cronjob_utils.edit_cronjob_schedule(self._cronjob_file_path, self.settings["update_schedule"])
+
+        try:
+            with cronjob_file_path.open('w') as yamlfile:
+                yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
+        except OSError:
+            raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')
