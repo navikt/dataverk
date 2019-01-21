@@ -23,11 +23,12 @@ def add_init_command(sub_arg_parser):
     parser_init.add_argument('-p', '--prompt-missing-args', dest="prompt_missing_args", action='store_true',
                               help="Prompter bruker om å skrive inn alle settings parametere som ikke "
                                    "angis som input til skriptet (default settings fil brukes ikke)")
+    parser_init.add_argument('-n', '--nav-internal', dest="nav_internal", action='store_true',
+                             help="For pakker som skal settes opp som cronjobber på NAIS-plattform")
     parser_init.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
                               default=None, help="Ønsket navn på ny datapakke")
     parser_init.add_argument('--update-schedule', dest="update_schedule", action='store', metavar='<schedule>',
                               default=None, help="Ønsket oppdateringsschedule for datapakke")
-
     parser_init.add_argument('--nais-namespace', dest="nais_namespace", action='store', metavar='<namespace>',
                               default=None, help="Namespace på NAIS plattform")
     parser_init.add_argument('--elastic-private', dest="elastic_private", action='store', metavar='<endpoint>',

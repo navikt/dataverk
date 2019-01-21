@@ -20,10 +20,10 @@ class JenkinsJobScheduler(Scheduler):
                                                password=self._env_store['PASSWORD'])
         self._package_name = settings_store["package_name"]
 
-    def job_exist(self, job_name):
-        return self._jenkins_server.job_exists(name=job_name)
+    def job_exist(self):
+        return self._jenkins_server.job_exists(name=self._package_name)
 
-    def configure_job(self, job_name, config):
+    def configure_job(self):
         self._edit_jenkins_job_config()
 
         config_file_path = Path(".").joinpath("jenkins_config.xml")
@@ -32,14 +32,14 @@ class JenkinsJobScheduler(Scheduler):
         else:
             self._create_new_jenkins_job(config_file_path=config_file_path)
 
-    def delete_job(self, job_name):
+    def delete_job(self):
         self._jenkins_server.delete_job(self._package_name)
 
     def _edit_jenkins_job_config(self):
         config_file_path = Path(".").joinpath("jenkins_config.xml")
         tag_value = {"scriptPath": self._package_name + '/Jenkinsfile',
-                     "projectUrl": self.github_project,
-                     "url": self.github_project_ssh,
+                     "projectUrl": self._github_project,
+                     "url": self._github_project_ssh,
                      "credentialsId": "datasett-ci"}
 
         xml = ElementTree.parse(config_file_path)
@@ -90,7 +90,7 @@ class JenkinsJobScheduler(Scheduler):
 
         jenkinsfile_path = Path(self._package_name).joinpath("Jenkinsfile")
         tag_value = {"package_name": self._package_name,
-                     "package_repo": self.github_project_ssh,
+                     "package_repo": self._github_project_ssh,
                      "package_path": self._package_name}
 
         try:

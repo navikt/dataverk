@@ -1,6 +1,7 @@
 from collections import Mapping
 from enum import Enum
 from .jenkins_job_scheduler import JenkinsJobScheduler
+from .travis_job_scheduler import TravisJobScheduler
 
 
 class Schedulers(Enum):
@@ -22,6 +23,8 @@ def create_scheduler(settings_store: Mapping, env_store: Mapping):
     # Factory
     if scheduler_type is Schedulers.JENKINS:
         return JenkinsJobScheduler(settings_store, env_store)
+    if scheduler_type is Schedulers.TRAVIS:
+        return TravisJobScheduler(settings_store, env_store)
     else:
         raise KeyError(f"Scheduler matching Schedulers({scheduler_type}) could not be found")
 

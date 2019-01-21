@@ -68,10 +68,10 @@ class SettingsCreator(ABC):
                 self._set_settings_param(datapackage_optional_parameters[param], getattr(self.args, param))
 
     def create_settings(self):
-        if self.args.package_name is None:
-            self.settings["package_name"] = self._prompt_for_user_input(arg="pakkenavn")
-        else:
-            self.settings["package_name"] = self.args.package_name
+        # if self.args.package_name is None:
+        #     self.settings["package_name"] = self._prompt_for_user_input(arg="pakkenavn")
+        # else:
+        #     self.settings["package_name"] = self.args.package_name
 
         validate_datapackage_name(self.settings["package_name"])
 

@@ -12,29 +12,28 @@ class DataverkSchedule(DataverkBase):
         super().__init__(settings=settings, envs=envs)
 
         self._scheduler = scheduler_factory.create_scheduler(settings_store=settings, env_store=envs)
-        self._package_name = settings["package_name"]
 
     def run(self):
         if not self._datapackage_exists_in_remote_repo():
-            raise FileNotFoundError(f'Datapakken må eksistere i remote repositoriet før man kan eksekvere '
-                                    f'<dataverk-cli schedule>. git add->commit->push av datapakken og prøv på nytt.')
+           raise FileNotFoundError(f'Datapakken må eksistere i remote repositoriet før man kan eksekvere '
+                                   f'<dataverk-cli schedule>. git add->commit->push av datapakken og prøv på nytt.')
 
         try:
             self._schedule_job()
         except Exception:
-            raise Exception(f'Klarte ikke sette opp pipeline for datapakke {self._package_name}')
+            raise Exception(f'Klarte ikke sette opp pipeline for datapakke {self._settings_store["package_name"]}')
 
-        print(f'Jobb for datapakke {self._package_name} er satt opp/rekonfigurert. '
+        print(f'Jobb for datapakke {self._settings_store["package_name"]} er satt opp/rekonfigurert. '
               f'For å fullføre oppsett av pipeline må endringer pushes til remote repository')
 
     def _get_org_name(self):
-        url_list = Path(self.github_project).parts
+        url_list = Path(self._github_project).parts
 
         return url_list[2]
 
     def _datapackage_exists_in_remote_repo(self):
         try:
-            subprocess.check_output(["git", "cat-file", "-e", f'origin/master:{self._package_name}/Jenkinsfile'])
+            subprocess.check_output(["git", "cat-file", "-e", f'origin/master:{self._settings_store["package_name"]}/Jenkinsfile'])
             return True
         except subprocess.CalledProcessError:
             return False
@@ -49,7 +48,7 @@ class DataverkSchedule(DataverkBase):
         '''  Tilpasser metadata fil til datapakken
         '''
 
-        metadata_file_path = Path(self._package_name).joinpath("METADATA.json")
+        metadata_file_path = Path(self._settings_store["package_name"]).joinpath("METADATA.json")
 
         try:
             with metadata_file_path.open('r') as metadatafile:
@@ -66,15 +65,15 @@ class DataverkSchedule(DataverkBase):
             raise OSError(f'Finner ikke METADATA.json fil på Path({metadata_file_path})')
 
     def _determine_bucket_path(self):
-        buckets = self.settings["bucket_storage_connections"]
-        for bucket_type in self.settings["bucket_storage_connections"]:
+        buckets = self._settings_store["bucket_storage_connections"]
+        for bucket_type in self._settings_store["bucket_storage_connections"]:
             if self._is_publish_set(bucket_type=bucket_type):
                 if BucketStorage(bucket_type) == BucketStorage.GITHUB:
-                    return f'{buckets[bucket_type]["host"]}/{self._get_org_name()}/{self._package_name}/master/'
+                    return f'{buckets[bucket_type]["host"]}/{self._get_org_name()}/{self._settings_store["package_name"]}/master/'
                 elif BucketStorage(bucket_type) == BucketStorage.DATAVERK_S3:
-                    return f'{buckets[bucket_type]["host"]}/{buckets[bucket_type]["bucket"]}/{self._package_name}'
+                    return f'{buckets[bucket_type]["host"]}/{buckets[bucket_type]["bucket"]}/{self._settings_store["package_name"]}'
                 else:
                     raise NameError(f'Unsupported bucket type: {bucket_type}')
 
     def _is_publish_set(self, bucket_type: str):
-        return self.settings["bucket_storage_connections"][bucket_type]["publish"].lower() == "true"
+        return self._settings_store["bucket_storage_connections"][bucket_type]["publish"].lower() == "true"

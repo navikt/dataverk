@@ -1,0 +1,12 @@
+{
+  "index_connections": {
+    "elastic_public": "https://...",
+    "index": "index_navn"
+  },
+  "bucket_storage_connections": {
+    "Github": {
+      "publish": "True",
+      "host": "https://raw.githubusercontent.com"
+    }
+  }
+}

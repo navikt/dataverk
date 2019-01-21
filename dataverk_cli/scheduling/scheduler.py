@@ -17,15 +17,15 @@ class Scheduler(ABC):
         self._github_project_ssh = self._get_ssh_url()
 
     @abstractmethod
-    def configure_job(self, job_name, config_file):
+    def configure_job(self):
         raise NotImplementedError()
 
     @abstractmethod
-    def delete_job(self, job_name):
+    def delete_job(self):
         raise NotImplementedError()
 
     @abstractmethod
-    def job_exist(self, job_name):
+    def job_exist(self):
         raise NotImplementedError()
 
     def _get_github_url(self):
