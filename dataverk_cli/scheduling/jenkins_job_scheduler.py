@@ -50,7 +50,7 @@ class JenkinsJobScheduler(Scheduler):
         tag_value = {"scriptPath": 'Jenkinsfile',
                      "projectUrl": self._github_project,
                      "url": self._github_project_ssh,
-                     "credentialsId": "datasett-ci"}
+                     "credentialsId": self._deploy_key_name}
 
         xml = ElementTree.parse(config_file_path)
         xml_root = xml.getroot()
@@ -101,7 +101,8 @@ class JenkinsJobScheduler(Scheduler):
         jenkinsfile_path = Path('Jenkinsfile')
         tag_value = {"package_name": self._package_name,
                      "package_repo": self._github_project_ssh,
-                     "package_path": self._package_name}
+                     "package_path": self._package_name,
+                     "package_credential_id": self._deploy_key_name}
 
         try:
             with jenkinsfile_path.open('r') as jenkinsfile:
@@ -193,4 +194,3 @@ class JenkinsJobScheduler(Scheduler):
         :param key: ssh nøkkel
         :return: None
         '''
-
