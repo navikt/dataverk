@@ -18,10 +18,10 @@ def _get_env_store():
 
 
 def init_wrapper(args):
-    if args.nav_internal is None:
-        envs = Mapping()
-    else:
+    if args.nav_internal is True:
         envs = _get_env_store()
+    else:
+        envs = {}
 
     settings = create_settings_dict(args=args, envs=envs)
 
@@ -35,9 +35,9 @@ def init_wrapper(args):
 def schedule_wrapper(args):
     settings = get_settings_dict()
     if settings.get("nav_internal", "") == "true":
-        envs = Mapping()
-    else:
         envs = _get_env_store()
+    else:
+        envs = {}
 
     if args.package_name is None:
         raise ValueError(f'For å kjøre <dataverk-cli schedule> må pakkenavn angis (-p, --package-name). '
@@ -66,9 +66,9 @@ def schedule_wrapper(args):
 def delete_wrapper(args):
     settings = get_settings_dict()
     if settings.get("nav_internal", "").lower() == "true":
-        envs = Mapping()
-    else:
         envs = _get_env_store()
+    else:
+        envs = {}
 
     if settings["package_name"] is None:
         raise ValueError(f'For å kjøre <dataverk-cli delete> må pakkenavn angis (-p, --package-name). '

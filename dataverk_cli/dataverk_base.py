@@ -1,6 +1,6 @@
 import os
 import json
-
+from dataverk.utils.validators import validate_datapackage_name
 from dataverk_cli.cli_utils import settings_creator, settings_loader
 from dataverk_cli.cli_utils import user_input
 from dataverk.context.env_store import EnvStore
@@ -42,11 +42,11 @@ class DataverkBase(ABC):
         self._envs = envs
 
     def _verify_class_init_arguments(self, settings, envs):
-        if not isinstance(settings, dict):
-            raise TypeError(f'settings parameter must be of type dict')
+        if not isinstance(settings, Mapping):
+            raise TypeError(f'settings parameter must be of type Mapping')
 
-        if not isinstance(envs, EnvStore):
-            raise TypeError(f'envs parameter must be of type EnvStore')
+        if not isinstance(envs, Mapping):
+            raise TypeError(f'envs parameter must be of type Mapping')
 
     def _clean_up_files(self):
         ''' Fjern alle filer som tilhører pakken
@@ -121,6 +121,8 @@ def create_settings_dict(args, envs: EnvStore):
         settings["package_name"] = user_input.prompt_for_user_input(arg="pakkenavn")
     else:
         settings["package_name"] = args.package_name
+
+    validate_datapackage_name(settings["package_name"])
 
     return settings
 

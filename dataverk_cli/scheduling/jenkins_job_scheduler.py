@@ -1,10 +1,16 @@
 import jenkins
 import yaml
+import requests
+import json
+from Crypto.PublicKey import RSA
 from collections.abc import Mapping
 from xml.etree import ElementTree
 from pathlib import Path
 from string import Template
 from .scheduler import Scheduler
+
+
+GITHUB_API_URL = "https://api.github.com/repos"
 
 
 class JenkinsJobScheduler(Scheduler):
@@ -19,14 +25,18 @@ class JenkinsJobScheduler(Scheduler):
                                                username=self._env_store['USER_IDENT'],
                                                password=self._env_store['PASSWORD'])
         self._package_name = settings_store["package_name"]
+        self._deploy_key_name = f'{self._package_name}-ci'
 
     def job_exist(self):
         return self._jenkins_server.job_exists(name=self._package_name)
 
     def configure_job(self):
         self._edit_jenkins_job_config()
+        self._edit_jenkinsfile()
+        self._edit_cronjob_config()
+        self._setup_deploy_key()
 
-        config_file_path = Path(".").joinpath("jenkins_config.xml")
+        config_file_path = Path('jenkins_config.xml')
         if self._jenkins_server.job_exists(name=self._package_name):
             self._update_jenkins_job(config_file_path=config_file_path)
         else:
@@ -37,7 +47,7 @@ class JenkinsJobScheduler(Scheduler):
 
     def _edit_jenkins_job_config(self):
         config_file_path = Path(".").joinpath("jenkins_config.xml")
-        tag_value = {"scriptPath": self._package_name + '/Jenkinsfile',
+        tag_value = {"scriptPath": 'Jenkinsfile',
                      "projectUrl": self._github_project,
                      "url": self._github_project_ssh,
                      "credentialsId": "datasett-ci"}
@@ -88,7 +98,7 @@ class JenkinsJobScheduler(Scheduler):
         ''' Tilpasser Jenkinsfile til datapakken
         '''
 
-        jenkinsfile_path = Path(self._package_name).joinpath("Jenkinsfile")
+        jenkinsfile_path = Path('Jenkinsfile')
         tag_value = {"package_name": self._package_name,
                      "package_repo": self._github_project_ssh,
                      "package_path": self._package_name}
@@ -113,7 +123,7 @@ class JenkinsJobScheduler(Scheduler):
         :return: None
         """
 
-        cronjob_file_path = Path(".").joinpath("cronjob.yaml")
+        cronjob_file_path = Path('cronjob.yaml')
 
         try:
             with cronjob_file_path.open('r') as yamlfile:
@@ -126,10 +136,61 @@ class JenkinsJobScheduler(Scheduler):
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self._package_name + '-cronjob'
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = self._settings_store["image_endpoint"] + self._package_name
         cronjob_config['spec']['schedule'] = self._settings_store["update_schedule"]
-        #cronjob_utils.edit_cronjob_schedule(self._cronjob_file_path, self.settings["update_schedule"])
 
         try:
             with cronjob_file_path.open('w') as yamlfile:
                 yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
         except OSError:
             raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')
+
+    def _setup_deploy_key(self) -> None:
+        ''' Setter opp deploy key mot github for jenkins-server
+
+        :return: None
+        '''
+        if not self._key_exists():
+            key = self._generate_deploy_key()
+            self._upload_public_key(key=key)
+            self._upload_private_key(key=key)
+
+    def _key_exists(self):
+        ''' Sjekker om det allerede eksisterer en deploy key på github for dette repoet
+
+        :return: True hvis nøkkelen eksisterer, False ellers
+        '''
+        res = requests.get(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name()}/keys',
+                           headers={"Authorization": f'token {self._env_store["GH_TOKEN"]}'})
+        if not res.ok:
+            res.raise_for_status()
+
+        if not res.content.decode("utf-8")[1:-1]:
+            return False
+        return True
+
+    def _generate_deploy_key(self, key_length: int=4096):
+        ''' Genererer et SSH nøkkelpar
+
+        :return: SSH public/private nøkkelpar
+        '''
+        return RSA.generate(key_length)
+
+    def _upload_public_key(self, key) -> None:
+        ''' Laster opp public nøkkelen til repositoriet på github
+
+        :param key: ssh nøkkel
+        :return: None
+        '''
+        public_key = key.publickey().exportKey(format='OpenSSH').decode(encoding="utf-8")
+        res = requests.post(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name()}/keys',
+                            headers={"Authorization": f'token {self._env_store["GH_TOKEN"]}'},
+                            data=json.dumps({"title": f'{self._deploy_key_name}', "key": public_key}))
+        if res.status_code != 201:
+            res.raise_for_status()
+
+    def _upload_private_key(self, key) -> None:
+        ''' Laster opp private nøkkelen til jenkins-serveren
+
+        :param key: ssh nøkkel
+        :return: None
+        '''
+

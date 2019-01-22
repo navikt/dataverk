@@ -36,3 +36,13 @@ class Scheduler(ABC):
         org_name = url_list[2]
         repo_name = url_list[3]
         return f'git@github.com:{org_name}/{repo_name}'
+
+    def _get_org_name(self):
+        url_list = Path(self._github_project).parts
+
+        return url_list[2]
+
+    def _get_repo_name(self):
+        url_list = Path(self._github_project).parts
+
+        return url_list[3]

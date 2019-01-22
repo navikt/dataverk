@@ -33,7 +33,7 @@ class DataverkSchedule(DataverkBase):
 
     def _datapackage_exists_in_remote_repo(self):
         try:
-            subprocess.check_output(["git", "cat-file", "-e", f'origin/master:{self._settings_store["package_name"]}/Jenkinsfile'])
+            subprocess.check_output(["git", "cat-file", "-e", f'origin/master:Jenkinsfile'])
             return True
         except subprocess.CalledProcessError:
             return False
@@ -48,7 +48,7 @@ class DataverkSchedule(DataverkBase):
         '''  Tilpasser metadata fil til datapakken
         '''
 
-        metadata_file_path = Path(self._settings_store["package_name"]).joinpath("METADATA.json")
+        metadata_file_path = Path('METADATA.json')
 
         try:
             with metadata_file_path.open('r') as metadatafile:

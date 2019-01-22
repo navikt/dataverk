@@ -73,8 +73,6 @@ class SettingsCreator(ABC):
         # else:
         #     self.settings["package_name"] = self.args.package_name
 
-        validate_datapackage_name(self.settings["package_name"])
-
         if self.args.update_schedule is None:
             self.settings["update_schedule"] = "* * 31 2 *" # Default value Feb 31 (i.e. never)
         else:
