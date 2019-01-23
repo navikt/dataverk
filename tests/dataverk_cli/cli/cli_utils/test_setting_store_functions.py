@@ -3,22 +3,40 @@
 # =================
 
 import unittest
-from dataverk_cli.cli.cli_utils.setting_store_functions import load_external_settings
+from dataverk_cli.cli.cli_utils.setting_store_functions import create_settings_dict
+from tests.dataverk_cli.settings_resource_test_mixin import SettingsResourceTestMixin
+from unittest.mock import MagicMock
+
+
 # Common input parameters
 # =======================
 
+class MockArgsInternal:
+    internal = True
+
+
+class MockArgsNotInternal:
+    internal = False
 
 # Base classes
 # ============
-class Base(unittest.TestCase):
+
+
+class Base(SettingsResourceTestMixin):
     """
     Base class for tests
 
     This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
-    def setUp(self):
-        self.empty_env_store = {"SETTINGS_REPO": ""}
 
+    def setUp(self):
+        super().setUp()
+        self.git_env_store = {"SETTINGS_REPO": self.tmp_repo_git_path}
+        self.mock_internal_args = MockArgsInternal
+        self.mock_not_internal_args = MockArgsNotInternal
+
+    def tearDown(self):
+        super().tearDown()
 
 
 # Test classes
@@ -30,10 +48,8 @@ class Instantiation(Base):
     Tests include: instantiation with args of wrong type, instantiation with input values outside constraints, etc.
     """
 
-    def test_load_internal_settings_file(self):
-        load_external_settings("empty_path")
-
-
+    def test_create_settings_dict__samity_check(self):
+        create_settings_dict(self.mock_internal_args, self.git_env_store)
 
 
     # Input arguments wrong type
@@ -43,30 +59,14 @@ class Instantiation(Base):
     # ===================================
 
 
-class Set(Base):
-    """
-    Tests all aspects of setting attributes
-
-    Tests include: setting attributes of wrong type, setting attributes outside their constraints, etc.
-    """
-    pass
-
-    # Set attribute wrong type
-    # ========================
-
-    # Set attribute outside constraint
-    # ================================
-
-
-class MethodsReturnType(Base):
-    """
-    Tests methods' output types
-    """
-    pass
-
-
 class MethodsReturnValues(Base):
     """
     Tests values of methods against known values
     """
-    pass
+
+    def test_create_settings_dict__internal_set(self):
+        result = create_settings_dict(self.mock_internal_args, self.git_env_store)
+        print(result)
+
+    def test_create_settings_dict__internal_not_set(self):
+        result = create_settings_dict(self.mock_internal_args, self.git_env_store)

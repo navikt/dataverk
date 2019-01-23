@@ -5,7 +5,7 @@ from distutils.dir_util import copy_tree
 from shutil import copy
 from pathlib import Path
 from importlib_resources import path
-from cli.cli_utils import settings_loader
+from dataverk_cli.cli.cli_utils import settings_loader
 from .dataverk_base import DataverkBase, remove_folder_structure, CONFIG_FILE_TYPES
 from dataverk.context.env_store import EnvStore
 from dataverk.context.settings import SettingsStore
