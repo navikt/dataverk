@@ -11,7 +11,6 @@ from .scheduler import Scheduler
 
 
 GITHUB_API_URL = "https://api.github.com/repos"
-JENKINS_API_URL = ""
 
 
 class JenkinsJobScheduler(Scheduler):
@@ -214,8 +213,8 @@ class JenkinsJobScheduler(Scheduler):
         data = {
             'credentials': {
                 'scope': "GLOBAL",
-                'username': "jenkins-test",
-                'id': "jenkins-test",
+                'username': self._deploy_key_name,
+                'id': self._deploy_key_name,
                 'privateKeySource': {
                     'privateKey': priv_key,
                     'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey$DirectEntryPrivateKeySource"
