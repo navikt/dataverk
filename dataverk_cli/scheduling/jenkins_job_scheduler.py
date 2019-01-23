@@ -11,6 +11,7 @@ from .scheduler import Scheduler
 
 
 GITHUB_API_URL = "https://api.github.com/repos"
+JENKINS_API_URL = ""
 
 
 class JenkinsJobScheduler(Scheduler):
@@ -194,3 +195,33 @@ class JenkinsJobScheduler(Scheduler):
         :param key: ssh nøkkel
         :return: None
         '''
+        jenkins_crumb = requests.get(f'{self._settings_store["jenkins"]["url"]}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)',
+                                     auth=(self._env_store["USER_IDENT"], self._env_store["PASSWORD"])).text
+
+        payload = self._compose_credential_payload(key=key)
+
+        res = requests.post(f'{self._settings_store["jenkins"]["url"]}/credentials/store/system/domain/_/createCredentials',
+                            auth=(self._env_store["USER_IDENT"], self._env_store["PASSWORD"]),
+                            headers={jenkins_crumb.split(":")[0]: jenkins_crumb.split(":")[1]},
+                            data=payload)
+
+        if not res.ok:
+            res.raise_for_status()
+
+    def _compose_credential_payload(self, key):
+        priv_key = key.exportKey().decode(encoding="utf-8")
+
+        data = {
+            'credentials': {
+                'scope': "GLOBAL",
+                'username': "jenkins-test",
+                'id': "jenkins-test",
+                'privateKeySource': {
+                    'privateKey': priv_key,
+                    'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey$DirectEntryPrivateKeySource"
+                },
+                'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey"
+            }
+        }
+
+        return {'json': json.dumps(data), 'Submit': "OK"}

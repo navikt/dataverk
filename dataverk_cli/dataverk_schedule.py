@@ -15,7 +15,7 @@ class DataverkSchedule(DataverkBase):
 
     def run(self):
         if not self._datapackage_exists_in_remote_repo():
-           raise FileNotFoundError(f'Datapakken må eksistere i remote repositoriet før man kan eksekvere '
+            raise FileNotFoundError(f'Datapakken må eksistere i remote repositoriet før man kan eksekvere '
                                    f'<dataverk-cli schedule>. git add->commit->push av datapakken og prøv på nytt.')
 
         try:
