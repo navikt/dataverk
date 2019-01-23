@@ -1,8 +1,7 @@
 import os
 import json
 from dataverk.utils.validators import validate_datapackage_name
-from dataverk_cli.cli_utils import settings_creator, settings_loader
-from dataverk_cli.cli_utils import user_input
+from cli.cli_utils import settings_creator, settings_loader, user_input
 from dataverk.context.env_store import EnvStore
 from abc import ABC, abstractmethod
 from enum import Enum
