@@ -159,7 +159,7 @@ class JenkinsJobScheduler(Scheduler):
 
         :return: True hvis nøkkelen eksisterer, False ellers
         '''
-        res = requests.get(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name()}/keys',
+        res = requests.get(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name().split(".")[0]}/keys',
                            headers={"Authorization": f'token {self._env_store["GH_TOKEN"]}'})
         if not res.ok:
             res.raise_for_status()
@@ -182,9 +182,9 @@ class JenkinsJobScheduler(Scheduler):
         :return: None
         '''
         public_key = key.publickey().exportKey(format='OpenSSH').decode(encoding="utf-8")
-        res = requests.post(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name()}/keys',
+        res = requests.post(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name().split(".")[0]}/keys',
                             headers={"Authorization": f'token {self._env_store["GH_TOKEN"]}'},
-                            data=json.dumps({"title": f'{self._deploy_key_name}', "key": public_key}))
+                            data=json.dumps({"title": f'{self._deploy_key_name}', "key": public_key, "read_only": True}))
         if res.status_code != 201:
             res.raise_for_status()
 
