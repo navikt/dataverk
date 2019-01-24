@@ -13,7 +13,7 @@ setup(
     name='dataverk',
     version=__version__,
     packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_cli', 'dataverk.context',
-              'dataverk_cli.scheduling', 'dataverk_cli.cli_utils', 'dataverk_cli.templates'],
+              'dataverk_cli.scheduling', 'dataverk_cli.cli.cli_utils', 'dataverk_cli.templates'],
     python_requires='>=3.6',
     install_requires=[
         'cryptography==2.3',
