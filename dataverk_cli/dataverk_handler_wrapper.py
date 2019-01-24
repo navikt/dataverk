@@ -2,11 +2,10 @@ from dataverk.context.env_store import EnvStore
 from .dataverk_base import Action
 from .dataverk_factory import get_datapackage_object
 from .dataverk_base import create_settings_dict, get_settings_dict
-from .cli_utils import user_input
+from cli.cli_utils import user_input
 from dataverk.utils import resource_discoverer
 from pathlib import Path
 from dataverk.utils.validators import validate_cronjob_schedule
-from collections.abc import Mapping
 
 
 def _get_env_store():
