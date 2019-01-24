@@ -3,9 +3,8 @@ import argparse
 from . import dataverk_create_env_file, __version__
 from .dataverk_notebook2script import notebook2script
 from .dataverk_publish import publish_datapackage
-from cli.cli_utils import commands
-from .dataverk_handler_wrapper import init_wrapper, schedule_wrapper, delete_wrapper
-
+from dataverk_cli.cli.cli_utils import commands
+from dataverk_cli.cli.cli_handlers import init_handler, schedule_handler, delete_handler
 
 def main():
     # Top level parser
@@ -29,14 +28,11 @@ def main():
     if args.command == 'create-env-file':
         dataverk_create_env_file.run(destination=args.destination)
     elif args.command == 'init':
-        #dp = get_datapackage_object(action=Action.INIT, args=args)
-        init_wrapper(args)
+        init_handler.handle(args)
     elif args.command == 'schedule':
-        #dp = get_datapackage_object(action=Action.SCHEDULE, args=args)
-        schedule_wrapper(args)
+        schedule_handler.handle(args)
     elif args.command == 'delete':
-        #dp = get_datapackage_object(action=Action.DELETE, args=args)
-        delete_wrapper(args)
+        delete_handler.handle(args)
     elif args.command == "notebook2script":
         notebook2script()
     elif args.command == "publish":

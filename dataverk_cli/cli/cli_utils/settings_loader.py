@@ -1,7 +1,7 @@
 import os
 from urllib3.util.url import parse_url
 from pathlib import Path
-from shutil import copyfile
+from distutils.dir_util import copy_tree
 import requests
 from git import Repo
 import tempfile
@@ -21,6 +21,13 @@ def load_settings_file_from_resource(url):
             settings_dict = _get_settings_dict_from_local_file(url)
 
     return settings_dict
+
+
+def load_template_files_from_resource(url):
+    """ Loads template files from external resource """
+
+    if _is_location_git_repo(url=url):
+        _get_templates_from_git_repo(url=url)
 
 
 def _is_location_git_repo(url: str):
@@ -55,6 +62,16 @@ def _get_settings_dict_from_git_repo(url):
         json_str = file_functions.read_file(settings_file)
         settings_dict = json.loads(json_str)
         return settings_dict
+
+
+def _get_templates_from_git_repo(url):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        try:
+            Repo.clone_from(url=url, to_path=tmpdir)
+        except AttributeError:
+            raise AttributeError(f"Could not clone git repository from url({url})")
+
+        copy_tree(str(Path(tmpdir).joinpath('file_templates')), '.')
 
 
 def _get_settings_dict_from_local_file(url):

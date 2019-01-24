@@ -1,12 +1,10 @@
-import os
 import json
 from uuid import uuid4
-from distutils.dir_util import copy_tree
 from shutil import copy
 from pathlib import Path
 from importlib_resources import path
 from dataverk_cli.cli.cli_utils import settings_loader
-from .dataverk_base import DataverkBase, remove_folder_structure, CONFIG_FILE_TYPES
+from .dataverk_base import DataverkBase, CONFIG_FILE_TYPES
 from dataverk.context.env_store import EnvStore
 from dataverk.context.settings import SettingsStore
 
@@ -49,17 +47,14 @@ class DataverkInit(DataverkBase):
                 if file.suffix in CONFIG_FILE_TYPES:
                     copy(str(Path(templates).joinpath(file)), '.')
 
-        if self._settings_store.get("nav_internal", "").lower() == "true":
-            templates_path = ""
+        if self._settings_store.get("internal", "").lower() == "true":
             try:
-                templates_loader = settings_loader.GitSettingsLoader(url=self._envs["TEMPLATES_REPO"])
-                templates_path = templates_loader.download_to('.')
-                copy_tree(os.path.join(str(templates_path), 'file_templates'), '.')
-            except OSError:
-                raise OSError(f'Templates mappe eksisterer ikke.')
-            finally:
-                if os.path.exists(str(templates_path)):
-                    remove_folder_structure(str(templates_path))
+                resource_url = self._envs["TEMPLATES_REPO"]
+            except KeyError:
+                raise KeyError(f"env_store({self._envs}) has to contain a TEMPLATES_REPO"
+                               f" variable to initialize internal project ")
+
+            settings_loader.load_template_files_from_resource(url=resource_url)
 
     def _write_settings_file(self):
 

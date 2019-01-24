@@ -1,4 +1,3 @@
-import subprocess
 import json
 from dataverk_cli.dataverk_base import DataverkBase, BucketStorage
 from dataverk_cli.scheduling import scheduler_factory
@@ -14,9 +13,6 @@ class DataverkSchedule(DataverkBase):
         self._scheduler = scheduler_factory.create_scheduler(settings_store=settings, env_store=envs)
 
     def run(self):
-        if not self._datapackage_exists_in_remote_repo():
-            raise FileNotFoundError(f'Datapakken må eksistere i remote repositoriet før man kan eksekvere '
-                                   f'<dataverk-cli schedule>. git add->commit->push av datapakken og prøv på nytt.')
 
         try:
             self._schedule_job()
@@ -30,13 +26,6 @@ class DataverkSchedule(DataverkBase):
         url_list = Path(self._github_project).parts
 
         return url_list[2]
-
-    def _datapackage_exists_in_remote_repo(self):
-        try:
-            subprocess.check_output(["git", "cat-file", "-e", f'origin/master:Jenkinsfile'])
-            return True
-        except subprocess.CalledProcessError:
-            return False
 
     def _schedule_job(self):
         ''' Setter opp schedulering av job for datapakken
