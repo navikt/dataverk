@@ -53,8 +53,8 @@ class DataverkInit(DataverkBase):
             except KeyError:
                 raise KeyError(f"env_store({self._envs}) has to contain a TEMPLATES_REPO"
                                f" variable to initialize internal project ")
-
-            settings_loader.load_template_files_from_resource(url=resource_url)
+            else:
+                settings_loader.load_template_files_from_resource(url=resource_url)
 
     def _write_settings_file(self):
 

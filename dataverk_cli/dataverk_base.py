@@ -20,9 +20,9 @@ CONFIG_FILE_TYPES = ('.json', '.md', '.ipynb')
 
 PACKAGE_FILES = ('.dockerignore', 'cronjob.yaml', 'dockerEntryPoint.sh', 'Dockerfile', 'etl.ipynb',
                  'jenkins_config.xml', 'Jenkinsfile', 'LICENSE.md', 'METADATA.json', 'README.md',
-                 'requirements.txt', 'settings.json')
+                 'requirements.txt', 'settings.json', 'etl.py')
 
-PACKAGE_FOLDERS = ('sql', '.circleci')
+PACKAGE_FOLDERS = ('sql', 'resources')
 
 
 class DataverkBase(ABC):
@@ -42,6 +42,9 @@ class DataverkBase(ABC):
         if not isinstance(envs, Mapping):
             raise TypeError(f'envs parameter must be of type Mapping')
 
+    def _get_github_project(self):
+        return os.popen('git config --get remote.origin.url').read().strip()
+
     def _clean_up_files(self):
         ''' Fjern alle filer som tilhører pakken
 
@@ -60,7 +63,7 @@ class DataverkBase(ABC):
                 pass
 
     def _remove_folder_structure(self, path: str):
-        rmtree(path=path, onerror=delete_rw_windows)
+        rmtree(path=path, onerror=self._delete_rw_windows)
 
     def _delete_rw_windows(self, action, name, exc):
         os.chmod(name, 128)

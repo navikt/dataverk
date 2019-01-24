@@ -23,7 +23,7 @@ class DataverkSchedule(DataverkBase):
               f'For å fullføre oppsett av pipeline må endringer pushes til remote repository')
 
     def _get_org_name(self):
-        url_list = Path(self._github_project).parts
+        url_list = Path(self._get_github_project()).parts
 
         return url_list[2]
 
