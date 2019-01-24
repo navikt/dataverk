@@ -1,44 +1,48 @@
 import os
 import getpass
 
-user_ident_string = "USER_IDENT="
-password_string = "PASSWORD="
-settings_repo_string = "SETTINGS_REPO="
-template_repo_string = "TEMPLATES_REPO="
-
+USER_IDENT_STRING = "USER_IDENT="
+PASSWORD_STRING = "PASSWORD="
+SETTINGS_REPO_STRING = "SETTINGS_REPO="
+TEMPLATE_REPO_STRING = "TEMPLATES_REPO="
+GITHUB_TOKEN_STRING = "GH_TOKEN="
 
 class CreateEnvFile:
     ''' Klasse for å generere .env fil for dataverk
 
     '''
 
-    def __init__(self, user_ident: str, password: str, settings_repo: str, template_repo: str, destination: str=None):
-        self._verify_input_types(user_ident=user_ident, password=password, template_repo=template_repo, settings_repo=settings_repo)
+    def __init__(self, user_ident: str, password: str, github_token: str, settings_repo: str, template_repo: str, destination: str=None):
+        self._verify_input_types(user_ident=user_ident, password=password, github_token=github_token, template_repo=template_repo, settings_repo=settings_repo)
         if destination is not None:
             self._verify_destination(destination)
             try:
                 with open(os.path.join(destination, ".env"), 'w') as env_file:
-                    print(user_ident_string + user_ident, file=env_file)
-                    print(password_string + password, file=env_file)
-                    print(settings_repo_string + settings_repo, file=env_file)
-                    print(template_repo_string + template_repo, file=env_file)
+                    print(USER_IDENT_STRING + user_ident, file=env_file)
+                    print(PASSWORD_STRING + password, file=env_file)
+                    print(GITHUB_TOKEN_STRING + github_token, file=env_file)
+                    print(SETTINGS_REPO_STRING + settings_repo, file=env_file)
+                    print(TEMPLATE_REPO_STRING + template_repo, file=env_file)
             except OSError:
                 raise OSError(f'Klarte ikke generere ny .env fil')
         else:
             try:
                 with open(".env", 'w') as env_file:
-                    print(user_ident_string + user_ident, file=env_file)
-                    print(password_string + password, file=env_file)
-                    print(settings_repo_string + settings_repo, file=env_file)
-                    print(template_repo_string + template_repo, file=env_file)
+                    print(USER_IDENT_STRING + user_ident, file=env_file)
+                    print(PASSWORD_STRING + password, file=env_file)
+                    print(GITHUB_TOKEN_STRING + github_token, file=env_file)
+                    print(SETTINGS_REPO_STRING + settings_repo, file=env_file)
+                    print(TEMPLATE_REPO_STRING + template_repo, file=env_file)
             except OSError:
                 raise OSError(f'Klarte ikke generere ny .env fil')
 
-    def _verify_input_types(self, user_ident, password, settings_repo, template_repo):
+    def _verify_input_types(self, user_ident, password, github_token, settings_repo, template_repo):
         if not isinstance(user_ident, str):
             raise TypeError(f'user_ident må være av type string')
         if not isinstance(password, str):
             raise TypeError(f'password må være av type string')
+        if not isinstance(github_token, str):
+            raise TypeError(f'github_token må være av type string')
         if not isinstance(settings_repo, str):
             raise TypeError(f'settings_repo må være av type string')
         if not isinstance(template_repo, str):
@@ -59,6 +63,7 @@ def run(destination: str=None):
 
     user_ident = input("Skriv inn brukerident: ")
     password = getpass.getpass("Skriv inn passord: ")
+    github_token = getpass.getpass("Skriv inn github token: ")
     settings_repo = input(f'Lim inn url til settings repository [{default_settings_repo}]: ')
     template_repo = input(f'Lim inn url til templates repository [{default_template_repo}]: ')
 
@@ -68,5 +73,5 @@ def run(destination: str=None):
     if not template_repo:
         template_repo = default_template_repo
 
-    CreateEnvFile(user_ident=user_ident, password=password, settings_repo=settings_repo,
-                  template_repo=template_repo, destination=destination)
+    CreateEnvFile(user_ident=user_ident, password=password, github_token=github_token,
+                  settings_repo=settings_repo, template_repo=template_repo, destination=destination)

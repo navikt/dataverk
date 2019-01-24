@@ -45,4 +45,4 @@ class Scheduler(ABC):
     def _get_repo_name(self):
         url_list = Path(self._github_project).parts
 
-        return url_list[3]
+        return url_list[3].split('.')[0]

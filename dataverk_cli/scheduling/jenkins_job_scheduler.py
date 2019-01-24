@@ -2,7 +2,7 @@ import jenkins
 import yaml
 import requests
 import json
-from Crypto.PublicKey import RSA
+from Cryptodome.PublicKey import RSA
 from collections.abc import Mapping
 from xml.etree import ElementTree
 from pathlib import Path
@@ -25,7 +25,7 @@ class JenkinsJobScheduler(Scheduler):
                                                username=self._env_store['USER_IDENT'],
                                                password=self._env_store['PASSWORD'])
         self._package_name = settings_store["package_name"]
-        self._deploy_key_name = f'{self._package_name}-ci'
+        self._deploy_key_name = f'{self._get_repo_name()}-ci'
 
     def job_exist(self):
         return self._jenkins_server.job_exists(name=self._package_name)
@@ -99,10 +99,7 @@ class JenkinsJobScheduler(Scheduler):
         '''
 
         jenkinsfile_path = Path('Jenkinsfile')
-        tag_value = {"package_name": self._package_name,
-                     "package_repo": self._github_project_ssh,
-                     "package_path": self._package_name,
-                     "package_credential_id": self._deploy_key_name}
+        tag_value = {"package_name": self._package_name}
 
         try:
             with jenkinsfile_path.open('r') as jenkinsfile:
@@ -159,7 +156,7 @@ class JenkinsJobScheduler(Scheduler):
 
         :return: True hvis nøkkelen eksisterer, False ellers
         '''
-        res = requests.get(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name().split(".")[0]}/keys',
+        res = requests.get(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name()}/keys',
                            headers={"Authorization": f'token {self._env_store["GH_TOKEN"]}'})
         if not res.ok:
             res.raise_for_status()
@@ -182,7 +179,7 @@ class JenkinsJobScheduler(Scheduler):
         :return: None
         '''
         public_key = key.publickey().exportKey(format='OpenSSH').decode(encoding="utf-8")
-        res = requests.post(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name().split(".")[0]}/keys',
+        res = requests.post(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name()}/keys',
                             headers={"Authorization": f'token {self._env_store["GH_TOKEN"]}'},
                             data=json.dumps({"title": f'{self._deploy_key_name}', "key": public_key, "read_only": True}))
         if res.status_code != 201:

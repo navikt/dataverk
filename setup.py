@@ -30,6 +30,7 @@ setup(
         'cx_Oracle==7.0.0',
         'protobuf==3.6.1',
         'pyarrow>=0.10.0',
+        'pycryptodomex==3.7.3',
         'python-jenkins==1.3.0',
         'pyyaml==4.2b1',
         'elasticsearch==6.3.0',
