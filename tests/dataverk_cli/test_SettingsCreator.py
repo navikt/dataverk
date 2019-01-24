@@ -2,7 +2,7 @@
 # Import statements
 # =================
 from unittest import TestCase
-from dataverk_cli.cli_utils.settings_creator import get_settings_creator
+from dataverk_cli.cli.cli_utils.settings_creator import get_settings_creator
 from argparse import Namespace
 
 # Common input parameters
