@@ -161,9 +161,11 @@ class JenkinsJobScheduler(Scheduler):
         if not res.ok:
             res.raise_for_status()
 
-        if not res.content.decode("utf-8")[1:-1]:
-            return False
-        return True
+        for key in json.loads(res.content.decode("utf-8")):
+            if key["title"] == self._deploy_key_name:
+                return True
+
+        return False
 
     def _generate_deploy_key(self, key_length: int=4096):
         ''' Genererer et SSH nøkkelpar
