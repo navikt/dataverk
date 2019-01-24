@@ -27,6 +27,7 @@ setup(
         'boto3==1.9.11',
         'numpy==1.15.2',
         'fire==0.1.3',
+        'GitPython==2.1.11',
         'cx_Oracle==7.0.0',
         'protobuf==3.6.1',
         'pyarrow>=0.10.0',
