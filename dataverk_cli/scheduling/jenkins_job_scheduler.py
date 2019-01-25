@@ -8,6 +8,7 @@ from xml.etree import ElementTree
 from pathlib import Path
 from string import Template
 from .scheduler import Scheduler
+from dataverk_cli.cli.cli_utils.repo_info import get_org_name, get_repo_name
 
 
 GITHUB_API_URL = "https://api.github.com/repos"
@@ -25,7 +26,7 @@ class JenkinsJobScheduler(Scheduler):
                                                username=self._env_store['USER_IDENT'],
                                                password=self._env_store['PASSWORD'])
         self._package_name = settings_store["package_name"]
-        self._deploy_key_name = f'{self._get_repo_name()}-ci'
+        self._deploy_key_name = f'{get_repo_name(self._github_project)}-ci'
 
     def job_exist(self):
         return self._jenkins_server.job_exists(name=self._package_name)
@@ -156,7 +157,7 @@ class JenkinsJobScheduler(Scheduler):
 
         :return: True hvis nøkkelen eksisterer, False ellers
         '''
-        res = requests.get(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name()}/keys',
+        res = requests.get(url=f'{GITHUB_API_URL}/{get_org_name(self._github_project)}/{get_repo_name(self._github_project)}/keys',
                            headers={"Authorization": f'token {self._env_store["GH_TOKEN"]}'})
         if not res.ok:
             res.raise_for_status()
@@ -181,7 +182,7 @@ class JenkinsJobScheduler(Scheduler):
         :return: None
         '''
         public_key = key.publickey().exportKey(format='OpenSSH').decode(encoding="utf-8")
-        res = requests.post(url=f'{GITHUB_API_URL}/{self._get_org_name()}/{self._get_repo_name()}/keys',
+        res = requests.post(url=f'{GITHUB_API_URL}/{get_org_name(self._github_project)}/{get_repo_name(self._github_project)}/keys',
                             headers={"Authorization": f'token {self._env_store["GH_TOKEN"]}'},
                             data=json.dumps({"title": f'{self._deploy_key_name}', "key": public_key, "read_only": True}))
         if res.status_code != 201:
