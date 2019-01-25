@@ -9,7 +9,7 @@ def get_env_store():
         :return EnvStore containing Environment variables and .env variables
     """
 
-    resource_files = resource_discoverer.search_for_files(start_path=Path('.'), file_names=('.env',), levels=3)
+    resource_files = resource_discoverer.search_for_files(start_path=Path('.'), file_names=('.env',), levels=1)
     if '.env' not in resource_files:
         raise FileNotFoundError(f'.env fil må finnes i repo for å kunne kjøre dataverk-cli init/schedule/delete')
 

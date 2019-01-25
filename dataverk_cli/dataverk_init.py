@@ -5,15 +5,14 @@ from pathlib import Path
 from importlib_resources import path
 from dataverk_cli.cli.cli_utils import settings_loader
 from .dataverk_base import DataverkBase, CONFIG_FILE_TYPES, BucketStorage
-from dataverk.context.env_store import EnvStore
-from dataverk.context.settings import SettingsStore
+from collections.abc import Mapping
 
 
 class DataverkInit(DataverkBase):
     ''' Klasse for å opprette ny datapakke lokalt i et eksisterende repository for datapakker/datasett
     '''
 
-    def __init__(self, settings: SettingsStore, envs: EnvStore):
+    def __init__(self, settings: Mapping, envs: Mapping):
         super().__init__(settings=settings, envs=envs)
 
         self._package_id = str(uuid4())
