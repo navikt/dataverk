@@ -1,11 +1,10 @@
 from dataverk_cli.dataverk_base import DataverkBase
 from dataverk_cli.scheduling import scheduler_factory
-from dataverk.context.env_store import EnvStore
-from dataverk.context.settings import SettingsStore
+from collections.abc import Mapping
 
 
 class DataverkSchedule(DataverkBase):
-    def __init__(self, settings: SettingsStore, envs: EnvStore):
+    def __init__(self, settings: Mapping, envs: Mapping):
         super().__init__(settings=settings, envs=envs)
 
         self._scheduler = scheduler_factory.create_scheduler(settings_store=settings, env_store=envs)

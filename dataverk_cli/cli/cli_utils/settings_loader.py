@@ -12,10 +12,10 @@ from dataverk.utils import file_functions
 def load_settings_file_from_resource(url):
     """ Loads settings file from external resource """
 
-    if _is_location_git_repo(url=url):
+    if _is_resource_git_repo(url=url):
         settings_dict = _get_settings_dict_from_git_repo(url)
     else:
-        if _is_online_resource(url=url):
+        if _is_resource_web_hosted(url=url):
             settings_dict = _get_settings_dict_from_web_file(url)
         else:
             settings_dict = _get_settings_dict_from_local_file(url)
@@ -26,11 +26,11 @@ def load_settings_file_from_resource(url):
 def load_template_files_from_resource(url):
     """ Loads template files from external resource """
 
-    if _is_location_git_repo(url=url):
+    if _is_resource_git_repo(url=url):
         _get_templates_from_git_repo(url=url)
 
 
-def _is_location_git_repo(url: str):
+def _is_resource_git_repo(url: str):
     """
     Returns true if given url is a git repository
 
@@ -43,9 +43,9 @@ def _get_url_suffix(url:str):
     return url.split(".")[-1]
 
 
-def _is_online_resource(url: str):
+def _is_resource_web_hosted(url: str):
     result = parse_url(url)
-    if result.scheme == "http" or result.scheme == "https":
+    if result.scheme == "http" or result.scheme == "https" or result.scheme == "ftp":
         return True
     else:
         return False

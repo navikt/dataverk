@@ -10,14 +10,21 @@ from collections.abc import Mapping
 
 
 def handle(args):
+    """
+    Handles the delete command case. Configures the settings mapping object accordingly to requirements for deletion
+    of a datapackage project
+
+    :param args: command line argument object
+    :return: settings_store: Mapping, env_store: Mapping
+    """
+
 
     settings_dict = setting_store_functions.get_settings_dict()
-    envs = get_env_store(settings=settings_dict)
+    env_store = get_env_store(settings=settings_dict)
 
-    delete = get_datapackage_object(action=Action.DELETE, settings=settings_dict, envs=envs)
 
     if user_input.cli_question(f'Er du sikker på at du ønsker å fjerne datapakken {settings_dict["package_name"]}? [j/n] '):
-        delete.run()
+        return settings_dict, env_store
     else:
         print(f'Datapakken {settings_dict["package_name"]} ble ikke fjernet')
 
