@@ -41,7 +41,7 @@ def handle(args) -> (Mapping, Mapping):
 def get_env_store(settings: Mapping):
     # Is project internal
     if "internal" in settings:
-        return env_store_functions.get_env_store()
+        return env_store_functions.create_env_store()
     else:
         return {}
 

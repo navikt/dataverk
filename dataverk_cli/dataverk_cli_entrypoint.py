@@ -6,9 +6,10 @@ from dataverk_cli import dataverk_create_env_file, __version__
 from dataverk_cli.dataverk_notebook2script import notebook2script
 from dataverk_cli.dataverk_publish import publish_datapackage
 from dataverk_cli.cli.cli_utils import commands
-from dataverk_cli.cli.cli_handlers import init_handler, schedule_handler, delete_handler
+from dataverk_cli.cli.cli_command_handlers import init_handler, schedule_handler, delete_handler
 from dataverk_cli.dataverk_factory import get_datapackage_object, Action
-
+from dataverk_cli.cli.cli_utils import setting_store_functions
+from dataverk_cli.cli.cli_utils import env_store_functions
 
 ERROR_TEMPLATE = "[ERROR] {}"
 
@@ -35,9 +36,17 @@ def main():
         if args.command == 'create-env-file':
             dataverk_create_env_file.run(destination=args.destination)
         elif args.command == 'init':
-            settings_dict, env_store = init_handler.handle(args)
+            # Create setting and env stores for init command handling
+            env_store = env_store_functions.safe_create_env_store(args)
+            settings_dict = setting_store_functions.create_settings_dict(args=args, env_store=env_store)
+
+            # call the init command handler to handle user interaction and settings configuration
+            settings_dict, env_store = init_handler.handle(args, settings_dict, env_store)
+
+            # create Datapackage object with the configured settings and env
             dp = get_datapackage_object(Action.INIT, settings_dict, env_store)
             dp.run()
+
         elif args.command == 'schedule':
             settings_dict, env_store = schedule_handler.handle(args)
             dp = get_datapackage_object(Action.SCHEDULE, settings_dict, env_store)
@@ -62,6 +71,10 @@ def main():
 
     finally:
         print(f"dataverk-cli {args.command} completed")
+
+
+
+
 
 
 if __name__ == "__main__":
