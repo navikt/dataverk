@@ -1,7 +1,6 @@
-import os
 from abc import ABC, abstractmethod
 from collections import Mapping
-from pathlib import Path
+from dataverk_cli.cli.cli_utils import repo_info
 
 
 class Scheduler(ABC):
@@ -13,8 +12,8 @@ class Scheduler(ABC):
     def __init__(self, settings_store: Mapping, env_store: Mapping):
         self._env_store = env_store
         self._settings_store = settings_store
-        self._github_project = self._get_github_url()
-        self._github_project_ssh = self._get_ssh_url()
+        self._github_project = repo_info.get_remote_url()
+        self._github_project_ssh = repo_info.convert_to_ssh_url(self._github_project)
 
     @abstractmethod
     def configure_job(self):
@@ -27,22 +26,3 @@ class Scheduler(ABC):
     @abstractmethod
     def job_exist(self):
         raise NotImplementedError()
-
-    def _get_github_url(self):
-        return os.popen('git config --get remote.origin.url').read().strip()
-
-    def _get_ssh_url(self):
-        url_list = Path(self._github_project).parts
-        org_name = url_list[2]
-        repo_name = url_list[3]
-        return f'git@github.com:{org_name}/{repo_name}'
-
-    def _get_org_name(self):
-        url_list = Path(self._github_project).parts
-
-        return url_list[2]
-
-    def _get_repo_name(self):
-        url_list = Path(self._github_project).parts
-
-        return url_list[3].split('.')[0]
