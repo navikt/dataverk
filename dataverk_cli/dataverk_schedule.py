@@ -1,5 +1,6 @@
 from dataverk_cli.dataverk_base import DataverkBase
 from dataverk_cli.scheduling import scheduler_factory
+from dataverk_cli.cli.cli_utils import repo_info
 from collections.abc import Mapping
 
 
@@ -8,6 +9,7 @@ class DataverkSchedule(DataverkBase):
         super().__init__(settings=settings, envs=envs)
 
         self._scheduler = scheduler_factory.create_scheduler(settings_store=settings, env_store=envs)
+        self._github_project = repo_info.get_remote_url()
 
     def run(self):
 

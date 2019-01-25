@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from shutil import rmtree
 from collections.abc import Mapping
-from dataverk_cli.cli.cli_utils import repo_info
 
 
 class Action(Enum):
@@ -35,7 +34,6 @@ class DataverkBase(ABC):
 
         self._settings_store = settings
         self._envs = envs
-        self._github_project = repo_info.get_remote_url()
 
     def _verify_class_init_arguments(self, settings, envs):
         if not isinstance(settings, Mapping):
