@@ -5,7 +5,7 @@ from dataverk_cli.dataverk_notebook2script import notebook2script
 from dataverk_cli.dataverk_publish import publish_datapackage
 from dataverk_cli.cli.cli_utils import commands
 from dataverk_cli.cli.cli_handlers import init_handler, schedule_handler, delete_handler
-from dataverk_factory import get_datapackage_object, Action
+from dataverk_cli.dataverk_factory import get_datapackage_object, Action
 
 ERROR_TEMPLATE = "[ERROR] {}"
 
