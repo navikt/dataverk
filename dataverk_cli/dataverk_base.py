@@ -1,13 +1,9 @@
 import os
-import json
-
-from dataverk_cli.cli_utils import settings_creator, settings_loader
-from dataverk.context.env_store import EnvStore
 from abc import ABC, abstractmethod
 from enum import Enum
 from shutil import rmtree
 from collections.abc import Mapping
-from pathlib import Path
+from dataverk_cli.cli.cli_utils import repo_info
 
 
 class Action(Enum):
@@ -21,6 +17,15 @@ class BucketStorage(Enum):
     DATAVERK_S3 = "Dataverk_S3"
 
 
+CONFIG_FILE_TYPES = ('.json', '.md', '.ipynb')
+
+PACKAGE_FILES = ('.dockerignore', 'cronjob.yaml', 'dockerEntryPoint.sh', 'Dockerfile', 'etl.ipynb',
+                 'jenkins_config.xml', 'Jenkinsfile', 'LICENSE.md', 'METADATA.json', 'README.md',
+                 'requirements.txt', 'settings.json', 'etl.py', 'datapackage.json')
+
+PACKAGE_FOLDERS = ('sql', 'resources')
+
+
 class DataverkBase(ABC):
     ''' Abstrakt baseklasse for dataverk scripts.
     '''
@@ -28,17 +33,40 @@ class DataverkBase(ABC):
     def __init__(self, settings: Mapping, envs: Mapping):
         self._verify_class_init_arguments(settings, envs)
 
-        self.settings = settings
-        self.github_project = self._get_github_url()
-        self.github_project_ssh = self._get_ssh_url()
-        self.envs = envs
+        self._settings_store = settings
+        self._envs = envs
+        self._github_project = repo_info.get_remote_url()
 
     def _verify_class_init_arguments(self, settings, envs):
-        if not isinstance(settings, dict):
-            raise TypeError(f'settings parameter must be of type dict')
+        if not isinstance(settings, Mapping):
+            raise TypeError(f'settings parameter must be of type Mapping')
 
-        if not isinstance(envs, EnvStore):
-            raise TypeError(f'envs parameter must be of type EnvStore')
+        if not isinstance(envs, Mapping):
+            raise TypeError(f'envs parameter must be of type Mapping')
+
+    def _clean_up_files(self):
+        ''' Fjern alle filer som tilhører pakken
+
+        :return:
+        '''
+        for file in PACKAGE_FILES:
+            try:
+                os.remove(file)
+            except OSError:
+                pass
+
+        for folder in PACKAGE_FOLDERS:
+            try:
+                self._remove_folder_structure(folder)
+            except OSError:
+                pass
+
+    def _remove_folder_structure(self, path: str):
+        rmtree(path=path, onerror=self._delete_rw_windows)
+
+    def _delete_rw_windows(self, action, name, exc):
+        os.chmod(name, 128)
+        os.remove(name)
 
     def _folder_exists_in_repo(self, name: str):
         ''' Sjekk på om det finnes en mappe i repoet med samme navn som ønsket pakkenavn
@@ -52,48 +80,6 @@ class DataverkBase(ABC):
 
         return False
 
-    def _print_datapipeline_config(self):
-        print("\n-------------Datapakke-----------------------------" +
-              "\nDatapakkenavn: " + self.settings["package_name"] +
-              "\ngithub repo: " + self.github_project +
-              "\ncronjob schedule: " + self.settings["update_schedule"] +
-              "\nNAIS namespace: " + self.settings["nais_namespace"] +
-              "\n-------------------------------------------------\n")
-
-    def _get_github_url(self):
-        return os.popen('git config --get remote.origin.url').read().strip()
-
-    def _get_ssh_url(self):
-        url_list = Path(self.github_project).parts
-        org_name = url_list[2]
-        repo_name = url_list[3]
-        return f'git@github.com:{org_name}/{repo_name}'
-
     @abstractmethod
     def run(self):
         raise NotImplementedError()
-
-
-def create_settings_dict(args, envs: EnvStore):
-    default_settings_path = ""
-    try:
-        default_settings_loader = settings_loader.GitSettingsLoader(url=envs["SETTINGS_REPO"])
-        default_settings_path = default_settings_loader.download_to('.')
-
-        settings_creator_object = settings_creator.get_settings_creator(args=args,
-                                                                        default_settings_path=str(default_settings_path))
-        settings = settings_creator_object.create_settings()
-    finally:
-        if os.path.exists(str(default_settings_path)):
-            rmtree(str(default_settings_path))
-
-    return settings
-
-
-def get_settings_dict(package_name):
-    try:
-        with open(os.path.join(package_name, "settings.json"), 'r') as settings_file:
-            settings = json.load(settings_file)
-    except OSError:
-        raise OSError(f'Settings file missing in datapackage {package_name}')
-    return settings

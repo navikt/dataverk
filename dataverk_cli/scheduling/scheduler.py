@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import Mapping
-from enum import Enum
+from dataverk_cli.cli.cli_utils import repo_info
 
 
 class Scheduler(ABC):
@@ -12,21 +12,17 @@ class Scheduler(ABC):
     def __init__(self, settings_store: Mapping, env_store: Mapping):
         self._env_store = env_store
         self._settings_store = settings_store
+        self._github_project = repo_info.get_remote_url()
+        self._github_project_ssh = repo_info.convert_to_ssh_url(self._github_project)
 
     @abstractmethod
-    def create_job(self, job_name, config_file):
+    def configure_job(self):
         raise NotImplementedError()
 
     @abstractmethod
-    def update_job(self, job_name, config_file):
+    def delete_job(self):
         raise NotImplementedError()
 
     @abstractmethod
-    def delete_job(self, job_name):
+    def job_exist(self):
         raise NotImplementedError()
-
-    @abstractmethod
-    def job_exist(self, job_name):
-        raise NotImplementedError()
-
-

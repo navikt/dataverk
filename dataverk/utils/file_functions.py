@@ -16,13 +16,13 @@ def write_file(path, content):
 
 
 def read_file(path):
-    with open(path) as f:
+    with open(path, mode="r", encoding="utf-8") as f:
         return f.read()
 
 
 def json_to_dict(path: Path):
-    _json_validate_params(path)
-    return json.loads(read_file(path))
+    file_string = read_file(path)
+    return json.loads(file_string)
 
 
 def _json_validate_params(file_path: Path):

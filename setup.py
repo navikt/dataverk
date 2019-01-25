@@ -13,7 +13,7 @@ setup(
     name='dataverk',
     version=__version__,
     packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_cli', 'dataverk.context',
-              'dataverk_cli.scheduling', 'dataverk_cli.cli_utils'],
+              'dataverk_cli.scheduling', 'dataverk_cli.cli.cli_handlers', 'dataverk_cli.cli.cli_utils', 'dataverk_cli.templates'],
     python_requires='>=3.6',
     install_requires=[
         'cryptography==2.3',
@@ -23,12 +23,15 @@ setup(
         'pyjstat==1.0.1',
         'setuptools>=39.0.1',
         'pandas==0.23.3',
+        'importlib_resources==1.0.2',
         'boto3==1.9.11',
         'numpy==1.15.2',
         'fire==0.1.3',
+        'GitPython==2.1.11',
         'cx_Oracle==7.0.0',
         'protobuf==3.6.1',
         'pyarrow>=0.10.0',
+        'pycryptodomex==3.7.3',
         'python-jenkins==1.3.0',
         'pyyaml==4.2b1',
         'elasticsearch==6.3.0',
@@ -41,10 +44,11 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'dataverk-cli = dataverk_cli.dataverk:main'
+            'dataverk-cli = dataverk_cli.dataverk_cli_entrypoint:main'
         ]
     },
-    package_data={'dataverk': ['VERSION']},
+    package_data={'dataverk': ['VERSION'],
+                  'dataverk_cli': ['templates/*']},
 
      # metadata to display on PyPI
     author="NAV IKT",
