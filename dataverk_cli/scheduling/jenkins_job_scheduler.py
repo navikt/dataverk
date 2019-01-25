@@ -33,7 +33,6 @@ class JenkinsJobScheduler(Scheduler):
 
     def configure_job(self):
         self._edit_jenkins_job_config()
-        self._edit_jenkinsfile()
         self._edit_cronjob_config()
         self._setup_deploy_key()
 
@@ -94,28 +93,6 @@ class JenkinsJobScheduler(Scheduler):
         xml_base_root = xml_base.getroot()
 
         return ElementTree.tostring(xml_base_root, encoding='utf-8', method='xml').decode()
-
-    def _edit_jenkinsfile(self):
-        ''' Tilpasser Jenkinsfile til datapakken
-        '''
-
-        jenkinsfile_path = Path('Jenkinsfile')
-        tag_value = {"package_name": self._package_name}
-
-        try:
-            with jenkinsfile_path.open('r') as jenkinsfile:
-                jenkins_config = jenkinsfile.read()
-        except OSError:
-            raise OSError(f'Finner ikke Jenkinsfile på Path({jenkinsfile_path})')
-
-        template = Template(jenkins_config)
-        jenkins_config = template.safe_substitute(**tag_value)
-
-        try:
-            with jenkinsfile_path.open('w') as jenkinsfile:
-                jenkinsfile.write(jenkins_config)
-        except OSError:
-            raise OSError(f'Finner ikke Jenkinsfile på Path{jenkinsfile_path})')
 
     def _edit_cronjob_config(self) -> None:
         """

@@ -2,6 +2,7 @@ import json
 from uuid import uuid4
 from shutil import copy
 from pathlib import Path
+from string import Template
 from importlib_resources import path
 from dataverk_cli.cli.cli_utils import settings_loader
 from .dataverk_base import DataverkBase, CONFIG_FILE_TYPES, BucketStorage
@@ -55,6 +56,7 @@ class DataverkInit(DataverkBase):
                                f" variable to initialize internal project ")
             else:
                 settings_loader.load_template_files_from_resource(url=resource_url)
+                self._edit_jenkinsfile()
 
     def _write_settings_file(self):
 
@@ -103,7 +105,24 @@ class DataverkInit(DataverkBase):
     def _is_publish_set(self, bucket_type: str):
         return self._settings_store["bucket_storage_connections"][bucket_type]["publish"].lower() == "true"
 
-    def _get_org_name(self):
-        url_list = Path(self._get_github_project()).parts
+    def _edit_jenkinsfile(self):
+        ''' Tilpasser Jenkinsfile til datapakken
+        '''
 
-        return url_list[2]
+        jenkinsfile_path = Path('Jenkinsfile')
+        tag_value = {"package_name": self._settings_store["package_name"]}
+
+        try:
+            with jenkinsfile_path.open('r') as jenkinsfile:
+                jenkins_config = jenkinsfile.read()
+        except OSError:
+            raise OSError(f'Finner ikke Jenkinsfile på Path({jenkinsfile_path})')
+
+        template = Template(jenkins_config)
+        jenkins_config = template.safe_substitute(**tag_value)
+
+        try:
+            with jenkinsfile_path.open('w') as jenkinsfile:
+                jenkinsfile.write(jenkins_config)
+        except OSError:
+            raise OSError(f'Finner ikke Jenkinsfile på Path{jenkinsfile_path})')

@@ -21,7 +21,7 @@ CONFIG_FILE_TYPES = ('.json', '.md', '.ipynb')
 
 PACKAGE_FILES = ('.dockerignore', 'cronjob.yaml', 'dockerEntryPoint.sh', 'Dockerfile', 'etl.ipynb',
                  'jenkins_config.xml', 'Jenkinsfile', 'LICENSE.md', 'METADATA.json', 'README.md',
-                 'requirements.txt', 'settings.json', 'etl.py')
+                 'requirements.txt', 'settings.json', 'etl.py', 'datapackage.json')
 
 PACKAGE_FOLDERS = ('sql', 'resources')
 
