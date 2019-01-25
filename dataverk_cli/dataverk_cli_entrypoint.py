@@ -1,11 +1,14 @@
 import argparse
 
+from git import GitError
+
 from dataverk_cli import dataverk_create_env_file, __version__
 from dataverk_cli.dataverk_notebook2script import notebook2script
 from dataverk_cli.dataverk_publish import publish_datapackage
 from dataverk_cli.cli.cli_utils import commands
 from dataverk_cli.cli.cli_handlers import init_handler, schedule_handler, delete_handler
 from dataverk_cli.dataverk_factory import get_datapackage_object, Action
+
 
 ERROR_TEMPLATE = "[ERROR] {}"
 
@@ -47,12 +50,19 @@ def main():
             notebook2script()
         elif args.command == "publish":
             publish_datapackage()
+
     except KeyboardInterrupt as user_cancel:
         print(user_cancel)
+
     except FileNotFoundError as bad_project_state_error:
         print(ERROR_TEMPLATE.format(bad_project_state_error))
+
+    except GitError as git_related_error:
+        print(ERROR_TEMPLATE.format(git_related_error))
+
     finally:
         print(f"dataverk-cli {args.command} completed")
+
 
 if __name__ == "__main__":
     main()
