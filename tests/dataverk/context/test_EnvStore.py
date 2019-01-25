@@ -59,7 +59,6 @@ class Instantiation(Base):
 
     def test_init__settings_file_and_envsetter_sanity_check(self):
         EnvStore(self.test_file_path, {})
-        prin
 
     # Input arguments wrong type
     # ==========================
