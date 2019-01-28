@@ -1,11 +1,9 @@
 """ Handles the init command"""
 
-import argparse
-from dataverk_cli.cli.cli_utils import env_store_functions
 from dataverk.utils.validators import validate_datapackage_name
 from dataverk_cli.cli.cli_utils import user_input
 
-from collections.abc import MutableMapping, Mapping
+from collections.abc import MutableMapping
 
 
 def handle(args, settings_store: MutableMapping) -> MutableMapping:

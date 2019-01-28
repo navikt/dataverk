@@ -16,4 +16,4 @@ def handle(args, settings_dict: MutableMapping) -> MutableMapping:
     if user_input.cli_question(f'Are you sure you want to remove datapackage {settings_dict["package_name"]}? [y/n] '):
         return settings_dict
     else:
-        print(f'Datapackage {settings_dict["package_name"]} was NOT removed')
+        raise KeyboardInterrupt(f'Datapackage {settings_dict["package_name"]} was NOT removed')

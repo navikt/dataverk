@@ -1,10 +1,9 @@
 """ Handles the schedule command"""
 
 import subprocess
-from dataverk_cli.cli.cli_utils import setting_store_functions
 from dataverk.utils.validators import validate_cronjob_schedule
 from dataverk_cli.cli.cli_utils import user_input
-from collections.abc import Mapping, MutableMapping
+from collections.abc import MutableMapping
 
 
 def handle(args, settings_dict: MutableMapping) -> MutableMapping:
