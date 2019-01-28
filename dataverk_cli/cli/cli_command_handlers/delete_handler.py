@@ -1,15 +1,10 @@
 """ Handles the delete command"""
 
-import argparse
-from dataverk_cli.cli.cli_utils import env_store_functions
-from dataverk_cli.cli.cli_utils import setting_store_functions
 from dataverk_cli.cli.cli_utils import user_input
-from dataverk_cli.dataverk_factory import get_datapackage_object
-from dataverk_cli.dataverk_base import Action
-from collections.abc import Mapping
+from collections.abc import MutableMapping
 
 
-def handle(args):
+def handle(args, settings_dict: MutableMapping) -> MutableMapping:
     """
     Handles the delete command case. Configures the settings mapping object accordingly to requirements for deletion
     of a datapackage project
@@ -18,15 +13,7 @@ def handle(args):
     :return: settings_store: Mapping, env_store: Mapping
     """
 
-
-    settings_dict = setting_store_functions.get_settings_dict()
-    env_store = get_env_store(settings=settings_dict)
-
-
-    if user_input.cli_question(f'Er du sikker på at du ønsker å fjerne datapakken {settings_dict["package_name"]}? [j/n] '):
-        return settings_dict, env_store
+    if user_input.cli_question(f'Are you sure you want to remove datapackage {settings_dict["package_name"]}? [y/n] '):
+        return settings_dict
     else:
-        print(f'Datapakken {settings_dict["package_name"]} ble ikke fjernet')
-
-
-
+        raise KeyboardInterrupt(f'Datapackage {settings_dict["package_name"]} was NOT removed')

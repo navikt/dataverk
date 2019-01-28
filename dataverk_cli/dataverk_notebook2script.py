@@ -30,8 +30,7 @@ def notebook2script():
         ##########################################################\n\n'''
     for cell in code_cells: module += ''.join(cell['source'][1:]) + '\n\n'
     fname = os.path.splitext(fname)[0]
-    number = fname.split('_')[0]
-    fname_out = f'{number}.py'
+    fname_out = f'{fname}.py'
     # remove trailing spaces
     module = re.sub(r' +$', '', module, flags=re.MULTILINE)
     with open(fname_out,'w', encoding="utf-8") as f:

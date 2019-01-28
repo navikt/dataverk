@@ -7,6 +7,7 @@ from importlib_resources import path
 from dataverk_cli.cli.cli_utils import settings_loader
 from .dataverk_base import DataverkBase, CONFIG_FILE_TYPES, BucketStorage
 from collections.abc import Mapping
+from dataverk_cli.cli.cli_utils import repo_info
 
 
 class DataverkInit(DataverkBase):
@@ -95,7 +96,8 @@ class DataverkInit(DataverkBase):
         for bucket_type in self._settings_store["bucket_storage_connections"]:
             if self._is_publish_set(bucket_type=bucket_type):
                 if BucketStorage(bucket_type) == BucketStorage.GITHUB:
-                    return f'{buckets[bucket_type]["host"]}/{self._get_org_name()}/{self._settings_store["package_name"]}/master/'
+                    remote_url = repo_info.get_remote_url()
+                    return f'{buckets[bucket_type]["host"]}/{repo_info.get_org_name(remote_url)}/{self._settings_store["package_name"]}/master/'
                 elif BucketStorage(bucket_type) == BucketStorage.DATAVERK_S3:
                     return f'{buckets[bucket_type]["host"]}/{buckets[bucket_type]["bucket"]}/{self._settings_store["package_name"]}'
                 else:

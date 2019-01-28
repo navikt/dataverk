@@ -8,8 +8,8 @@ from dataverk_cli.dataverk_publish import publish_datapackage
 from dataverk_cli.cli.cli_utils import commands
 from dataverk_cli.cli.cli_command_handlers import init_handler, schedule_handler, delete_handler
 from dataverk_cli.dataverk_factory import get_datapackage_object, Action
-from dataverk_cli.cli.cli_utils import setting_store_functions
-from dataverk_cli.cli.cli_utils import env_store_functions
+from dataverk_cli.cli.cli_utils.package_config_handler import get_package_configuration
+
 
 ERROR_TEMPLATE = "[ERROR] {}"
 
@@ -37,22 +37,28 @@ def main():
             dataverk_create_env_file.run(destination=args.destination)
         elif args.command == 'init':
             # Create setting and env stores for init command handling
-            env_store = env_store_functions.safe_create_env_store(args)
-            settings_dict = setting_store_functions.create_settings_dict(args=args, env_store=env_store)
+            settings_dict, env_store = get_package_configuration(args, initialize=True)
 
             # call the init command handler to handle user interaction and settings configuration
-            settings_dict, env_store = init_handler.handle(args, settings_dict, env_store)
+            settings_dict = init_handler.handle(args, settings_dict)
 
             # create Datapackage object with the configured settings and env
             dp = get_datapackage_object(Action.INIT, settings_dict, env_store)
             dp.run()
-
         elif args.command == 'schedule':
-            settings_dict, env_store = schedule_handler.handle(args)
+            # Create setting and env stores for schedule command handling
+            settings_dict, env_store = get_package_configuration(args)
+
+            # call the schedule command handler to handle user interaction and settings configuration
+            settings_dict = schedule_handler.handle(args, settings_dict)
             dp = get_datapackage_object(Action.SCHEDULE, settings_dict, env_store)
             dp.run()
         elif args.command == 'delete':
-            settings_dict, env_store = delete_handler.handle(args)
+            # Create setting and env stores for delete command handling
+            settings_dict, env_store = get_package_configuration(args)
+
+            # call the delete command handler to handle user interaction and settings configuration
+            settings_dict = delete_handler.handle(args, settings_dict)
             dp = get_datapackage_object(Action.DELETE, settings_dict, env_store)
             dp.run()
         elif args.command == "notebook2script":

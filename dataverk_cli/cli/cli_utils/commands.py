@@ -20,33 +20,10 @@ def add_init_command(sub_arg_parser):
     parser_init.add_argument('-v', '--version', action='version', version=__version__,
                               help="Viser programversjon")
     parser_init.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
-    parser_init.add_argument('-p', '--prompt-missing-args', dest="prompt_missing_args", action='store_true',
-                              help="Prompter bruker om å skrive inn alle settings parametere som ikke "
-                                   "angis som input til skriptet (default settings fil brukes ikke)")
     parser_init.add_argument('-i', '--internal', dest="internal", action='store_true',
                              help="For pakker som skal settes opp med intern konfigurasjon")
     parser_init.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
-                              default=None, help="Ønsket navn på ny datapakke")
-    parser_init.add_argument('--update-schedule', dest="update_schedule", action='store', metavar='<schedule>',
-                              default=None, help="Ønsket oppdateringsschedule for datapakke")
-    parser_init.add_argument('--nais-namespace', dest="nais_namespace", action='store', metavar='<namespace>',
-                              default=None, help="Namespace på NAIS plattform")
-    parser_init.add_argument('--elastic-private', dest="elastic_private", action='store', metavar='<endpoint>',
-                              default=None, help="Endepunkt for private elastic index")
-    parser_init.add_argument('--aws-endpoint', dest="aws_endpoint", action='store', metavar='<endpoint>',
-                              default=None, help="Endepunkt for AWS S3")
-    parser_init.add_argument('--jenkins-endpoint', dest="jenkins_endpoint", action='store', metavar='<endpoint>',
-                              default=None, help="Endepunkt for jenkins server")
-    parser_init.add_argument('--vault-secrets-uri', dest="vault_secrets_uri", action='store', metavar='<uri>',
-                              default=None, help="URI for vault secrets")
-    parser_init.add_argument('--vault-auth-path', dest="vault_auth_path", action='store', metavar='<path>',
-                              default=None, help="Vault sti for vks auth path")
-    parser_init.add_argument('--vault-kv-path', dest="vault_kv_path", action='store', metavar='<path>',
-                              default=None, help="Vault sti til kv secrets")
-    parser_init.add_argument('--vault-role', dest="vault_role", action='store', metavar='<role>',
-                              default=None, help="Vault role")
-    parser_init.add_argument('--vault-service-account', dest="vault_service_account", action='store', metavar='<service account>',
-                              default=None, help="Vault service account")
+                             default=None, help="Ønsket navn på ny datapakke")
 
 
 def add_update_schedule_command(sub_arg_parser):
@@ -54,7 +31,6 @@ def add_update_schedule_command(sub_arg_parser):
     parser_schedule.add_argument('-v', '--version', action='version', version=__version__,
                                  help="Viser programversjon")
     parser_schedule.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
-
     parser_schedule.add_argument('--package-name', dest="package_name", action='store', metavar='<pakkenavn>',
                                  default=None, help="Navn på datapakke som ønskes schedulert")
     parser_schedule.add_argument('--update-schedule', dest="update_schedule", action='store', metavar='<update schedule>',

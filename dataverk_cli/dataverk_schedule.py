@@ -16,10 +16,10 @@ class DataverkSchedule(DataverkBase):
         try:
             self._schedule_job()
         except Exception:
-            raise Exception(f'Klarte ikke sette opp pipeline for datapakke {self._settings_store["package_name"]}')
+            raise Exception(f'Unable to setup pipeline for datapackage {self._settings_store["package_name"]}')
 
-        print(f'Jobb for datapakke {self._settings_store["package_name"]} er satt opp/rekonfigurert. '
-              f'For å fullføre oppsett av pipeline må endringer pushes til remote repository')
+        print(f'Job for datapackage {self._settings_store["package_name"]} is set up/reconfigured. '
+              f'To complete the pipeline setup all local changes must be pushed to remote repository')
 
     def _schedule_job(self):
         ''' Setter opp schedulering av job for datapakken
