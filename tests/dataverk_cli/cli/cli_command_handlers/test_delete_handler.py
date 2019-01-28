@@ -5,20 +5,19 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 
-from dataverk_cli.cli.cli_command_handlers import init_handler
+from dataverk_cli.cli.cli_command_handlers import delete_handler
 
 # Common input parameters
 # =======================
 
 
-class MockArgsInternal:
-    internal = True
-    package_name = "test-package"
+class MockArgs:
+    pass
 
 
-class MockArgsNotInternal:
-    internal = False
-    package_name = "test-package"
+SETTINGS_DICT = {
+    "package_name": "my-package"
+}
 
 # Base classes
 # ============
@@ -59,9 +58,9 @@ class MethodsReturnValues(Base):
 
     @patch('builtins.input', return_value='y')
     def test_handler_yes_sanity_check(self, input):
-        init_handler.handle(MockArgsInternal, {})
+        delete_handler.handle(MockArgs, SETTINGS_DICT)
 
     @patch('builtins.input', return_value='n')
     def test_handler_no_sanity_check(self, input):
         with self.assertRaises(KeyboardInterrupt):
-            init_handler.handle(MockArgsInternal, {})
+            delete_handler.handle(MockArgs, SETTINGS_DICT)

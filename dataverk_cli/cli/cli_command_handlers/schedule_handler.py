@@ -12,7 +12,7 @@ def handle(args, settings_dict: MutableMapping) -> MutableMapping:
     scheduling of a datapackage project in a datapipeline
 
     :param args: command line argument object
-    :return: settings_store: Mapping, env_store: Mapping
+    :return: settings_dict: Mapping, env_store: Mapping
     """
 
     if not datapackage_exists_in_remote_repo():
@@ -21,7 +21,6 @@ def handle(args, settings_dict: MutableMapping) -> MutableMapping:
 
     update_schedule = _create_update_schedule(args)
 
-    validate_cronjob_schedule(update_schedule)
     settings_dict["update_schedule"] = update_schedule
 
     if user_input.cli_question('Do you want to set up pipeline for the datapackage? [y/n] '):
@@ -47,5 +46,7 @@ def _create_update_schedule(args):
             update_schedule = "* * 31 2 *"  # Default value Feb 31 (i.e. never)
     else:
         update_schedule = args.update_schedule
+
+    validate_cronjob_schedule(update_schedule)
 
     return update_schedule
