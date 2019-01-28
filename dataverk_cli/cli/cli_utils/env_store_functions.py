@@ -3,7 +3,7 @@ from dataverk.context import EnvStore
 from pathlib import Path
 
 
-def get_env_store():
+def create_env_store():
     """ Retrives .env file from project folder
 
         :return EnvStore containing Environment variables and .env variables
@@ -14,3 +14,12 @@ def get_env_store():
         raise FileNotFoundError(f'.env fil må finnes i repo for å kunne kjøre dataverk-cli init/schedule/delete')
 
     return EnvStore(path=Path(resource_files['.env']))
+
+
+def safe_create_env_store(args):
+    # Is project internal
+    try:
+        env_store = create_env_store()
+        return env_store
+    except FileNotFoundError:
+        return EnvStore()

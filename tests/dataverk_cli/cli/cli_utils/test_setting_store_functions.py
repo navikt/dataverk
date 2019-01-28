@@ -2,10 +2,8 @@
 # Import statements
 # =================
 
-import unittest
 from dataverk_cli.cli.cli_utils.setting_store_functions import create_settings_dict
-from tests.dataverk_cli.settings_resource_test_mixin import SettingsResourceTestMixin
-from unittest.mock import MagicMock
+from tests.settings_resource_test_mixin import SettingsResourceTestMixin
 
 
 # Common input parameters

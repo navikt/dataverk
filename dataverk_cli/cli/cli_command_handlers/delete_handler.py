@@ -29,11 +29,4 @@ def handle(args):
         print(f'Datapakken {settings_dict["package_name"]} ble ikke fjernet')
 
 
-def get_env_store(settings: Mapping):
-    # Is project internal
-    if "internal" in settings:
-        return env_store_functions.get_env_store()
-    else:
-        return {}
-
 

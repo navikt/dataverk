@@ -8,22 +8,23 @@ class EnvStore(Mapping):
     Mapping object for storing and easy accessing of Environment variables
     """
 
-    def __init__(self, path: Path, env_setter=None):
+    def __init__(self, path: Path = None, env_setter=None):
 
         if env_setter is None:
             env_setter = environ
 
         tmp_dict = {}
-        with path.open("r") as reader:
-            envs = reader.readlines()
+        if path is not None:
+            with path.open("r") as reader:
+                envs = reader.readlines()
 
-            for env in envs:
-                env = env.strip()
-                if env[0] == '#':
-                    continue
+                for env in envs:
+                    env = env.strip()
+                    if env[0] == '#':
+                        continue
 
-                var = env.split('=')
-                tmp_dict[str(var[0])] = str(var[1])
+                    var = env.split('=')
+                    tmp_dict[str(var[0])] = str(var[1])
 
         self._env_store = {**env_setter, **tmp_dict}
 
