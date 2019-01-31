@@ -9,10 +9,10 @@ class Scheduler(ABC):
         Definerer en kontrakt for alle CI jobb skedulerings tjeneste wrappers.
     """
 
-    def __init__(self, settings_store: Mapping, env_store: Mapping):
+    def __init__(self, settings_store: Mapping, env_store: Mapping, repo_path: str="."):
         self._env_store = env_store
         self._settings_store = settings_store
-        self._github_project = repo_info.get_remote_url()
+        self._github_project = repo_info.get_remote_url(repo_path=repo_path)
         self._github_project_ssh = repo_info.convert_to_ssh_url(self._github_project)
 
     @abstractmethod

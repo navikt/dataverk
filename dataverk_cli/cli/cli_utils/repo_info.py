@@ -2,13 +2,13 @@ from git import Repo, exc
 from pathlib import Path
 
 
-def get_remote_url() -> str:
+def get_remote_url(repo_path: str=".") -> str:
     ''' Get remote repository https URL
 
     :return: remote repository url: str
     '''
 
-    remote = Repo().remotes[0]
+    remote = Repo(repo_path).remotes[0]
 
     return remote.url
 

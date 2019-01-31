@@ -1,0 +1,41 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: dataverk-job
+  namespace: namespace
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - image: path
+            name: dataverk-cronjob
+            volumeMounts:
+            - mountPath: /mount/path
+              name: vault-secrets
+          initContainers:
+          - env:
+            - name: VKS_VAULT_ADDR
+              value: https://vault.com
+            - name: VKS_AUTH_PATH
+              value: /
+            - name: VKS_KV_PATH
+              value: /
+            - name: VKS_VAULT_ROLE
+              value: dataverk
+            - name: VKS_SECRET_DEST_PATH
+              value: /
+            image: navikt/vks:24
+            name: vks
+            volumeMounts:
+            - mountPath: /
+              name: vault-secrets
+          restartPolicy: Never
+          serviceAccount: dataverk
+          serviceAccountName: dataverk
+          volumes:
+          - emptyDir:
+              medium: Memory
+            name: vault-secrets
+  schedule: '* * 31 2 *'

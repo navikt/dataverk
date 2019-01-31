@@ -19,8 +19,8 @@ class JenkinsJobScheduler(Scheduler):
 
     """
 
-    def __init__(self, settings_store: Mapping, env_store: Mapping):
-        super().__init__(settings_store, env_store)
+    def __init__(self, settings_store: Mapping, env_store: Mapping, repo_path: str="."):
+        super().__init__(settings_store, env_store, repo_path=repo_path)
 
         self._jenkins_server = jenkins.Jenkins(url=self._settings_store["jenkins"]["url"],
                                                username=self._env_store['USER_IDENT'],
@@ -94,12 +94,12 @@ class JenkinsJobScheduler(Scheduler):
 
         return ElementTree.tostring(xml_base_root, encoding='utf-8', method='xml').decode()
 
-    def _edit_cronjob_config(self) -> None:
+    def _edit_cronjob_config(self, yaml_path: Path=Path('cronjob.yaml')) -> None:
         """
         :return: None
         """
 
-        cronjob_file_path = Path('cronjob.yaml')
+        cronjob_file_path = yaml_path
 
         try:
             with cronjob_file_path.open('r') as yamlfile:
@@ -112,6 +112,11 @@ class JenkinsJobScheduler(Scheduler):
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self._package_name + '-cronjob'
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = self._settings_store["image_endpoint"] + self._package_name
         cronjob_config['spec']['schedule'] = self._settings_store["update_schedule"]
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0][1]['value'] = self._settings_store["vault"]["vks_auth_path"]
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0][2]['value'] = self._settings_store["vault"]["vks_kv_path"]
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0][2]['value'] = self._package_name
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccount'] = self._package_name
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccountName'] = self._package_name
 
         try:
             with cronjob_file_path.open('w') as yamlfile:
