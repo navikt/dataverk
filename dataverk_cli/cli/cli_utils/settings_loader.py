@@ -59,7 +59,7 @@ def _get_settings_dict_from_git_repo(url):
             settings_file = Path(tmpdir).joinpath("settings.json")
             json_str = file_functions.read_file(settings_file)
             settings_dict = json.loads(json_str)
-            return settings_dict
+        return settings_dict
     except (AttributeError, GitCommandError):
         raise AttributeError(f"Could not clone git repository from url({url})")
 

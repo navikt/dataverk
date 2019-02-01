@@ -143,7 +143,7 @@ class MethodsReturnValues(Base):
     def test__get_settings_dict_from_git_repo__pass_file_url(self):
         settings_file = self.tmp_file_store_settings_file_path
         with self.assertRaises(AttributeError):
-            settings_loader._get_settings_dict_from_git_repo(settings_file)
+            result = settings_loader._get_settings_dict_from_git_repo(settings_file)
 
     def test_load_settings_file_from_resource_git_repo(self):
         result_dict = settings_loader.load_settings_file_from_resource(self.tmp_repo_git_path)
