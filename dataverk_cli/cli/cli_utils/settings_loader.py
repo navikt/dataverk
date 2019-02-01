@@ -53,16 +53,15 @@ def _is_resource_web_hosted(url: str):
 
 
 def _get_settings_dict_from_git_repo(url):
-    with tempfile.TemporaryDirectory() as tmpdir:
-        try:
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
             Repo.clone_from(url=str(url), to_path=tmpdir)
-        except (AttributeError, GitCommandError):
-            raise AttributeError(f"Could not clone git repository from url({url})")
-
-        settings_file = Path(tmpdir).joinpath("settings.json")
-        json_str = file_functions.read_file(settings_file)
-        settings_dict = json.loads(json_str)
-        return settings_dict
+            settings_file = Path(tmpdir).joinpath("settings.json")
+            json_str = file_functions.read_file(settings_file)
+            settings_dict = json.loads(json_str)
+            return settings_dict
+    except (AttributeError, GitCommandError):
+        raise AttributeError(f"Could not clone git repository from url({url})")
 
 
 def _get_templates_from_git_repo(url):
