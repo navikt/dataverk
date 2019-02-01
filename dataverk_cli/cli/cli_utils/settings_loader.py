@@ -4,7 +4,7 @@ from pathlib import Path
 from distutils.dir_util import copy_tree
 import requests
 from git import Repo
-from git.exc import GitCommandError
+from git.exc import GitCommandError, GitError
 import tempfile
 import json
 from dataverk.utils import file_functions
@@ -53,15 +53,21 @@ def _is_resource_web_hosted(url: str):
 
 
 def _get_settings_dict_from_git_repo(url):
-    try:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            Repo.clone_from(url=str(url), to_path=tmpdir)
-            settings_file = Path(tmpdir).joinpath("settings.json")
-            json_str = file_functions.read_file(settings_file)
-            settings_dict = json.loads(json_str)
-        return settings_dict
-    except (AttributeError, GitCommandError):
-        raise AttributeError(f"Could not clone git repository from url({url})")
+
+            tmpdir = tempfile.TemporaryDirectory()
+            try:
+                Repo.clone_from(url=str(url), to_path=tmpdir.name)
+                settings_file = Path(tmpdir.name).joinpath("settings.json")
+                json_str = file_functions.read_file(settings_file)
+                settings_dict = json.loads(json_str)
+                return settings_dict
+            except (AttributeError, GitError):
+                raise AttributeError(f"Could not clone git repository from url({url})")
+            finally:
+                try:
+                    tmpdir.cleanup()
+                except FileNotFoundError:
+                    pass
 
 
 def _get_templates_from_git_repo(url):

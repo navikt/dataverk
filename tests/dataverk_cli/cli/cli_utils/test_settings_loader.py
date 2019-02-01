@@ -111,7 +111,7 @@ class Instantiation(Base):
     """
 
     def test__clone_git_repo__sanity_check(self):
-        settings_loader._get_settings_dict_from_git_repo(self.tmp_repo.name)
+        settings_loader._get_settings_dict_from_git_repo(self.tmp_repo_git_path)
 
     def test_load_settings_file_from_resource__sanity_check(self):
         settings_loader.load_settings_file_from_resource(self.tmp_repo_git_path)
@@ -137,7 +137,7 @@ class MethodsReturnValues(Base):
     """
 
     def test__get_settings_dict_from_git_repo__return_dict_is_correct(self):
-        result_dict = settings_loader._get_settings_dict_from_git_repo(self.tmp_repo.name)
+        result_dict = settings_loader._get_settings_dict_from_git_repo(self.tmp_repo_git_path)
         self.assertEqual(result_dict, self.settings_file_dict)
 
     def test__get_settings_dict_from_git_repo__pass_file_url(self):
