@@ -4,6 +4,7 @@ from pathlib import Path
 from distutils.dir_util import copy_tree
 import requests
 from git import Repo
+from git.exc import GitCommandError
 import tempfile
 import json
 from dataverk.utils import file_functions
@@ -44,7 +45,7 @@ def _get_url_suffix(url: str):
 
 
 def _is_resource_web_hosted(url: str):
-    result = parse_url(url)
+    result = parse_url(str(url))
     if result.scheme == "http" or result.scheme == "https" or result.scheme == "ftp":
         return True
     else:
@@ -54,8 +55,8 @@ def _is_resource_web_hosted(url: str):
 def _get_settings_dict_from_git_repo(url):
     with tempfile.TemporaryDirectory() as tmpdir:
         try:
-            Repo.clone_from(url=url, to_path=tmpdir)
-        except AttributeError:
+            Repo.clone_from(url=str(url), to_path=tmpdir)
+        except (AttributeError, GitCommandError):
             raise AttributeError(f"Could not clone git repository from url({url})")
 
         settings_file = Path(tmpdir).joinpath("settings.json")

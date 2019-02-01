@@ -75,6 +75,9 @@ def main():
     except GitError as git_related_error:
         print(ERROR_TEMPLATE.format(git_related_error))
 
+    except AttributeError as attribute_related_error:
+        print(ERROR_TEMPLATE.format(attribute_related_error))
+
     finally:
         print(f"dataverk-cli {args.command} completed")
 
