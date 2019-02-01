@@ -9,16 +9,16 @@ import json
 from dataverk.utils import file_functions
 
 
-def load_settings_file_from_resource(url):
+def load_settings_file_from_resource(resource):
     """ Loads settings file from external resource """
 
-    if _is_resource_git_repo(url=url):
-        settings_dict = _get_settings_dict_from_git_repo(url)
+    if _is_resource_git_repo(url=resource):
+        settings_dict = _get_settings_dict_from_git_repo(resource)
     else:
-        if _is_resource_web_hosted(url=url):
-            settings_dict = _get_settings_dict_from_web_file(url)
+        if _is_resource_web_hosted(url=resource):
+            settings_dict = _get_settings_dict_from_web_file(resource)
         else:
-            settings_dict = _get_settings_dict_from_local_file(url)
+            settings_dict = _get_settings_dict_from_local_file(resource)
 
     return settings_dict
 
@@ -39,8 +39,8 @@ def _is_resource_git_repo(url: str):
     return _get_url_suffix(url) == "git"
 
 
-def _get_url_suffix(url:str):
-    return url.split(".")[-1]
+def _get_url_suffix(url: str):
+    return str(url).split(".")[-1]
 
 
 def _is_resource_web_hosted(url: str):
