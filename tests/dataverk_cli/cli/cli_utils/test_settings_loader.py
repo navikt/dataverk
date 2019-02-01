@@ -72,6 +72,9 @@ class Base(unittest.TestCase):
     def tearDown(self):
         try:
             self.tmp_repo.cleanup()
+        except FileNotFoundError:
+            pass
+        try:
             self.tmp_file_store.cleanup()
         except FileNotFoundError:
             pass
