@@ -70,8 +70,11 @@ class Base(unittest.TestCase):
         self.tmp_file_store_settings_file_path = Path(self.tmp_file_store.name).joinpath("settings.json")
 
     def tearDown(self):
-        self.tmp_repo.cleanup()
-        self.tmp_file_store.cleanup()
+        try:
+            self.tmp_repo.cleanup()
+            self.tmp_file_store.cleanup()
+        except FileNotFoundError:
+            pass
 
     def create_tmp_repo(self) -> tempfile.TemporaryDirectory:
         tmpdir = tempfile.TemporaryDirectory()
