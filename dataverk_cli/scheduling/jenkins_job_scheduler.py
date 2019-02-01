@@ -45,8 +45,7 @@ class JenkinsJobScheduler(Scheduler):
     def delete_job(self):
         self._jenkins_server.delete_job(self._package_name)
 
-    def _edit_jenkins_job_config(self):
-        config_file_path = Path(".").joinpath("jenkins_config.xml")
+    def _edit_jenkins_job_config(self, config_file_path: Path=Path("jenkins_config.xml")):
         tag_value = {"scriptPath": 'Jenkinsfile',
                      "projectUrl": self._github_project,
                      "url": self._github_project_ssh,
@@ -112,9 +111,9 @@ class JenkinsJobScheduler(Scheduler):
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['name'] = self._package_name + '-cronjob'
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['containers'][0]['image'] = self._settings_store["image_endpoint"] + self._package_name
         cronjob_config['spec']['schedule'] = self._settings_store["update_schedule"]
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0][1]['value'] = self._settings_store["vault"]["vks_auth_path"]
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0][2]['value'] = self._settings_store["vault"]["vks_kv_path"]
-        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0][2]['value'] = self._package_name
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0]["env"][1]['value'] = self._settings_store["vault"]["vks_auth_path"]
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0]["env"][2]['value'] = self._settings_store["vault"]["vks_kv_path"]
+        cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['initContainers'][0]["env"][3]['value'] = self._package_name
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccount'] = self._package_name
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccountName'] = self._package_name
 

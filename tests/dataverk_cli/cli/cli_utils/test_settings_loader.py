@@ -66,8 +66,8 @@ class Base(unittest.TestCase):
         }
         self.tmp_repo = self.create_tmp_repo()
         self.tmp_file_store = self.create_tmp_file()
-        self.tmp_repo_git_path = self.tmp_repo.name + "/.git"
-        self.tmp_file_store_settings_file_path = self.tmp_file_store.name + "/settings.json"
+        self.tmp_repo_git_path = Path(self.tmp_repo.name).joinpath("/.git").absolute()
+        self.tmp_file_store_settings_file_path = Path(self.tmp_file_store.name).joinpath("settings.json").absolute()
 
     def tearDown(self):
         self.tmp_repo.cleanup()

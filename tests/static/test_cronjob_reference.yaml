@@ -12,7 +12,7 @@ spec:
           - image: mitt.image.endpoint.no:1234/package_name
             name: package_name-cronjob
             volumeMounts:
-            - mountPath: /
+            - mountPath: /mount/path
               name: vault-secrets
           initContainers:
           - env:
@@ -26,10 +26,10 @@ spec:
               value: package_name
             - name: VKS_SECRET_DEST_PATH
               value: /
-            image: navikt/vks:24
+            image: my-init-container-image
             name: vks
             volumeMounts:
-            - mountPath: /
+            - mountPath: /mount/path
               name: vault-secrets
           restartPolicy: Never
           serviceAccount: package_name

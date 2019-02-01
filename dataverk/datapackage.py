@@ -16,7 +16,6 @@ class Datapackage:
         self.is_public = False
         self.resources = {}
         self.views = []
-        print("test")
         self.dir_path = self._package_top_dir()
         self.datapackage_metadata = self._create_datapackage()
 

@@ -17,7 +17,7 @@ spec:
           initContainers:
           - env:
             - name: VKS_VAULT_ADDR
-              value: https://vault.com
+              value: https://vault.auth.uri.com
             - name: VKS_AUTH_PATH
               value: /
             - name: VKS_KV_PATH
@@ -26,10 +26,10 @@ spec:
               value: dataverk
             - name: VKS_SECRET_DEST_PATH
               value: /
-            image: navikt/vks:24
+            image: my-init-container-image
             name: vks
             volumeMounts:
-            - mountPath: /
+            - mountPath: /mount/path
               name: vault-secrets
           restartPolicy: Never
           serviceAccount: dataverk
@@ -38,4 +38,4 @@ spec:
           - emptyDir:
               medium: Memory
             name: vault-secrets
-  schedule: '* * 31 2 *'
+  schedule: ''

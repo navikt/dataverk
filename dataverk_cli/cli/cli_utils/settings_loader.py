@@ -40,7 +40,7 @@ def _is_resource_git_repo(url: str):
 
 
 def _get_url_suffix(url:str):
-    return url.split(".")[-1]
+    return str(url).split(".")[-1]
 
 
 def _is_resource_web_hosted(url: str):

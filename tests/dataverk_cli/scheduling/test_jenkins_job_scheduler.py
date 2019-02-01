@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 # Import statements
 # =================
-import os
 import unittest
+import os
 import yaml
+from shutil import copyfile
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from dataverk_cli.scheduling.jenkins_job_scheduler import JenkinsJobScheduler
 from git import Repo
-from dataverk_cli.cli.cli_utils.repo_info import get_remote_url
-
+from importlib_resources import read_text, path
 
 # Common input parameters
 # =======================
@@ -17,6 +17,7 @@ SETTINGS_TEMPLATE = {
   "package_name": "package_name",
   "nais_namespace": "dataverk",
   "image_endpoint": "mitt.image.endpoint.no:1234/",
+  "update_schedule": "* * 31 2 *",
 
   "vault": {
     "auth_uri": "https://vault.auth.uri.com",
@@ -51,13 +52,19 @@ class Base(unittest.TestCase):
     def setUp(self):
         self._local_repo_path = self.create_tmp_repo()
 
+        self._scheduler = JenkinsJobScheduler(settings_store=SETTINGS_TEMPLATE,
+                                              env_store=ENV_STORE_TEMPLATE,
+                                              repo_path=self._local_repo_path.name)
+
+    def tearDown(self):
+        self._local_repo_path.cleanup()
+
     def create_tmp_repo(self) -> TemporaryDirectory:
         tmpdir = TemporaryDirectory()
         repo = Repo.init(tmpdir.name)
         repo.create_remote("origin", url="https://my/remote/repo.git")
         repo.index.commit("initial commit")
         return tmpdir
-
 
 # Test classes
 # ============
@@ -91,26 +98,27 @@ class MethodsReturnValues(Base):
     Tests values of methods against known values
     """
     def test__edit_cronjob_config(self):
-        scheduler = JenkinsJobScheduler(settings_store=SETTINGS_TEMPLATE, env_store=ENV_STORE_TEMPLATE, repo_path=self._local_repo_path.name)
-
-        yamlpath_template = Path(os.path.dirname(__file__)).joinpath("static").joinpath("test_cronjob.yaml")
-
-        with yamlpath_template.open(mode="r", encoding="utf-8") as yamlfile:
-            yamldata = yamlfile.read()
-
         yamlpath = Path(self._local_repo_path.name).joinpath("cronjob.yaml")
+        yaml_reference = yaml.load(read_text('tests.static', 'test_cronjob_reference.yaml'))
+        with path('tests.static', 'test_cronjob_template.yaml') as yaml_template:
+            copyfile(yaml_template, str(yamlpath))
 
-        with yamlpath.open(mode="w", encoding="utf-8") as yamlfile:
-            yamlfile.write(yaml.dump(yamldata, default_flow_style=False))
+        self._scheduler._edit_cronjob_config(yaml_path=yamlpath)
 
-        scheduler._edit_cronjob_config()
-        correctyaml = Path(os.path.dirname(__file__)).joinpath("static").joinpath("test_cronjob2.yaml")
+        with yamlpath.open(mode="r", encoding="utf-8") as yamlfile:
+            edited_yaml = yaml.load(yamlfile.read())
 
-        with correctyaml.open(mode="w", encoding="utf-8") as yamlfile:
-            correct = yamlfile.read()
+        self.assertEqual(edited_yaml, yaml_reference)
 
+    def test__edit_jenkins_job_config(self):
+        configpath = Path(self._local_repo_path.name).joinpath("jenkins_config.xml")
+        jenkins_config_ref = read_text('tests.static', 'test_jenkins_config_reference.xml')
+        with path('tests.static', 'test_jenkins_config_template.xml') as jenkins_config:
+            copyfile(jenkins_config, str(configpath))
 
+        self._scheduler._edit_jenkins_job_config(config_file_path=configpath)
 
-        #self.assertEqual()
-        # cronjob_yaml = self.create_temp_file(file_name='cronjob.yaml')
-        # with cronjob_yaml.open()
+        with configpath.open(mode="r", encoding="utf-8") as jenkins_config:
+            edited_jenkins_config = jenkins_config.read()
+
+        self.assertEqual(edited_jenkins_config, jenkins_config_ref)
