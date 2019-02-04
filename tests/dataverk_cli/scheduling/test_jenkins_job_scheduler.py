@@ -3,6 +3,7 @@
 # =================
 import unittest
 import os
+import json
 import yaml
 from shutil import copyfile
 from tempfile import TemporaryDirectory
@@ -37,6 +38,24 @@ SETTINGS_TEMPLATE = {
 ENV_STORE_TEMPLATE = {
     "USER_IDENT": "my-ident",
     "PASSWORD": "password"
+}
+
+JENKINS_CREDENTIAL_WRAPPER_TEMPLATE = {
+    "json": "",
+    "Submit": "OK"
+}
+
+JENKINS_CREDENTIAL_TEMPLATE = {
+    'credentials': {
+        'scope': "GLOBAL",
+        'username': "repo-ci",
+        'id': "repo-ci",
+        'privateKeySource': {
+            'privateKey': "",
+            'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey$DirectEntryPrivateKeySource"
+        },
+        'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey"
+     }
 }
 
 
@@ -122,3 +141,16 @@ class MethodsReturnValues(Base):
             edited_jenkins_config = jenkins_config.read()
 
         self.assertEqual(edited_jenkins_config, jenkins_config_ref)
+
+    def test__compose_credential_payload(self):
+        key = self._scheduler._generate_deploy_key(key_length=1024)
+        priv_key = key.exportKey().decode(encoding="utf-8")
+
+        expected_payload = JENKINS_CREDENTIAL_WRAPPER_TEMPLATE
+        expected_credentials = JENKINS_CREDENTIAL_TEMPLATE
+        expected_credentials["credentials"]["privateKeySource"]["privateKey"] = priv_key
+        expected_payload["json"] = json.dumps(expected_credentials)
+
+        credential_payload = self._scheduler._compose_credential_payload(key=key)
+
+        self.assertEqual(credential_payload, expected_payload)
