@@ -1,5 +1,5 @@
 import os
-from urllib3.util.url import parse_url
+from urllib3.util.url import parse_url, LocationParseError
 from pathlib import Path
 from distutils.dir_util import copy_tree
 import requests
@@ -45,29 +45,33 @@ def _get_url_suffix(url: str):
 
 
 def _is_resource_web_hosted(url: str):
-    result = parse_url(str(url))
-    if result.scheme == "http" or result.scheme == "https" or result.scheme == "ftp":
-        return True
-    else:
+    try:
+        result = parse_url(str(url))
+    except LocationParseError:
         return False
+    else:
+        if result.scheme == "http" or result.scheme == "https" or result.scheme == "ftp":
+            return True
+        else:
+            return False
 
 
 def _get_settings_dict_from_git_repo(url):
 
-            tmpdir = tempfile.TemporaryDirectory()
-            try:
-                Repo.clone_from(url=str(url), to_path=tmpdir.name)
-                settings_file = Path(tmpdir.name).joinpath("settings.json")
-                json_str = file_functions.read_file(settings_file)
-                settings_dict = json.loads(json_str)
-                return settings_dict
-            except (AttributeError, GitError):
-                raise AttributeError(f"Could not clone git repository from url({url})")
-            finally:
-                try:
-                    tmpdir.cleanup()
-                except FileNotFoundError:
-                    pass
+    tmpdir = tempfile.TemporaryDirectory()
+    try:
+        Repo.clone_from(url=str(url), to_path=tmpdir.name)
+        settings_file = Path(tmpdir.name).joinpath("settings.json")
+        json_str = file_functions.read_file(settings_file)
+        settings_dict = json.loads(json_str)
+        return settings_dict
+    except (AttributeError, GitError):
+        raise AttributeError(f"Could not clone git repository from url({url})")
+    finally:
+        try:
+            tmpdir.cleanup()
+        except FileNotFoundError:
+            pass
 
 
 def _get_templates_from_git_repo(url):
