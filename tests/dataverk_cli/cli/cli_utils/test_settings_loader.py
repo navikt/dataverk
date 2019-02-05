@@ -4,12 +4,9 @@
 import unittest
 from dataverk_cli.cli.cli_utils import settings_loader
 from git import Repo
-from git.exc import GitCommandError
 import tempfile
 from pathlib import Path
 import json
-from pprint import pprint as pp
-
 # Common input parameters
 # =======================
 
@@ -64,14 +61,15 @@ class Base(unittest.TestCase):
             }
 
         }
-        self.tmp_repo = self.create_tmp_repo()
+        self.tmp_repo, self.tmp_repo_dir = self.create_tmp_repo()
         self.tmp_file_store = self.create_tmp_file()
-        self.tmp_repo_git_path = Path(self.tmp_repo.name).joinpath(".git")
+        self.tmp_repo_git_path = Path(self.tmp_repo_dir.name).joinpath(".git")
         self.tmp_file_store_settings_file_path = Path(self.tmp_file_store.name).joinpath("settings.json")
 
     def tearDown(self):
         try:
-            self.tmp_repo.cleanup()
+            self.tmp_repo.close()
+            self.tmp_repo_dir.cleanup()
         except FileNotFoundError:
             pass
         try:
@@ -79,7 +77,7 @@ class Base(unittest.TestCase):
         except FileNotFoundError:
             pass
 
-    def create_tmp_repo(self) -> tempfile.TemporaryDirectory:
+    def create_tmp_repo(self) -> (Repo, tempfile.TemporaryDirectory):
         tmpdir = tempfile.TemporaryDirectory()
         repo = Repo.init(tmpdir.name)
         filepath = Path(tmpdir.name).joinpath("settings.json")
@@ -88,7 +86,7 @@ class Base(unittest.TestCase):
             file.write(json.dumps(self.settings_file_dict))
         repo.index.add("*")
         repo.index.commit("initial commit")
-        return tmpdir
+        return repo, tmpdir
 
     def create_tmp_file(self):
         tmpdir = tempfile.TemporaryDirectory()

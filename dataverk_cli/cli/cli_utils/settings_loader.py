@@ -15,11 +15,10 @@ def load_settings_file_from_resource(resource):
 
     if _is_resource_git_repo(url=resource):
         settings_dict = _get_settings_dict_from_git_repo(resource)
+    elif _is_resource_web_hosted(url=resource):
+        settings_dict = _get_settings_dict_from_web_file(resource)
     else:
-        if _is_resource_web_hosted(url=resource):
-            settings_dict = _get_settings_dict_from_web_file(resource)
-        else:
-            settings_dict = _get_settings_dict_from_local_file(resource)
+        settings_dict = _get_settings_dict_from_local_file(resource)
 
     return settings_dict
 
@@ -89,7 +88,7 @@ def _get_settings_dict_from_local_file(url):
 
 
 def _get_settings_dict_from_web_file(url):
-        result = requests.get(url, allow_redirects=False)
-        settings_dict = json.dumps(result.content)
-        return settings_dict
+    result = requests.get(url, allow_redirects=False)
+    settings_dict = json.dumps(result.content)
+    return settings_dict
 
