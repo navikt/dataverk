@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/navikt/dataverk.svg?style=svg&circle-token=3e5fd8de41d8dd24ce2546d0e5800ce06926add0)](https://circleci.com/gh/navikt/dataverk)
+
 [![Build Status](https://travis-ci.com/navikt/dataverk.svg?branch=master)](https://travis-ci.com/navikt/dataverk)
 [![Maintainability](https://api.codeclimate.com/v1/badges/517723886f838e83ceaa/maintainability)](https://codeclimate.com/github/navikt/dataverk/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/517723886f838e83ceaa/test_coverage)](https://codeclimate.com/github/navikt/dataverk/test_coverage)
