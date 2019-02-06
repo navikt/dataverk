@@ -156,6 +156,7 @@ class MethodsReturnValues(Base):
 
         self.assertEqual(credential_payload, expected_payload)
 
+
 CRONJOB_YAML_TEMPLATE = '''
 apiVersion: batch/v1beta1
 kind: CronJob
