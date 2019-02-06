@@ -4,12 +4,9 @@
 import unittest
 from dataverk_cli.cli.cli_utils import settings_loader
 from git import Repo
-from git.exc import GitCommandError
 import tempfile
 from pathlib import Path
 import json
-from pprint import pprint as pp
-
 # Common input parameters
 # =======================
 
@@ -64,16 +61,23 @@ class Base(unittest.TestCase):
             }
 
         }
-        self.tmp_repo = self.create_tmp_repo()
+        self.tmp_repo, self.tmp_repo_dir = self.create_tmp_repo()
         self.tmp_file_store = self.create_tmp_file()
-        self.tmp_repo_git_path = Path(self.tmp_repo.name).joinpath("/.git").absolute()
-        self.tmp_file_store_settings_file_path = Path(self.tmp_file_store.name).joinpath("settings.json").absolute()
+        self.tmp_repo_git_path = Path(self.tmp_repo_dir.name).joinpath(".git")
+        self.tmp_file_store_settings_file_path = Path(self.tmp_file_store.name).joinpath("settings.json")
 
     def tearDown(self):
-        self.tmp_repo.cleanup()
-        self.tmp_file_store.cleanup()
+        try:
+            self.tmp_repo.close()
+            self.tmp_repo_dir.cleanup()
+        except FileNotFoundError:
+            pass
+        try:
+            self.tmp_file_store.cleanup()
+        except FileNotFoundError:
+            pass
 
-    def create_tmp_repo(self) -> tempfile.TemporaryDirectory:
+    def create_tmp_repo(self) -> (Repo, tempfile.TemporaryDirectory):
         tmpdir = tempfile.TemporaryDirectory()
         repo = Repo.init(tmpdir.name)
         filepath = Path(tmpdir.name).joinpath("settings.json")
@@ -82,7 +86,7 @@ class Base(unittest.TestCase):
             file.write(json.dumps(self.settings_file_dict))
         repo.index.add("*")
         repo.index.commit("initial commit")
-        return tmpdir
+        return repo, tmpdir
 
     def create_tmp_file(self):
         tmpdir = tempfile.TemporaryDirectory()
@@ -105,7 +109,7 @@ class Instantiation(Base):
     """
 
     def test__clone_git_repo__sanity_check(self):
-        settings_loader._get_settings_dict_from_git_repo(self.tmp_repo.name)
+        settings_loader._get_settings_dict_from_git_repo(self.tmp_repo_git_path)
 
     def test_load_settings_file_from_resource__sanity_check(self):
         settings_loader.load_settings_file_from_resource(self.tmp_repo_git_path)
@@ -130,15 +134,14 @@ class MethodsReturnValues(Base):
     Tests values of methods against known values
     """
 
-
     def test__get_settings_dict_from_git_repo__return_dict_is_correct(self):
-        result_dict = settings_loader._get_settings_dict_from_git_repo(self.tmp_repo.name)
+        result_dict = settings_loader._get_settings_dict_from_git_repo(self.tmp_repo_git_path)
         self.assertEqual(result_dict, self.settings_file_dict)
 
     def test__get_settings_dict_from_git_repo__pass_file_url(self):
-        settings_file = Path(self.tmp_file_store.name).joinpath("settings.json")
-        with self.assertRaises(TypeError):
-            settings_loader._get_settings_dict_from_git_repo(settings_file)
+        settings_file = self.tmp_file_store_settings_file_path
+        with self.assertRaises(AttributeError):
+            result = settings_loader._get_settings_dict_from_git_repo(settings_file)
 
     def test_load_settings_file_from_resource_git_repo(self):
         result_dict = settings_loader.load_settings_file_from_resource(self.tmp_repo_git_path)

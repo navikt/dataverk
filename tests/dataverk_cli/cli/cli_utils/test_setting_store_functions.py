@@ -64,7 +64,8 @@ class MethodsReturnValues(Base):
 
     def test_create_settings_dict__internal_set(self):
         result = create_settings_dict(self.mock_internal_args, self.git_env_store)
-        print(result)
+        self.assertIsNotNone(result)
 
     def test_create_settings_dict__internal_not_set(self):
         result = create_settings_dict(self.mock_internal_args, self.git_env_store)
+        self.assertIsNotNone(result)
