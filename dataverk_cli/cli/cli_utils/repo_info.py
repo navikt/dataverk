@@ -8,9 +8,12 @@ def get_remote_url(repo_path: str=".") -> str:
     :return: remote repository url: str
     '''
 
-    remote = Repo(repo_path).remotes[0]
-
-    return remote.url
+    try:
+        remote = Repo(repo_path).remotes[0]
+    except exc.InvalidGitRepositoryError:
+        raise exc.InvalidGitRepositoryError(f'No remote remote set for {repo_path}')
+    else:
+        return remote.url
 
 
 def convert_to_ssh_url(https_url: str) -> str:
