@@ -1,0 +1,26 @@
+
+site_name: Dataverk Dokumentasjon
+theme: readthedocs
+# theme_dir: theme
+docs_dir: sources
+repo_url: https://github.com/navikt/dataverk
+site_url: https://github.com/navikt/dataverk.io
+site_description: 'Dokumentasjon for Dataverk, et åpne data bibliotek fra NAV'
+lang: no
+
+dev_addr: '0.0.0.0:8000'
+google_analytics: ['', 'dataverk.io']
+
+site_dir: ../docs/
+
+pages:
+- Home: index.md
+- Getting started:
+  - Installation: getting-started/installation.md
+  - FAQ: getting-started/faq.md
+- API: api.md
+- Datapackage: datapackage.md
+- Connectors: connectors/connectors.md
+- Utils: utils.md
+- Context: context.md
+- Contributing: contributing.md
