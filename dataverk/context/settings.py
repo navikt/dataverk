@@ -1,5 +1,5 @@
 
-""" Funskjoner som setter sammen og tilgjengeliggjør data definerte konfigurasjoner i dataverk.
+""" Funksjoner som setter sammen og tilgjengeliggjør data definerte konfigurasjoner i dataverk.
 """
 
 from collections.abc import Mapping
