@@ -37,6 +37,9 @@ Creating your first Dataverk project
    :maxdepth: 2
    :caption: Contents:
 
+   api-docs/datapackage
+   api-docs/api
+
 
 
 Indices and tables
