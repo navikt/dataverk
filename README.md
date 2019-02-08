@@ -51,6 +51,7 @@
 
 url | beskrivelse
 ----| -----------
+[ContinuumIO/intake](https://github.com/ContinuumIO/intake/) | Intake: A general interface for loading data
 [frictionlessdata.io](https://frictionlessdata.io/) | Frictionless data
 [git lfs](https://git-lfs.github.com/) | Github Large File Storage
 [dvc.org](https://dvc.org) | Data Science Version Control 
