@@ -10,20 +10,26 @@ Dataverk is a Python package and commandline tool to create and program a Python
 
 Dataverk consists of two main components
 -----------------------------------------
- - dataverk - python package with classes and functions for programming the ETL job
- - dataverk-cli - commandline tool to setup the initial project structure, convert etl notebooks to scripts, publish the etl result and schedule the etl job
+* **dataverk** - python package with classes and functions for programming the ETL job
+* **dataverk-cli** - commandline tool to setup the initial project structure, convert etl notebooks to scripts, publish the etl result and schedule the etl job
 
 
-Installation::
+Installation
 --------------
+::
 
    pip install dataverk
 
 
-Creating your first Dataverk project::
+Creating your first Dataverk project
 --------------------------------------
+**NB:** Before running the dataverk-cli init commmand it is important that a git repository has already been created in the target directory.
+
+::
+
    mkdir new_dataverk_project
    cd new_dataverk_project
+   git init
    dataverk-cli init
 
 
