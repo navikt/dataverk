@@ -6,6 +6,27 @@
 Welcome to Dataverk's documentation!
 ====================================
 
+Dataverk is a Python package and commandline tool to create and program a Python based ETL(Extract Transform Load) job.
+
+Dataverk consists of two main components
+-----------------------------------------
+ - dataverk - python package with classes and functions for programming the ETL job
+ - dataverk-cli - commandline tool to setup the initial project structure, convert etl notebooks to scripts, publish the etl result and schedule the etl job
+
+
+Installation::
+--------------
+
+   pip install dataverk
+
+
+Creating your first Dataverk project::
+--------------------------------------
+   mkdir new_dataverk_project
+   cd new_dataverk_project
+   dataverk-cli init
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
