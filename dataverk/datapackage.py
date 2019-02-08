@@ -46,11 +46,35 @@ class Datapackage:
             raise TypeError(f'dataset_description must be of type string')
 
     def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str=""):
+        """
+        Adds a provided DataFrame as a resource in the Datapackage object with provided name and description.
+
+        :param df: DataFrame to add as resource
+        :param dataset_name: Name of the dataset
+        :param dataset_description: Description of the dataset
+        :return: None
+        """
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
         self.resources[dataset_name] = df
 
     def add_view(self, name: str, resources: MutableSequence, title: str="", description: str="", attribution: str="", spec_type: str="simple",
                  spec: MutableMapping=None, type: str="", group: str="", series: MutableSequence=list(), row_limit: int=500):
+        """
+        Adds a view to the Datapackage object. A view is a specification of a visualisation the datapackage provides.
+
+        :param name: View name
+        :param resources: resource the view is for
+        :param title: Title to be presented in the visualisation
+        :param description: Description of the view
+        :param attribution:
+        :param spec_type: Spec type eg. (matplotlib, vega-lite)
+        :param spec:
+        :param type:
+        :param group:
+        :param series:
+        :param row_limit:
+        :return: None
+        """
         if spec is None:
             spec = {"type": type,
                     "group": group,
@@ -76,6 +100,13 @@ class Datapackage:
             raise TypeError(f'Value must be of type string')
 
     def update_metadata(self, key: str, value: str):
+        """
+        Update the datapackage metadata.
+
+        :param key: metadata field to update
+        :param value: new value for given field
+        :return: None
+        """
         self._verify_update_metadata_input_types(key, value)
         self.datapackage_metadata[key] = value
 
@@ -197,6 +228,11 @@ class Datapackage:
         return datapackage_metadata
 
     def write_datapackage(self):
+        """
+        Writes the Datapackage object to output files, the datapackage files can then be published.
+
+        :return: None
+        """
         resources = []
         with self.dir_path.joinpath('datapackage.json').open('w') as outfile:
             for filename, df in self.resources.items():
