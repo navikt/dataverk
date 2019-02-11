@@ -9,9 +9,8 @@ from dataverk_cli.cli.cli_utils import commands
 from dataverk_cli.cli.cli_command_handlers import init_handler, schedule_handler, delete_handler
 from dataverk_cli.dataverk_factory import get_datapackage_object, Action
 from dataverk_cli.cli.cli_utils.package_config_handler import get_package_configuration
+from dataverk_cli.cli.cli_utils.user_message_templates import ERROR_TEMPLATE
 
-
-ERROR_TEMPLATE = "[ERROR] {}"
 
 def main():
     # Top level parser
