@@ -68,19 +68,25 @@ def _get_settings_dict_from_git_repo(url):
         raise AttributeError(f"Could not clone git repository from url({url})")
     finally:
         try:
+            _windows_specific_cleanup(tmpdir=tmpdir)
             tmpdir.cleanup()
         except FileNotFoundError:
             pass
 
 
 def _get_templates_from_git_repo(url):
-    with tempfile.TemporaryDirectory() as tmpdir:
+    tmpdir = tempfile.TemporaryDirectory()
+    try:
+        Repo.clone_from(url=url, to_path=tmpdir.name)
+        copy_tree(str(Path(tmpdir.name).joinpath('file_templates')), '.')
+    except AttributeError:
+        raise AttributeError(f"Could not clone git repository from url({url})")
+    finally:
         try:
-            Repo.clone_from(url=url, to_path=tmpdir)
-        except AttributeError:
-            raise AttributeError(f"Could not clone git repository from url({url})")
-
-        copy_tree(str(Path(tmpdir).joinpath('file_templates')), '.')
+            _windows_specific_cleanup(tmpdir=tmpdir)
+            tmpdir.cleanup()
+        except FileNotFoundError:
+            pass
 
 
 def _get_settings_dict_from_local_file(url):
@@ -91,4 +97,19 @@ def _get_settings_dict_from_web_file(url):
     result = requests.get(url, allow_redirects=False)
     settings_dict = json.dumps(result.content)
     return settings_dict
+
+
+def _windows_specific_cleanup(tmpdir):
+    """ Windows can stop the tempdir removal process
+        This function handles that case
+    """
+    tmp_path = Path(tmpdir.name)
+    for dir in tmp_path.iterdir():
+        try:
+            file_functions.win_readonly_directories_force_remove(dir)
+        except Exception as exp:
+            # Could be files we try to remove, which will throw exceptions
+            pass
+
+
 

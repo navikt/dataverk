@@ -7,7 +7,6 @@ from collections.abc import Mapping
 from dataverk.connectors.bucket_storage_base import BucketStorageConnector
 
 
-# Google storage
 class GoogleStorageConnector(BucketStorageConnector):
     """Google Storage connector"""
 
