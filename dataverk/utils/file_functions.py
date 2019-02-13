@@ -2,6 +2,8 @@ import os
 import errno
 from pathlib import Path
 import json
+import shutil
+import stat
 
 def write_file(path, content):
     if not os.path.exists(os.path.dirname(path)):
@@ -37,3 +39,14 @@ def _json_validate_params(file_path: Path):
 
 def _get_url_suffix(url: str):
     return url.split(".")[-1]
+
+
+def win_readonly_directories_force_remove(directory):
+    """ Removes directories with read-only files"""
+    shutil.rmtree(directory, onerror=_remove_readonly)
+
+
+def _remove_readonly(func, path, _):
+    "Clear the readonly bit and reattempt the removal"
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
