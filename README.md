@@ -51,6 +51,7 @@
 
 url | beskrivelse
 ----| -----------
+[go-jek feast](https://github.com/gojek/feast/) | Feast - Feature Store for Machine Learning
 [ContinuumIO/intake](https://github.com/ContinuumIO/intake/) | Intake: A general interface for loading data
 [frictionlessdata.io](https://frictionlessdata.io/) | Frictionless data
 [git lfs](https://git-lfs.github.com/) | Github Large File Storage
