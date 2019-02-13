@@ -4,10 +4,12 @@ from shutil import copy
 from pathlib import Path
 from string import Template
 from importlib_resources import path
+from git import exc
 from dataverk_cli.cli.cli_utils import settings_loader
 from .dataverk_base import DataverkBase, CONFIG_FILE_TYPES, BucketStorage
 from collections.abc import Mapping
 from dataverk_cli.cli.cli_utils import repo_info
+from dataverk_cli.cli.cli_utils.user_message_templates import WARNING_TEMPLATE
 
 
 class DataverkInit(DataverkBase):
@@ -83,7 +85,12 @@ class DataverkInit(DataverkBase):
         package_metadata['datapackage_name'] = self._settings_store["package_name"]
         package_metadata['title'] = self._settings_store["package_name"]
         package_metadata['id'] = self._package_id
-        package_metadata['path'] = self._determine_bucket_path()
+
+        try:
+            package_metadata['path'] = self._determine_bucket_path()
+        except UserWarning as invalid_storage_path:
+            print(WARNING_TEMPLATE.format(invalid_storage_path))
+            package_metadata['path'] = ""
 
         try:
             with metadata_file_path.open('w') as metadatafile:
@@ -96,8 +103,15 @@ class DataverkInit(DataverkBase):
         for bucket_type in self._settings_store["bucket_storage_connections"]:
             if self._is_publish_set(bucket_type=bucket_type):
                 if BucketStorage(bucket_type) == BucketStorage.GITHUB:
-                    remote_url = repo_info.get_remote_url()
-                    return f'{buckets[bucket_type]["host"]}/{repo_info.get_org_name(remote_url)}/{self._settings_store["package_name"]}/master/'
+                    try:
+                        remote_url = repo_info.get_remote_url()
+                    except exc.InvalidGitRepositoryError:
+                        raise UserWarning(
+                            f'Could not automatically determine storage path, you must manually specify storage path '
+                            f'in METADATA.json. Github is chosen as storage location, but no remote repo is set for '
+                            f'the datapackage repo.')
+                    else:
+                        return f'{buckets[bucket_type]["host"]}/{repo_info.get_org_name(remote_url)}/{self._settings_store["package_name"]}/master/'
                 elif BucketStorage(bucket_type) == BucketStorage.DATAVERK_S3:
                     return f'{buckets[bucket_type]["host"]}/{buckets[bucket_type]["bucket"]}/{self._settings_store["package_name"]}'
                 else:
