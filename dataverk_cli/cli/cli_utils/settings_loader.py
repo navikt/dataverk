@@ -75,13 +75,18 @@ def _get_settings_dict_from_git_repo(url):
 
 
 def _get_templates_from_git_repo(url):
-    with tempfile.TemporaryDirectory() as tmpdir:
+    tmpdir = tempfile.TemporaryDirectory()
+    try:
+        Repo.clone_from(url=url, to_path=tmpdir.name)
+        copy_tree(str(Path(tmpdir.name).joinpath('file_templates')), '.')
+    except AttributeError:
+        raise AttributeError(f"Could not clone git repository from url({url})")
+    finally:
         try:
-            Repo.clone_from(url=url, to_path=tmpdir)
-        except AttributeError:
-            raise AttributeError(f"Could not clone git repository from url({url})")
-
-        copy_tree(str(Path(tmpdir).joinpath('file_templates')), '.')
+            _windows_specific_cleanup(tmpdir=tmpdir)
+            tmpdir.cleanup()
+        except FileNotFoundError:
+            pass
 
 
 def _get_settings_dict_from_local_file(url):
