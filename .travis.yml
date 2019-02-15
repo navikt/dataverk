@@ -21,8 +21,7 @@ after_script:
 deploy:
   provider: pypi
   user: sonnav
-  password:
-    secure: pc+6eL4JSO5HFO8/W9JprVP50qhhmW3UzQ1FMXRO8KVBDo0bfKrQ4evHU4qlCZVzsSOGOPXZ0yEeUqCI7htkfnWv71Otn/5LdybId6FvJI46f/ETv/X6z61BabN4Lhr2BSE5S+ZdOoR+tcLbaBuqKtvVH0mRGiqQkqNFgb1H/V5yjqtn5fxguOQI8Dua3gYJX7kdnzc0hNd72mR+JemmDKJuQdm8c+IITBRVa8+SJT6GEL0RzsW5ycmsng/oj73EeV2k1gcQgmtEtjX/i4+CLXKzFEd5YCCXwyrBg3CAQg/aU3eeJ+GvxjuS7Z8Xs2x8af/67OpcW1IzkcGJcBU51s3eqvkJL2wlA8vRZSlzZZ6u/6Wa/Uxa8NbKsLqalPe5JqXreHqVaHxGYZ3jl7PcGVQAM8gI1OFkyNz1Rbcdy3OSK0vlNsDhKyB/k7QVxBLKicIkVgM4lZ3nj5xFIIT839tpdm7jtGfW2viBvQ1Fw3DMBXvm/cpzCIaazMVMwX4O/AP967S8gANRHNOVmHQLg3Z8PCaipd9vHYdC4soZeGw73GKYlWbYMXaIqCkhGGK2SsV0SKk7AFkKUq3KpwGnTJuz5uSTDKvhCu18k0Igd0CrxuFoA3qZWkKquZl2qduEiCYPMi5kst/FKOaVIcoVyZ/SrLaWcWk4CcBmnXlIL6s=
+  password: $PYPI_PASS
   on:
     tags: true
     branch: master
