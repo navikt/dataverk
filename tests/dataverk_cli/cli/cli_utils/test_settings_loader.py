@@ -34,7 +34,7 @@ class Base(unittest.TestCase):
             },
 
             "bucket_storage_connections": {
-                "AWS_S3": {
+                "aws_s3": {
                     "host": "https://some.test.url.no",
                     "bucket": "default-bucket-test"
                 },

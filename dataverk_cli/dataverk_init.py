@@ -6,10 +6,11 @@ from string import Template
 from importlib_resources import path
 from git import exc
 from dataverk_cli.cli.cli_utils import settings_loader
-from .dataverk_base import DataverkBase, CONFIG_FILE_TYPES, BucketStorage
+from .dataverk_base import DataverkBase, CONFIG_FILE_TYPES
 from collections.abc import Mapping
 from dataverk_cli.cli.cli_utils import repo_info
 from dataverk_cli.cli.cli_utils.user_message_templates import WARNING_TEMPLATE
+from dataverk.connectors.bucket_connector_factory import BucketType
 
 
 class DataverkInit(DataverkBase):
@@ -102,7 +103,7 @@ class DataverkInit(DataverkBase):
         buckets = self._settings_store["bucket_storage_connections"]
         for bucket_type in self._settings_store["bucket_storage_connections"]:
             if self._is_publish_set(bucket_type=bucket_type):
-                if BucketStorage(bucket_type) == BucketStorage.GITHUB:
+                if BucketType(bucket_type) == BucketType.GITHUB:
                     try:
                         remote_url = repo_info.get_remote_url()
                     except exc.InvalidGitRepositoryError:
@@ -112,7 +113,7 @@ class DataverkInit(DataverkBase):
                             f'the datapackage repo.')
                     else:
                         return f'{buckets[bucket_type]["host"]}/{repo_info.get_org_name(remote_url)}/{self._settings_store["package_name"]}/master/'
-                elif BucketStorage(bucket_type) == BucketStorage.DATAVERK_S3:
+                elif BucketType(bucket_type) == BucketType.DATAVERK_S3:
                     return f'{buckets[bucket_type]["host"]}/{buckets[bucket_type]["bucket"]}/{self._settings_store["package_name"]}'
                 else:
                     raise NameError(f'Unsupported bucket type: {bucket_type}')
