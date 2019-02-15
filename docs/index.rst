@@ -39,6 +39,8 @@ Creating your first Dataverk project
 
    api-docs/datapackage
    api-docs/api
+   internal-project/getting-started
+
 
 
 
