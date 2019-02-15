@@ -28,6 +28,8 @@ def load_template_files_from_resource(url):
 
     if _is_resource_git_repo(url=url):
         _get_templates_from_git_repo(url=url)
+    else:
+        raise NotImplementedError(f"url={url} is an unsupported resource type")
 
 
 def _is_resource_git_repo(url: str):
