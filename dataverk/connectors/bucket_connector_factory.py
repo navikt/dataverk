@@ -8,11 +8,11 @@ from enum import Enum
 
 
 class BucketType(Enum):
-    AWS_S3 = "AWS_S3"
-    DATAVERK_S3 = "Dataverk_S3"
+    AWS_S3 = "aws_s3"
+    DATAVERK_S3 = "dataverk_s3"
     GCS = "google_cloud"
     AZURE = "azure"
-    GITHUB = "Github"
+    GITHUB = "github"
 
 
 def get_storage_connector(bucket_type: BucketType, bucket_name: str, settings: Mapping, encrypted: bool=True) -> BucketStorageConnector:
