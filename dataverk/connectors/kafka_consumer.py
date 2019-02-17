@@ -31,7 +31,7 @@ class DVKafkaConsumer:
         df = pd.DataFrame()
 
         for message in self._consumer:
-            self._append_to_df(df=df, message_value=message.value.decode("utf-8"))
+            df = self._append_to_df(df=df, message_value=message.value.decode("utf-8"))
             if self._is_requested_messages_read(message):
                 break
 
