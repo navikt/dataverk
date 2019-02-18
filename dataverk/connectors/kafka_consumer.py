@@ -24,17 +24,11 @@ class DVKafkaConsumer:
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
 
     def get_pandas_df(self):
-        """ Read kafka topics and return result as pandas dataframe
+        """ Read kafka topics, commits offset and returns result as pandas dataframe
 
         :return: pd.Dataframe containing kafka messages read
         """
-        df = pd.DataFrame()
-
-        for message in self._consumer:
-            df = self._append_to_df(df=df, message_value=message.value.decode("utf-8"))
-            if self._is_requested_messages_read(message):
-                break
-
+        df = self._read_kafka()
         self._commit_offsets()
 
         return df
@@ -45,7 +39,7 @@ class DVKafkaConsumer:
         :param settings: Mapping object containing project settings
         :param topics: Sequence of topics to subscribe
         :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset)
-        :return:
+        :return: KafkaConsumer object with desired configuration
         """
         if KafkaFetchMode(fetch_mode) is KafkaFetchMode.FROM_BEGINNING:
             group_id = None
@@ -69,6 +63,16 @@ class DVKafkaConsumer:
 
     def _get_current_timestamp_in_ms(self):
         return int(datetime.now().timestamp() * 1000)
+
+    def _read_kafka(self):
+        df = pd.DataFrame()
+
+        for message in self._consumer:
+            df = self._append_to_df(df=df, message_value=message.value.decode("utf-8"))
+            if self._is_requested_messages_read(message):
+                break
+
+        return df
 
     def _append_to_df(self, df: pd.DataFrame, message_value):
         return pd.concat([df, pd.DataFrame(json.loads(message_value), index=[0])], ignore_index=True)
