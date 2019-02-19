@@ -106,7 +106,7 @@ class OracleConnector(BaseConnector):
         except cx_Oracle.DatabaseError as dberror:
             self.log(dberror)
 
-    def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000):
+    def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists='replace'):
 
         if 'service_name' in self.db:
             engine = create_engine(f"oracle+cx_oracle://{self.db['user']}:{self.db['password']}@{self.db['host']}:{self.db['port']}/?service_name={self.db['service_name']}")
@@ -120,12 +120,12 @@ class OracleConnector(BaseConnector):
             schema = self.get_user()
        
         try:
-            engine.execute(f'DROP TABLE {schema}.{table}')
-        except:
-            pass
+            # using sqlalchemy pandas support
+            self.log(f'Persisting {len(df)} records to table: {table} in schema: {schema} in Oracle database: {self.source}')
+            df.to_sql(table, engine, schema=schema, if_exists=if_exists, chunksize=chunksize)
 
-        # using sqlalchemy pandas support
-        self.log(f'Persisting {len(df)} records to table: {table} in schema: {schema} in Oracle database: {self.source}')
-        df.to_sql(table, engine, schema=schema, if_exists='replace', chunksize=chunksize)
+            return len(df)
 
-        return len(df)
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return error
