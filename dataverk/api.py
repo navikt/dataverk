@@ -1,7 +1,9 @@
-from dataverk.connectors import OracleConnector, SQLiteConnector
-from dataverk.utils import notebook2script
+import pandas as pd
+from .connectors import OracleConnector, SQLiteConnector, DVKafkaConsumer
+from .utils import notebook2script
 from dataverk.context import singleton_settings_store_factory
 from pathlib import Path
+from collections import Sequence
 
 
 def write_notebook():
@@ -33,7 +35,20 @@ def read_sql(source, sql, connector='Oracle'):
             return conn.get_pandas_df(sql)         
 
 
-def to_sql(df, table, if_exists: str='replace', sink=None, schema=None, connector='Oracle'):
+def read_kafka(topics: Sequence, fetch_mode: str="last_commited_offset") -> pd.DataFrame:
+    """ Read kafka topics and return pandas dataframe
+
+    :param topics: Sequence of topics to subscribe to
+    :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset), default last_committed_offset
+    :return: pandas.Dataframe
+    """
+    settings_store = singleton_settings_store_factory()
+    consumer = DVKafkaConsumer(settings=settings_store, topics=topics, fetch_mode=fetch_mode)
+
+    return consumer.get_pandas_df()
+
+
+def to_sql(df, table, sink=None, schema=None, connector='Oracle'):
     """Write records in dataframe to a SQL database table"""
     settings_store = singleton_settings_store_factory()
 

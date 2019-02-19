@@ -2,6 +2,7 @@ import time
 import cx_Oracle
 import pandas as pd
 from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
 
 from urllib import parse
 from dataverk.connectors import BaseConnector
@@ -94,7 +95,7 @@ class OracleConnector(BaseConnector):
         except cx_Oracle.DatabaseError as dberror:
             self.log(dberror)
 
-    def persist_pandas_df(self, table, df, schema=None, if_exists: str='replace', chunksize=10000):
+    def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists='replace'):
 
         if 'service_name' in self._db:
             engine = create_engine(f"oracle+cx_oracle://{self._db['user']}:{self._db['password']}@"
@@ -110,5 +111,14 @@ class OracleConnector(BaseConnector):
 
         self.log(f'Persisting {len(df)} records to table: {table} in schema: {schema} in Oracle database: {self._source}')
         df.to_sql(table, engine, schema=schema, if_exists=if_exists, chunksize=chunksize)
+       
+        try:
+            # using sqlalchemy pandas support
+            self.log(f'Persisting {len(df)} records to table: {table} in schema: {schema} in Oracle database: {self.source}')
+            df.to_sql(table, engine, schema=schema, if_exists=if_exists, chunksize=chunksize)
 
-        return len(df)
+            return len(df)
+
+        except SQLAlchemyError as e:
+            error = str(e.__dict__['orig'])
+            return error
