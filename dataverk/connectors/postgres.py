@@ -6,8 +6,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from dataverk.connectors import SQLDbConnector
 from collections.abc import Mapping
 
-class PostgresConnector(SQLDbConnector):
 
+class PostgresConnector(SQLDbConnector):
 
     def __init__(self, settings_store: Mapping, source=None):
         super(PostgresConnector, self).__init__()
@@ -24,23 +24,22 @@ class PostgresConnector(SQLDbConnector):
 
         self.engine = create_engine(self.db)
 
-
-    def get_pandas_df(self, sql, arraysize=100000):
+    def get_pandas_df(self, query, arraysize=100000):
 
         start_time = time.time()
 
         if self.df:
-            self.log(f'{len(self.df)} records returned from cached dataframe. Query: {sql}')
+            self.log(f'{len(self.df)} records returned from cached dataframe. Query: {query}')
             return self.df
 
         self.log(f'Establishing connection to PostgreSQL database: {self.source}')
 
         try: 
             #adapter = PostgresAdapter(self.db, query = sql, self.pg_kwargs)
-            df = pd.read_sql_query(sql, self.engine)
+            df = pd.read_sql_query(query, self.engine)
             end_time = time.time()
         
-            self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {sql}')
+            self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {query}')
 
             self.df = df
 

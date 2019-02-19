@@ -57,11 +57,11 @@ class OracleConnector(BaseConnector):
                 'service_name': res.path[1:]
                }
 
-    def get_pandas_df(self, sql, arraysize=100000):
+    def get_pandas_df(self, query, arraysize=100000):
         start_time = time.time()
 
         if self._df:
-            self.log(f'{len(self._df)} records returned from cached dataframe. Query: {sql}')
+            self.log(f'{len(self._df)} records returned from cached dataframe. Query: {query}')
             return self._df
 
         self.log(f'Establishing connection to Oracle database: {self._source}')
@@ -76,7 +76,7 @@ class OracleConnector(BaseConnector):
 
             cur = conn.cursor()
             cur.arraysize = arraysize
-            cur.execute(sql)
+            cur.execute(query)
             col_names = [x[0] for x in cur.description]
             results = cur.fetchall()
             cur.close()
@@ -86,7 +86,7 @@ class OracleConnector(BaseConnector):
 
             df = pd.DataFrame(results, columns=col_names)
             
-            self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {sql}')
+            self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {query}')
 
             self._df = df
 
