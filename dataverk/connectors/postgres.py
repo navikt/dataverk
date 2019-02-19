@@ -50,20 +50,18 @@ class PostgresConnector(SQLDbConnector):
             error = str(e.__dict__['orig'])
             return error
 
-    def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000):
+    def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists='replace'):
 
         engine = create_engine(self.db)
 
         _table = table
 
         if schema is not None:
-           _table = f'DROP TABLE {schema}.{table}'
+           _table = f'{schema}.{table}'
        
         try:
-            engine.execute(f'DROP TABLE {_table}')
-
             self.log(f'Persisting {len(df)} records to table: {_table} in PostgreSQL database: {self.source}')
-            df.to_sql(_table, engine, if_exists='replace', chunksize=chunksize)
+            df.to_sql(_table, engine, if_exists=if_exists, chunksize=chunksize)
 
             return len(df)
 
