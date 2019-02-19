@@ -9,6 +9,8 @@ from .s3 import AWSS3Connector
 from .ssb_api import SSBConnector
 from .oracle import OracleConnector
 from .sqlite import SQLiteConnector
+from .kafka_consumer import DVKafkaConsumer
+from .postgres import PostgresConnector
 
 __all__ = [
             #'BaseConnector',
@@ -22,4 +24,6 @@ __all__ = [
             'SSBConnector',
             'OracleConnector',
             'SQLiteConnector',
+            'DVKafkaConsumer',
+            'PostgresConnector',
            ]

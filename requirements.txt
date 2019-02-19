@@ -14,6 +14,7 @@ googleapis-common-protos==1.5.3
 importlib_resources==1.0.2
 ipykernel==5.1.0
 jenkins==1.0.2
+kafka-python==1.4.4
 notebook==5.7.4
 numpy==1.15.2
 pandas==0.23.3
