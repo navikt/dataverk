@@ -121,9 +121,9 @@ def _set_vks_fields(settings_builder: SettingsBuilder) -> None:
         settings_builder.env_store['VKS_SECRET_DEST_PATH'] + '/S3_SECRET_KEY', 'r').read()
     bucket_storage_connections["google_cloud"]["credentials"]["private_key"] = open(
         settings_builder.env_store['VKS_SECRET_DEST_PATH'] + '/GCLOUD_PRIVATE_KEY', 'r').read()
-    bucket_storage_connections["kafka"]["sasl_plain_username"] = open(
+    settings_dict["kafka"]["sasl_plain_username"] = open(
         settings_builder.env_store['VKS_SECRET_DEST_PATH'] + '/SASL_PLAIN_USERNAME', 'r').read()
-    bucket_storage_connections["kafka"]["sasl_plain_password"] = open(
+    settings_dict["kafka"]["sasl_plain_password"] = open(
         settings_builder.env_store['VKS_SECRET_DEST_PATH'] + '/SASL_PLAIN_PASSWORD', 'r').read()
 
 
@@ -168,8 +168,8 @@ def _set_vdi_fields(settings_builder: SettingsBuilder) -> None:
     bucket_storage_connections["AWS_S3"]["access_key"] = secrets["data"]["S3_ACCESS_KEY"]
     bucket_storage_connections["AWS_S3"]["secret_key"] = secrets["data"]["S3_SECRET_KEY"]
     bucket_storage_connections["google_cloud"]["credentials"]["private_key"] = secrets["data"]["GCLOUD_PRIVATE_KEY"]
-    bucket_storage_connections["kafka"]["sasl_plain_username"] = user_ident
-    bucket_storage_connections["kafka"]["sasl_plain_password"] = password
+    settings_store["kafka"]["sasl_plain_username"] = user_ident
+    settings_store["kafka"]["sasl_plain_password"] = password
 
 
 def _set_config_path_fields(settings_builder: SettingsBuilder) -> None:

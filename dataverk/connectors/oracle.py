@@ -25,19 +25,19 @@ class OracleConnector(BaseConnector):
 
     """
 
-    def __init__(self, settings: Mapping, source=None):
+    def __init__(self, settings_store: Mapping, source=None):
         super(OracleConnector, self).__init__()
 
-        self._settings = settings
+        self._settings = settings_store
         self._source = source
         self._df = None
         self._dsn = None
     
-        if source not in settings["db_connection_strings"]:
+        if source not in settings_store["db_connection_strings"]:
             raise ValueError(f'Database connection string not found in settings file. '
                              f'Unable to establish connection to database: {source}')
 
-        self._db = self._parse_connection_string(settings["db_connection_strings"][source])
+        self._db = self._parse_connection_string(settings_store["db_connection_strings"][source])
 
         if 'service_name' in self._db:
             self.dsn = cx_Oracle.makedsn(host=self._db['host'], port=self._db['port'], service_name=self._db['service_name'])
@@ -107,18 +107,15 @@ class OracleConnector(BaseConnector):
             raise ValueError(f'Neither "service_name" nor "sid" found in database connection string')
 
         if schema is None:
-            schema = self.get_user()
+            schema = "dataverk"
 
-        self.log(f'Persisting {len(df)} records to table: {table} in schema: {schema} in Oracle database: {self._source}')
-        df.to_sql(table, engine, schema=schema, if_exists=if_exists, chunksize=chunksize)
-       
+            self.log(f'Persisting {len(df)} records to table: {table}'
+                     f' in schema: {schema} in Oracle database: {self._source}')
+
         try:
             # using sqlalchemy pandas support
-            self.log(f'Persisting {len(df)} records to table: {table} in schema: {schema} in Oracle database: {self.source}')
             df.to_sql(table, engine, schema=schema, if_exists=if_exists, chunksize=chunksize)
-
             return len(df)
-
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return error

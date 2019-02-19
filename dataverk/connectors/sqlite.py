@@ -1,10 +1,12 @@
 import pandas as pd
 import sqlite3
 from dataverk.connectors import SQLDbConnector
+from collections import Mapping
+
 
 class SQLiteConnector(SQLDbConnector):
 
-    def __init__(self, source=":memory:"):
+    def __init__(self, settings_store: Mapping, source=":memory:"):
         """Init"""
 
         super(SQLiteConnector, self).__init__()

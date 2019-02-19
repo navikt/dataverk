@@ -53,6 +53,11 @@ class BaseConnector(AuthMixin, LoggerMixin):
         message =  { 'method': 'get_pandas_df', 'query': query}
         LoggerMixin.log(self, json.dumps(message))
 
+    def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists='replace'):
+        """ Write Pandas
+
+        """
+        raise NotImplementedError()
 
 
 

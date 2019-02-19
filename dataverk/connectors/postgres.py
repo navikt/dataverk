@@ -9,18 +9,18 @@ from collections.abc import Mapping
 class PostgresConnector(SQLDbConnector):
 
 
-    def __init__(self, settings: Mapping, source=None):
+    def __init__(self, settings_store: Mapping, source=None):
         super(PostgresConnector, self).__init__()
 
-        self.settings = settings
+        self.settings = settings_store
         self.source = source
         self.df = None
 
-        if source not in settings["db_connection_strings"]:
+        if source not in settings_store["db_connection_strings"]:
             raise ValueError(f'Database connection string not found in settings file.\
              Unable to establish connection to PostgreSQL database: {source}')
 
-        self.db = settings["db_connection_strings"][source]
+        self.db = settings_store["db_connection_strings"][source]
 
         self.engine = create_engine(self.db)
 
