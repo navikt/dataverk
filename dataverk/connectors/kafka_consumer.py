@@ -22,7 +22,6 @@ class DVKafkaConsumer(AuthMixin, LoggerMixin):
         :param topics: Sequence of topics to subscribe to
         :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset)
         """
-        super().__init__()
 
         self._consumer = self._get_kafka_consumer(settings=settings, topics=topics, fetch_mode=fetch_mode)
         self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
