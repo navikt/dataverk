@@ -34,7 +34,9 @@ Creating your first Dataverk project
 Dataverk expects one git repository per datapackage.
 
 Start with creating a new Github repository and clone it to your local machine.
+
 .. code-block:: bash
+
     git clone https://github.com/my-user/my-datapackage.git
     cd my-datapackage
 
@@ -48,6 +50,7 @@ We store it in a local .env file, each individual datapackage needs its own .env
 
 
 Dataverk initialize a new datapackage project with template files and settings.
+
 .. code-block:: bash
 
     dataverk-cli init -i (optionally add --package-name to avoid being prompted)
@@ -57,6 +60,7 @@ Edit the etl.ipynb in your favorite notebook editor. For sample etl scripts, see
 
 
 If you want to publish the datapackage once only (not on a schedule) you can do this with the dataverk-cli publish command.
+
 .. code-block:: bash
 
     dataverk-cli publish
@@ -73,16 +77,22 @@ to find the Jenkinsfile. Jenkins is listening to the master branch.
 
 
 You can now define the schedule for you ETL job with the POSIX cron syntax, ref: https://support.acquia.com/hc/en-us/articles/360004224494-Cron-time-string-format
+
 .. code-block:: bash
 
     dataverk-cli schedule (optionally add --update-schedule to avoid being promted)
 
 When you now commit the new job schedule to Github, Jenkins will automatically run your ETL script on Nais as per the schedule.
+
 .. code-block:: bash
+
     git add .
     git commit -m "your commit message"
     git push origin master
 
 If you want to remove a scheduled job use the dataverk-cli delete.
+
 .. code-block:: bash
+
     dataverk-cli delete (will delete jenkins-job and delete the files in the local repo)
+
