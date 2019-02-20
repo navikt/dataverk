@@ -11,11 +11,6 @@ class Action(Enum):
     DELETE = 3
 
 
-class BucketStorage(Enum):
-    GITHUB = "Github"
-    DATAVERK_S3 = "Dataverk_S3"
-
-
 CONFIG_FILE_TYPES = ('.json', '.md', '.ipynb')
 
 PACKAGE_FILES = ('.dockerignore', 'cronjob.yaml', 'dockerEntryPoint.sh', 'Dockerfile', 'etl.ipynb',

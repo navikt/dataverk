@@ -118,10 +118,7 @@ class MethodsReturnType(Base):
     """
     Tests methods' output types
     """
-    def test__get_current_timestamp_in_ms(self):
-        DVKafkaConsumer.__init__(self._fake_instance, settings=self._settings_store, topics=TOPICS, fetch_mode=self._fetch_mode)
-        read_until_timestamp = DVKafkaConsumer._get_current_timestamp_in_ms(self._fake_instance)
-        self.assertAlmostEqual(int(datetime.now().timestamp() * 1000), read_until_timestamp)
+    pass
 
 class MethodsReturnUnits(Base):
     """

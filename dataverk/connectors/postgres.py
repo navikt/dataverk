@@ -6,41 +6,40 @@ from sqlalchemy.exc import SQLAlchemyError
 from dataverk.connectors import SQLDbConnector
 from collections.abc import Mapping
 
+
 class PostgresConnector(SQLDbConnector):
 
-
-    def __init__(self, settings: Mapping, source=None):
+    def __init__(self, settings_store: Mapping, source=None):
         super(PostgresConnector, self).__init__()
 
-        self.settings = settings
+        self.settings = settings_store
         self.source = source
         self.df = None
 
-        if source not in settings["db_connection_strings"]:
+        if source not in settings_store["db_connection_strings"]:
             raise ValueError(f'Database connection string not found in settings file.\
              Unable to establish connection to PostgreSQL database: {source}')
 
-        self.db = settings["db_connection_strings"][source]
+        self.db = settings_store["db_connection_strings"][source]
 
-        self.engine = create_engine(self.db)
-
-
-    def get_pandas_df(self, sql, arraysize=100000):
+    def get_pandas_df(self, query, arraysize=100000):
 
         start_time = time.time()
 
+        engine = create_engine(self.db)
+
         if self.df:
-            self.log(f'{len(self.df)} records returned from cached dataframe. Query: {sql}')
+            self.log(f'{len(self.df)} records returned from cached dataframe. Query: {query}')
             return self.df
 
         self.log(f'Establishing connection to PostgreSQL database: {self.source}')
 
         try: 
             #adapter = PostgresAdapter(self.db, query = sql, self.pg_kwargs)
-            df = pd.read_sql_query(sql, self.engine)
+            df = pd.read_sql_query(query, self.engine)
             end_time = time.time()
         
-            self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {sql}')
+            self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {query}')
 
             self.df = df
 
