@@ -24,7 +24,7 @@ class DVKafkaConsumer(AuthMixin, LoggerMixin):
         """
 
         self._consumer = self._get_kafka_consumer(settings=settings, topics=topics, fetch_mode=fetch_mode)
-        self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
+        #self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
 
     def get_pandas_df(self):
@@ -34,6 +34,20 @@ class DVKafkaConsumer(AuthMixin, LoggerMixin):
         """
         df = self._read_kafka()
         self._commit_offsets()
+
+        return df
+        
+    def _read_kafka(self):
+
+        messages = []
+        for message in self._consumer:
+            #self.log(f"Message with offset {message.offset} and timestamp {message.timestamp} "
+            #         f"read from topic {message.topic} (partition: {message.partition})")
+            messages.append(json.loads(message.value.decode("utf-8")))
+            if self._is_requested_messages_read(message):
+                break
+
+        df = pd.DataFrame.from_records(messages)
 
         return df
 
@@ -67,18 +81,6 @@ class DVKafkaConsumer(AuthMixin, LoggerMixin):
 
     def _get_current_timestamp_in_ms(self):
         return int(datetime.now().timestamp() * 1000)
-
-    def _read_kafka(self):
-        df = pd.DataFrame()
-
-        for message in self._consumer:
-            self.log(f"Message with offset {message.offset} and timestamp {message.timestamp} "
-                     f"read from topic {message.topic} (partition: {message.partition})")
-            df = self._append_to_df(df=df, message_value=message.value.decode("utf-8"))
-            if self._is_requested_messages_read(message):
-                break
-
-        return df
 
     def _append_to_df(self, df: pd.DataFrame, message_value):
         return pd.concat([df, pd.DataFrame(json.loads(message_value), index=[0])], ignore_index=True)
