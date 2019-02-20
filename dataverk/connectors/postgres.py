@@ -22,11 +22,11 @@ class PostgresConnector(SQLDbConnector):
 
         self.db = settings_store["db_connection_strings"][source]
 
-        self.engine = create_engine(self.db)
-
     def get_pandas_df(self, query, arraysize=100000):
 
         start_time = time.time()
+
+        engine = create_engine(self.db)
 
         if self.df:
             self.log(f'{len(self.df)} records returned from cached dataframe. Query: {query}')
