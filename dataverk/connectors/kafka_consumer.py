@@ -4,6 +4,8 @@ from kafka import KafkaConsumer
 from collections import Mapping, Sequence
 from enum import Enum
 from datetime import datetime
+from dataverk.utils.auth_mixin import AuthMixin
+from dataverk.utils.logger_mixin import LoggerMixin
 
 
 class KafkaFetchMode(Enum):
@@ -11,7 +13,7 @@ class KafkaFetchMode(Enum):
     LAST_COMMITED_OFFSET = "last_commited_offset"
 
 
-class DVKafkaConsumer:
+class DVKafkaConsumer(AuthMixin, LoggerMixin):
 
     def __init__(self, settings: Mapping, topics: Sequence, fetch_mode: str):
         """ Dataverk Kafka consumer class
@@ -20,7 +22,9 @@ class DVKafkaConsumer:
         :param topics: Sequence of topics to subscribe to
         :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset)
         """
+
         self._consumer = self._get_kafka_consumer(settings=settings, topics=topics, fetch_mode=fetch_mode)
+        self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
 
     def get_pandas_df(self):
@@ -46,8 +50,8 @@ class DVKafkaConsumer:
         elif KafkaFetchMode(fetch_mode) is KafkaFetchMode.LAST_COMMITED_OFFSET:
             group_id = settings["kafka"].get("group_id", None)
         else:
-            raise ValueError(f'{fetch_mode} is not a valid KafkaFetchMode. Valid fetch_modes are: '
-                             f'"{KafkaFetchMode.FROM_BEGINNING}" and "{KafkaFetchMode.LAST_COMMITED_OFFSET}"')
+            raise ValueError(f"{fetch_mode} is not a valid KafkaFetchMode. Valid fetch_modes are: "
+                             f"'{KafkaFetchMode.FROM_BEGINNING}' and '{KafkaFetchMode.LAST_COMMITED_OFFSET}'")
 
         return KafkaConsumer(*topics,
                              group_id=group_id,
@@ -59,7 +63,7 @@ class DVKafkaConsumer:
                              ssl_cafile=settings["kafka"].get("ssl_cafile", None),
                              auto_offset_reset='earliest',
                              enable_auto_commit=False,
-                             consumer_timeout_ms=1000)
+                             consumer_timeout_ms=15000)
 
     def _get_current_timestamp_in_ms(self):
         return int(datetime.now().timestamp() * 1000)
@@ -68,6 +72,8 @@ class DVKafkaConsumer:
         df = pd.DataFrame()
 
         for message in self._consumer:
+            self.log(f"Message with offset {message.offset} and timestamp {message.timestamp} "
+                     f"read from topic {message.topic} (partition: {message.partition})")
             df = self._append_to_df(df=df, message_value=message.value.decode("utf-8"))
             if self._is_requested_messages_read(message):
                 break
