@@ -577,7 +577,7 @@ Write string to a bucket.
 ## ElasticsearchConnector class
 
 ```python
-dataverk.connectors.elasticsearch.ElasticsearchConnector(settings, host='elastic_private')
+dataverk.connectors.elasticsearch.ElasticsearchConnector(settings, host='elastic_host')
 ```
 
 Elasticsearch connection

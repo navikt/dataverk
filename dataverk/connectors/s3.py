@@ -17,10 +17,10 @@ class AWSS3Connector(BucketStorageConnector):
 
         self.s3 = boto3.resource(
             service_name='s3',
-            aws_access_key_id=settings["bucket_storage_connections"]["AWS_S3"]["access_key"],
-            aws_secret_access_key=settings["bucket_storage_connections"]["AWS_S3"]["secret_key"],
+            aws_access_key_id=settings["bucket_storage_connections"]["aws_s3"]["access_key"],
+            aws_secret_access_key=settings["bucket_storage_connections"]["aws_s3"]["secret_key"],
             verify=ssl_context.load_default_certs(),
-            endpoint_url=settings["bucket_storage_connections"]["AWS_S3"]["host"]
+            endpoint_url=settings["bucket_storage_connections"]["aws_s3"]["host"]
         )
 
         if not self.s3.Bucket(bucket_name) in self.s3.buckets.all():
