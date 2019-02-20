@@ -45,7 +45,7 @@ class PublishDataPackage:
 
     def _update_es_index(self):
         try:
-            es = ElasticsearchConnector(settings=self.package_settings, host="elastic_private")
+            es = ElasticsearchConnector(settings=self.package_settings)
             id = self.datapackage_json["id"]
 
             js = {

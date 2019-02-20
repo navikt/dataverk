@@ -7,7 +7,7 @@ class S3Connector(BucketStorageConnector):
 
     def __init__(self, bucket_name: str, settings: Mapping, encrypted=True):
         super().__init__(settings=settings, encrypted=encrypted)
-        self.s3_api_url = settings["bucket_storage_connections"]["Dataverk_S3"]["host"]
+        self.s3_api_url = settings["bucket_storage_connections"]["dataverk_s3"]["host"]
         self.bucket_name = bucket_name
 
     def write(self, source_string: str, destination_blob_name: str, fmt: str=".csv", metadata: dict={}):
