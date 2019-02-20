@@ -2,12 +2,13 @@ import time
 import cx_Oracle
 import pandas as pd
 from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
 
 from urllib import parse
 from dataverk.connectors import BaseConnector
 from collections.abc import Mapping
 
-# Oracle
+
 class OracleConnector(BaseConnector):
     """Common oracle connector methods
 
@@ -24,70 +25,58 @@ class OracleConnector(BaseConnector):
 
     """
 
-    def __init__(self, settings: Mapping, source=None):
+    def __init__(self, settings_store: Mapping, source=None):
         super(OracleConnector, self).__init__()
 
-        self.settings = settings
-        self.source = source
-        self.df = None
-        self.dsn = None
+        self._settings = settings_store
+        self._source = source
+        self._df = None
+        self._dsn = None
     
-        if source not in settings["db_connection_strings"]:
-            raise ValueError(f'Database connection string not found in settings file.\
-             Unable to establish connection to database: {source}')
+        if source not in settings_store["db_connection_strings"]:
+            raise ValueError(f'Database connection string not found in settings file. '
+                             f'Unable to establish connection to database: {source}')
 
-        db = self._parse_connection_string(settings["db_connection_strings"][source])
-        self.db = db
+        self._db = self._parse_connection_string(settings_store["db_connection_strings"][source])
 
-        if 'service_name' in db:
-            self.dsn = cx_Oracle.makedsn(
-                host = db['host'],
-                port = db['port'],
-                service_name = db['service_name']
-            )
-
-        if 'sid' in db:
-            self.dsn = cx_Oracle.makedsn(
-                host = db['host'],
-                port = db['port'],
-                sid = db['sid']
-            )
-
-        assert self.dsn is not None, f'Invalid connection description. Neither "service name" nor "sid" specified for {self.source}'
+        if 'service_name' in self._db:
+            self.dsn = cx_Oracle.makedsn(host=self._db['host'], port=self._db['port'], service_name=self._db['service_name'])
+        elif 'sid' in self._db:
+            self.dsn = cx_Oracle.makedsn(host=self._db['host'], port=self._db['port'], sid=self._db['sid'])
+        else:
+            raise ValueError(f'Invalid connection description. Neither "service name" nor "sid" specified for {self._source}')
 
     def _parse_connection_string(self, connection_string):
         res = parse.urlparse(connection_string)
 
         return {
-                    'user': res.username,
-                    'password': res.password,
-                    'host': res.hostname,
-                    'port': res.port,
-                    'service_name': res.path[1:]
+                'user': res.username,
+                'password': res.password,
+                'host': res.hostname,
+                'port': res.port,
+                'service_name': res.path[1:]
                }
 
-
-    def get_pandas_df(self, sql, arraysize=100000):
-
+    def get_pandas_df(self, query, arraysize=100000):
         start_time = time.time()
 
-        if self.df:
-            self.log(f'{len(self.df)} records returned from cached dataframe. Query: {sql}')
-            return self.df
+        if self._df:
+            self.log(f'{len(self._df)} records returned from cached dataframe. Query: {query}')
+            return self._df
 
-        self.log(f'Establishing connection to Oracle database: {self.source}')
+        self.log(f'Establishing connection to Oracle database: {self._source}')
 
         try: 
             conn = cx_Oracle.connect(
-                user=self.db['user'], 
-                password=self.db['password'],
-                dsn = self.dsn,
-                encoding = 'utf-8'
+                user=self._db['user'],
+                password=self._db['password'],
+                dsn=self.dsn,
+                encoding='utf-8'
             ) 
 
             cur = conn.cursor()
             cur.arraysize = arraysize
-            cur.execute(sql)
+            cur.execute(query)
             col_names = [x[0] for x in cur.description]
             results = cur.fetchall()
             cur.close()
@@ -97,9 +86,9 @@ class OracleConnector(BaseConnector):
 
             df = pd.DataFrame(results, columns=col_names)
             
-            self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {sql}')
+            self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {query}')
 
-            self.df = df
+            self._df = df
 
             return df
 
@@ -108,24 +97,25 @@ class OracleConnector(BaseConnector):
 
     def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists='replace'):
 
-        if 'service_name' in self.db:
-            engine = create_engine(f"oracle+cx_oracle://{self.db['user']}:{self.db['password']}@{self.db['host']}:{self.db['port']}/?service_name={self.db['service_name']}")
-        
-        if 'sid' in self.db: 
-            engine = create_engine(f"oracle+cx_oracle://{self.db['user']}:{self.db['password']}@{self.db['host']}:{self.db['port']}/{self.db['sid']}")
-        
-        #exists = engine.dialect.has_table(engine, table, schema = schema)
+        if 'service_name' in self._db:
+            engine = create_engine(f"oracle+cx_oracle://{self._db['user']}:{self._db['password']}@"
+                                   f"{self._db['host']}:{self._db['port']}/?service_name={self._db['service_name']}")
+        elif 'sid' in self._db:
+            engine = create_engine(f"oracle+cx_oracle://{self._db['user']}:{self._db['password']}@"
+                                   f"{self._db['host']}:{self._db['port']}/{self._db['sid']}")
+        else:
+            raise ValueError(f'Neither "service_name" nor "sid" found in database connection string')
 
         if schema is None:
-            schema = self.get_user()
-       
+            schema = "dataverk"
+
+            self.log(f'Persisting {len(df)} records to table: {table}'
+                     f' in schema: {schema} in Oracle database: {self._source}')
+
         try:
             # using sqlalchemy pandas support
-            self.log(f'Persisting {len(df)} records to table: {table} in schema: {schema} in Oracle database: {self.source}')
             df.to_sql(table, engine, schema=schema, if_exists=if_exists, chunksize=chunksize)
-
             return len(df)
-
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return error
