@@ -22,7 +22,7 @@ Dataverk consists of two main components
 
 Installation
 --------------
-::
+.. code-block:: bash
 
     pip install dataverk
 
@@ -32,13 +32,13 @@ Creating your first Dataverk project
 ------------------------------------
 **NB:** Before running the dataverk-cli init commmand it is important that a git repository has already been created in the target directory.
 
-::
+.. code-block:: bash
 
     dataverk-cli create-env-file
-    dataverk-cli init -i (eventuelt med --package-name for å unngå prompt)
+    dataverk-cli init -i (optionally add --package-name to avoid being prompted)
     git add -> commit -> push
-    (dataverk-cli publish) hvis man vil publisere uten å schedulere
+    (optional)dataverk-cli publish (used when wanting to publish the data but not schedule a job)
 
-    dataverk-cli schedule (eventuelt med --update-schedule for å unngå prompt) (edited)
+    dataverk-cli schedule (optionally add --update-schedule to avoid being promted)
     git add -> commit -> push
-    dataverk-cli delete (fjerne jenkinsjobb og slette filer i local repo)
+    dataverk-cli delete (will delete jenkins-job and delete the files in the local repo)
