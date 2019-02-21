@@ -4,8 +4,7 @@ from kafka import KafkaConsumer
 from collections import Mapping, Sequence
 from enum import Enum
 from datetime import datetime
-from dataverk.utils.auth_mixin import AuthMixin
-from dataverk.utils.logger_mixin import LoggerMixin
+from dataverk.connectors import BaseConnector
 
 
 class KafkaFetchMode(Enum):
@@ -13,7 +12,7 @@ class KafkaFetchMode(Enum):
     LAST_COMMITED_OFFSET = "last_commited_offset"
 
 
-class DVKafkaConsumer(AuthMixin, LoggerMixin):
+class DVKafkaConsumer(BaseConnector):
 
     def __init__(self, settings: Mapping, topics: Sequence, fetch_mode: str):
         """ Dataverk Kafka consumer class
@@ -22,9 +21,11 @@ class DVKafkaConsumer(AuthMixin, LoggerMixin):
         :param topics: Sequence of topics to subscribe to
         :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset)
         """
-
+        super(DVKafkaConsumer, self).__init__()
+        self._topics = topics
+        self._fetch_mode = fetch_mode
         self._consumer = self._get_kafka_consumer(settings=settings, topics=topics, fetch_mode=fetch_mode)
-        #self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
+        self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
 
     def get_pandas_df(self):
@@ -39,15 +40,18 @@ class DVKafkaConsumer(AuthMixin, LoggerMixin):
         
     def _read_kafka(self):
 
+        self.log(f"Reading kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
+
         messages = []
         for message in self._consumer:
-            #self.log(f"Message with offset {message.offset} and timestamp {message.timestamp} "
-            #         f"read from topic {message.topic} (partition: {message.partition})")
             messages.append(json.loads(message.value.decode("utf-8")))
             if self._is_requested_messages_read(message):
                 break
 
         df = pd.DataFrame.from_records(messages)
+
+        self.log(f"({len(df)} messages read from kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
+
 
         return df
 
