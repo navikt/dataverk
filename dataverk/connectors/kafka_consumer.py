@@ -34,7 +34,7 @@ class DVKafkaConsumer(BaseConnector):
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
         self._schema_registry_url = settings["kafka"].get("schema_registry", "http://localhost:8081/schemas/ids/")
 
-    def get_pandas_df(self, numb_of_msgs):
+    def get_pandas_df(self, numb_of_msgs=None):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
 
         :return: pd.Dataframe containing kafka messages read
@@ -54,7 +54,7 @@ class DVKafkaConsumer(BaseConnector):
             schema_res = self._get_schema_from_registry(message=message)
             try:
                 schema = schema_res.json()["schema"]
-            except AttributeError:
+            except (AttributeError, KeyError):
                 mesg = message.value.decode('utf8')
             else:
                 mesg = self._decode_avro_message(schema=schema, message=message)
