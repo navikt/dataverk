@@ -42,16 +42,25 @@ class DVKafkaConsumer(BaseConnector):
 
         self.log(f"Reading kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
 
-        messages = []
+        data = list()
+
         for message in self._consumer:
-            messages.append(json.loads(message.value.decode("utf-8")))
+            schema_res = self._get_schema_from_registry(message=message)
+            try:
+                schema = schema_res.json()["schema"]
+            except AttributeError:
+                mesg = message.value.decode('utf8')
+            else:
+                mesg = self._decode_avro_message(schema=schema, message=message)
+
+            data.append(mesg)
+            print(mesg)
             if self._is_requested_messages_read(message):
                 break
 
-        df = pd.DataFrame.from_records(messages)
+        return data
 
         self.log(f"({len(df)} messages read from kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
-
 
         return df
 
