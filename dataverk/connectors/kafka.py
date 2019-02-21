@@ -5,6 +5,7 @@ import requests
 import avro
 import avro.io
 import io
+import time
 from kafka import KafkaConsumer
 from collections import Mapping, Sequence
 from enum import Enum
@@ -33,7 +34,7 @@ class KafkaConnector(BaseConnector):
         self._consumer = self._get_kafka_consumer(settings=settings, topics=topics, fetch_mode=fetch_mode)
         self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
-        self._schema_registry_url = settings["kafka"].get("schema_registry", "http://localhost:8081")
+        self._schema_registry_url = settings.get('kafka', {}).get("schema_registry", "http://localhost:8081")
 
     def get_pandas_df(self, numb_of_msgs=None):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
@@ -46,6 +47,8 @@ class KafkaConnector(BaseConnector):
         return df
         
     def _read_kafka(self):
+
+        start_time = time.time()
 
         self.log(f"Reading kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
 
@@ -64,7 +67,7 @@ class KafkaConnector(BaseConnector):
             if self._is_requested_messages_read(message):
                 break
 
-        self.log(f"({len(data)} messages read from kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
+        self.log(f"({len(data)} messages read from kafka stream {self._topics} in {time.time() - start_time} sec. Fetch mode {self._fetch_mode}")
 
         return data
 
@@ -102,12 +105,12 @@ class KafkaConnector(BaseConnector):
 
         return KafkaConsumer(*topics,
                              group_id=group_id,
-                             bootstrap_servers=settings["kafka"].get("brokers", "localhost:9092"),
-                             security_protocol=settings["kafka"].get("security_protocol", "PLAINTEXT"),
-                             sasl_mechanism=settings["kafka"].get("sasl_mechanism", None),
-                             sasl_plain_username=settings["kafka"].get("sasl_plain_username", None),
-                             sasl_plain_password=settings["kafka"].get("sasl_plain_password", None),
-                             ssl_cafile=settings["kafka"].get("ssl_cafile", None),
+                             bootstrap_servers=settings.get('kafka', {}).get("brokers", "localhost:9092"),
+                             security_protocol=settings.get('kafka', {}).get("security_protocol", "PLAINTEXT"),
+                             sasl_mechanism=settings.get('kafka', {}).get("sasl_mechanism", None),
+                             sasl_plain_username=settings.get('kafka', {}).get("sasl_plain_username", None),
+                             sasl_plain_password=settings.get('kafka', {}).get("sasl_plain_password", None),
+                             ssl_cafile=settings.get('kafka', {}).get("ssl_cafile", None),
                              auto_offset_reset='earliest',
                              enable_auto_commit=False,
                              consumer_timeout_ms=15000)
