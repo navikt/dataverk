@@ -1,5 +1,5 @@
 import pandas as pd
-from .connectors import OracleConnector, SQLiteConnector, DVKafkaConsumer, BaseConnector, PostgresConnector
+from .connectors import OracleConnector, SQLiteConnector, KafkaConnector, BaseConnector, PostgresConnector
 from .utils import notebook2script
 from dataverk.context import singleton_settings_store_factory
 from pathlib import Path
@@ -27,7 +27,7 @@ def read_sql(source, sql, connector='Oracle'):
     return conn.get_pandas_df(query=query)
 
 
-def read_kafka(topics: Sequence, fetch_mode: str="last_commited_offset") -> pd.DataFrame:
+def read_kafka(topics: Sequence, fetch_mode: str="from_beginning") -> pd.DataFrame:
     """ Read kafka topics and return pandas dataframe
 
     :param topics: Sequence of topics to subscribe to
@@ -35,7 +35,7 @@ def read_kafka(topics: Sequence, fetch_mode: str="last_commited_offset") -> pd.D
     :return: pandas.Dataframe
     """
     settings_store = singleton_settings_store_factory()
-    consumer = DVKafkaConsumer(settings=settings_store, topics=topics, fetch_mode=fetch_mode)
+    consumer = KafkaConnector(settings=settings_store, topics=topics, fetch_mode=fetch_mode)
 
     return consumer.get_pandas_df()
 
