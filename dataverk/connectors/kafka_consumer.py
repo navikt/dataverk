@@ -1,5 +1,10 @@
 import pandas as pd
 import json
+import struct
+import requests
+import avro
+import avro.io
+import io
 from kafka import KafkaConsumer
 from collections import Mapping, Sequence
 from enum import Enum
@@ -27,8 +32,9 @@ class DVKafkaConsumer(BaseConnector):
         self._consumer = self._get_kafka_consumer(settings=settings, topics=topics, fetch_mode=fetch_mode)
         self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
+        self._schema_registry_url = settings["kafka"].get("schema_registry", "http://localhost:8081/schemas/ids/")
 
-    def get_pandas_df(self):
+    def get_pandas_df(self, numb_of_msgs):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
 
         :return: pd.Dataframe containing kafka messages read
@@ -54,15 +60,23 @@ class DVKafkaConsumer(BaseConnector):
                 mesg = self._decode_avro_message(schema=schema, message=message)
 
             data.append(mesg)
-            print(mesg)
             if self._is_requested_messages_read(message):
                 break
 
+        self.log(f"({len(data)} messages read from kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
+
         return data
 
-        self.log(f"({len(df)} messages read from kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
+    def _get_schema_from_registry(self, message):
+        schema_id = struct.unpack(">L", message.value[1:5])[0]
+        return requests.get(self._schema_registry_url + str(schema_id))
 
-        return df
+    def _decode_avro_message(self, schema, message):
+        schema = avro.schema.Parse(schema)
+        bytes_reader = io.BytesIO(message.value[5:])
+        decoder = avro.io.BinaryDecoder(bytes_reader)
+        reader = avro.io.DatumReader(schema)
+        return reader.read(decoder)
 
     def _get_kafka_consumer(self, settings: Mapping, topics: Sequence, fetch_mode: str) -> KafkaConsumer:
         """ Factory method returning a KafkaConsumer object with desired configuration
