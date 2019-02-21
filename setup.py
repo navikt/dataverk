@@ -16,6 +16,7 @@ setup(
               'dataverk_cli.scheduling', 'dataverk_cli.cli.cli_command_handlers', 'dataverk_cli.cli.cli_utils', 'dataverk_cli.templates'],
     python_requires='>=3.6',
     install_requires=[
+        'avro-python3==1.8.2',
         'cryptography==2.3',
         'requests==2.21.0',
         'prometheus_client==0.4.0',

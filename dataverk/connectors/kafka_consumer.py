@@ -1,11 +1,15 @@
 import pandas as pd
 import json
+import struct
+import requests
+import avro
+import avro.io
+import io
 from kafka import KafkaConsumer
 from collections import Mapping, Sequence
 from enum import Enum
 from datetime import datetime
-from dataverk.utils.auth_mixin import AuthMixin
-from dataverk.utils.logger_mixin import LoggerMixin
+from dataverk.connectors import BaseConnector
 
 
 class KafkaFetchMode(Enum):
@@ -13,7 +17,7 @@ class KafkaFetchMode(Enum):
     LAST_COMMITED_OFFSET = "last_commited_offset"
 
 
-class DVKafkaConsumer(AuthMixin, LoggerMixin):
+class DVKafkaConsumer(BaseConnector):
 
     def __init__(self, settings: Mapping, topics: Sequence, fetch_mode: str):
         """ Dataverk Kafka consumer class
@@ -22,12 +26,15 @@ class DVKafkaConsumer(AuthMixin, LoggerMixin):
         :param topics: Sequence of topics to subscribe to
         :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset)
         """
-
+        super(DVKafkaConsumer, self).__init__()
+        self._topics = topics
+        self._fetch_mode = fetch_mode
         self._consumer = self._get_kafka_consumer(settings=settings, topics=topics, fetch_mode=fetch_mode)
         self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
+        self._schema_registry_url = settings["kafka"].get("schema_registry", "http://localhost:8081/schemas/ids/")
 
-    def get_pandas_df(self):
+    def get_pandas_df(self, numb_of_msgs=None):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
 
         :return: pd.Dataframe containing kafka messages read
@@ -36,6 +43,40 @@ class DVKafkaConsumer(AuthMixin, LoggerMixin):
         self._commit_offsets()
 
         return df
+        
+    def _read_kafka(self):
+
+        self.log(f"Reading kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
+
+        data = list()
+
+        for message in self._consumer:
+            schema_res = self._get_schema_from_registry(message=message)
+            try:
+                schema = schema_res.json()["schema"]
+            except (AttributeError, KeyError):
+                mesg = message.value.decode('utf8')
+            else:
+                mesg = self._decode_avro_message(schema=schema, message=message)
+
+            data.append(mesg)
+            if self._is_requested_messages_read(message):
+                break
+
+        self.log(f"({len(data)} messages read from kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
+
+        return data
+
+    def _get_schema_from_registry(self, message):
+        schema_id = struct.unpack(">L", message.value[1:5])[0]
+        return requests.get(self._schema_registry_url + str(schema_id))
+
+    def _decode_avro_message(self, schema, message):
+        schema = avro.schema.Parse(schema)
+        bytes_reader = io.BytesIO(message.value[5:])
+        decoder = avro.io.BinaryDecoder(bytes_reader)
+        reader = avro.io.DatumReader(schema)
+        return reader.read(decoder)
 
     def _get_kafka_consumer(self, settings: Mapping, topics: Sequence, fetch_mode: str) -> KafkaConsumer:
         """ Factory method returning a KafkaConsumer object with desired configuration
@@ -67,18 +108,6 @@ class DVKafkaConsumer(AuthMixin, LoggerMixin):
 
     def _get_current_timestamp_in_ms(self):
         return int(datetime.now().timestamp() * 1000)
-
-    def _read_kafka(self):
-        df = pd.DataFrame()
-
-        for message in self._consumer:
-            self.log(f"Message with offset {message.offset} and timestamp {message.timestamp} "
-                     f"read from topic {message.topic} (partition: {message.partition})")
-            df = self._append_to_df(df=df, message_value=message.value.decode("utf-8"))
-            if self._is_requested_messages_read(message):
-                break
-
-        return df
 
     def _append_to_df(self, df: pd.DataFrame, message_value):
         return pd.concat([df, pd.DataFrame(json.loads(message_value), index=[0])], ignore_index=True)
