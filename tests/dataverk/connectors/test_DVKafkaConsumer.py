@@ -106,13 +106,7 @@ class MethodsInput(Base):
 
     Tests include: passing invalid input, etc.
     """
-
-    def test__get_kafka_consumer_invalid_fetch_mode(self):
-        fetch_mode = "invalid_fetch_mode"
-        DVKafkaConsumer.__init__(self._fake_instance, settings=self._settings_store, topics=TOPICS, fetch_mode=fetch_mode)
-        with self.assertRaises(ValueError):
-            consumer_object = DVKafkaConsumer._get_kafka_consumer(self._fake_instance, settings=self._settings_store, topics=TOPICS, fetch_mode=fetch_mode)
-
+    pass
 
 class MethodsReturnType(Base):
     """
