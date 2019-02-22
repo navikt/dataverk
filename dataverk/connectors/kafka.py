@@ -55,8 +55,8 @@ class KafkaConnector(BaseConnector):
         data = list()
 
         for message in self._consumer:
-            schema_res = self._get_schema_from_registry(message=message)
             try:
+                schema_res = self._get_schema_from_registry(message=message)
                 schema = schema_res.json()["schema"]
             except (AttributeError, KeyError):
                 mesg = json.loads(message.value.decode('utf8'))
