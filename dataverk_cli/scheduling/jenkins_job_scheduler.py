@@ -15,7 +15,7 @@ GITHUB_API_URL = "https://api.github.com/repos"
 
 
 class JenkinsJobScheduler(Scheduler):
-    """ Implementer methoder for å håndtere skedulering av jobber for dataverk
+    """ Implements methods for handling scheduling of jobs for dataverk
 
     """
 
@@ -34,6 +34,7 @@ class JenkinsJobScheduler(Scheduler):
     def configure_job(self):
         self._edit_jenkins_job_config()
         self._edit_cronjob_config()
+        self._edit_service_user_config()
         self._setup_deploy_key()
 
         config_file_path = Path('jenkins_config.xml')
@@ -122,6 +123,21 @@ class JenkinsJobScheduler(Scheduler):
                 yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
         except OSError:
             raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')
+
+    def _edit_service_user_config(self, service_account_file: Path=Path('service_account_file.yaml')):
+        try:
+            with service_account_file.open('r') as servicefile:
+                service_account = yaml.load(servicefile)
+        except OSError:
+            raise OSError(f'Can not find a service_account.yaml file on Path({service_account_file})')
+
+        service_account['metadata']['name'] = self._package_name
+
+        try:
+            with service_account_file.open('w') as yamlfile:
+                yamlfile.write(yaml.dump(service_account, default_flow_style=False))
+        except OSError:
+            raise OSError(f'Finner ikke cronjob.yaml fil på Path({service_account_file})')
 
     def _setup_deploy_key(self) -> None:
         ''' Setter opp deploy key mot github for jenkins-server
