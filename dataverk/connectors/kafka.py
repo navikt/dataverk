@@ -34,7 +34,7 @@ class KafkaConnector(BaseConnector):
         self._consumer = self._get_kafka_consumer(settings=settings, topics=topics, fetch_mode=fetch_mode)
         self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
-        self._schema_registry_url = settings.get('kafka', {}).get("schema_registry", "http://localhost:8081")
+        self._schema_registry_url = self._safe_get_nested(settings=settings, keys=("kafka", "schema_registry"), default="http://localhost:8081"), # settings.get('kafka', {}).get("schema_registry", "http://localhost:8081")
 
     def get_pandas_df(self, numb_of_msgs=None):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
@@ -105,15 +105,23 @@ class KafkaConnector(BaseConnector):
 
         return KafkaConsumer(*topics,
                              group_id=group_id,
-                             bootstrap_servers=settings.get('kafka', {}).get("brokers", "localhost:9092"),
-                             security_protocol=settings.get('kafka', {}).get("security_protocol", "PLAINTEXT"),
-                             sasl_mechanism=settings.get('kafka', {}).get("sasl_mechanism", None),
-                             sasl_plain_username=settings.get('kafka', {}).get("sasl_plain_username", None),
-                             sasl_plain_password=settings.get('kafka', {}).get("sasl_plain_password", None),
-                             ssl_cafile=settings.get('kafka', {}).get("ssl_cafile", None),
+                             bootstrap_servers=self._safe_get_nested(settings=settings, keys=("kafka", "brokers"), default="localhost:9092"), #settings.get('kafka', {}).get("brokers", "localhost:9092"),
+                             security_protocol=self._safe_get_nested(settings=settings, keys=("kafka", "security_protocol"), default="PLAINTEXT"), #settings.get('kafka', {}).get("security_protocol", "PLAINTEXT"),
+                             sasl_mechanism=self._safe_get_nested(settings=settings, keys=("kafka", "sasl_mechanism"), default=None), #settings.get('kafka', {}).get("sasl_mechanism", None),
+                             sasl_plain_username=self._safe_get_nested(settings=settings, keys=("kafka", "sasl_plain_username"), default=None), #settings.get('kafka', {}).get("sasl_plain_username", None),
+                             sasl_plain_password=self._safe_get_nested(settings=settings, keys=("kafka", "sasl_plain_password"), default=None), #settings.get('kafka', {}).get("sasl_plain_password", None),
+                             ssl_cafile=self._safe_get_nested(settings=settings, keys=("kafka", "ssl_cafile"), default=None), #settings.get('kafka', {}).get("ssl_cafile", None),
                              auto_offset_reset='earliest',
                              enable_auto_commit=False,
                              consumer_timeout_ms=15000)
+
+    def _safe_get_nested(self, settings: Mapping, keys: tuple, default):
+        for key in keys:
+            if key not in settings:
+                return default
+            else:
+                settings = settings[key]
+        return settings
 
     def _get_current_timestamp_in_ms(self):
         return int(datetime.now().timestamp() * 1000)
