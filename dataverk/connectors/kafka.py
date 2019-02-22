@@ -34,7 +34,7 @@ class KafkaConnector(BaseConnector):
         self._consumer = self._get_kafka_consumer(settings=settings, topics=topics, fetch_mode=fetch_mode)
         self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
-        self._schema_registry_url = self._safe_get_nested(settings=settings, keys=("kafka", "schema_registry"), default="http://localhost:8081"),
+        self._schema_registry_url = self._safe_get_nested(settings=settings, keys=("kafka", "schema_registry"), default="http://localhost:8081")
 
     def get_pandas_df(self, numb_of_msgs=None):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
@@ -59,11 +59,11 @@ class KafkaConnector(BaseConnector):
             try:
                 schema = schema_res.json()["schema"]
             except (AttributeError, KeyError):
-                mesg = message.value.decode('utf8')
+                mesg = json.loads(message.value.decode('utf8'))
             else:
                 mesg = self._decode_avro_message(schema=schema, message=message)
 
-            data.append(json.loads(mesg))
+            data.append(mesg)
             if self._is_requested_messages_read(message):
                 break
 
