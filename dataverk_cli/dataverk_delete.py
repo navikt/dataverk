@@ -1,6 +1,7 @@
 from .dataverk_base import DataverkBase
 from dataverk_cli.scheduling import scheduler_factory
 from collections.abc import Mapping
+from dataverk_cli.cli.cli_utils.user_message_templates import WARNING_TEMPLATE
 
 
 class DataverkDelete(DataverkBase):
@@ -25,6 +26,9 @@ class DataverkDelete(DataverkBase):
         '''
 
         if self._scheduler is not None:
-            self._scheduler.delete_job()
+            try:
+                self._scheduler.delete_job()
+            except UserWarning as no_job_exists_warning:
+                print(WARNING_TEMPLATE.format(no_job_exists_warning))
 
         self._clean_up_files()
