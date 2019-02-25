@@ -13,8 +13,6 @@ class SettingsBuilder:
 
     def __init__(self, settings: Mapping, env_store: Mapping=None):
 
-
-
         if env_store is None:
             env_store = {}
         self._env_store = env_store

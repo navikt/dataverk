@@ -22,6 +22,7 @@ setup(
         'prometheus_client==0.4.0',
         'SQLAlchemy==1.2.10',
         'pyjstat==1.0.1',
+        'hvac==0.7.2',
         'setuptools>=39.0.1',
         'pandas==0.23.3',
         'importlib_resources==1.0.2',
