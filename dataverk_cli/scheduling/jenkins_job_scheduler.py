@@ -43,7 +43,10 @@ class JenkinsJobScheduler(Scheduler):
             self._create_new_jenkins_job(config_file_path=config_file_path)
 
     def delete_job(self):
-        self._jenkins_server.delete_job(self._package_name)
+        self._delete_cronjob()
+
+        if self._jenkins_server.job_exists(name=self._package_name):
+            self._jenkins_server.delete_job(self._package_name)
 
     def _edit_jenkins_job_config(self, config_file_path: Path=Path("jenkins_config.xml")):
         tag_value = {"scriptPath": 'Jenkinsfile',
@@ -205,3 +208,6 @@ class JenkinsJobScheduler(Scheduler):
         }
 
         return {'json': json.dumps(data), 'Submit': "OK"}
+
+    def _delete_cronjob(self):
+        self._jenkins_server.build_job(name="remove-cronjob", parameters={"PACKAGE_NAME": self._package_name})

@@ -25,9 +25,6 @@ class DataverkDelete(DataverkBase):
         '''
 
         if self._scheduler is not None:
-            if self._scheduler.job_exist():
-                self._scheduler.delete_job()
-            else:
-                print(f'Det finnes ingen jobber med navn {self._settings_store["package_name"]}.')
+            self._scheduler.delete_job()
 
         self._clean_up_files()
