@@ -99,13 +99,7 @@ class JenkinsJobScheduler(Scheduler):
         :return: None
         """
 
-        cronjob_file_path = yaml_path
-
-        try:
-            with cronjob_file_path.open('r') as yamlfile:
-                cronjob_config = yaml.load(yamlfile)
-        except OSError:
-            raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')
+        cronjob_config = self._read_yaml(yaml_file=yaml_path)
 
         cronjob_config['metadata']['name'] = self._package_name
         cronjob_config['metadata']['namespace'] = self._settings_store["nais_namespace"]
@@ -118,29 +112,30 @@ class JenkinsJobScheduler(Scheduler):
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccount'] = self._package_name
         cronjob_config['spec']['jobTemplate']['spec']['template']['spec']['serviceAccountName'] = self._package_name
 
-        try:
-            with cronjob_file_path.open('w') as yamlfile:
-                yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
-        except OSError:
-            raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')
+        self._write_yaml(yaml_data=cronjob_config, yaml_file=yaml_path)
 
     def _edit_service_user_config(self, service_account_file: Path=Path('service_account_file.yaml')):
-        try:
-            with service_account_file.open('r') as servicefile:
-                service_account = yaml.load(servicefile)
-        except OSError:
-            raise OSError(f'Can not find a service_account.yaml file on Path({service_account_file})')
+        service_account_data = self._read_yaml(yaml_file=service_account_file)
+        service_account_data['metadata']['name'] = self._package_name
 
-        service_account['metadata']['name'] = self._package_name
+        self._write_yaml(yaml_data=service_account_data, yaml_file=service_account_file)
 
+    def _read_yaml(self, yaml_file):
         try:
-            with service_account_file.open('w') as yamlfile:
-                yamlfile.write(yaml.dump(service_account, default_flow_style=False))
+            with yaml_file.open('r') as yamlfile:
+                return yaml.load(yamlfile)
         except OSError:
-            raise OSError(f'Finner ikke cronjob.yaml fil på Path({service_account_file})')
+            raise OSError(f'Can not find a service_account.yaml file on Path({yaml_file})')
+
+    def _write_yaml(self, yaml_data, yaml_file):
+        try:
+            with yaml_file.open('w') as yamlfile:
+                yamlfile.write(yaml.dump(yaml_data, default_flow_style=False))
+        except OSError:
+            raise OSError(f'Finner ikke cronjob.yaml fil på Path({yaml_file})')
 
     def _setup_deploy_key(self) -> None:
-        ''' Setter opp deploy key mot github for jenkins-server
+        ''' Setting up deploy key to github for Jenkins server
 
         :return: None
         '''
@@ -150,9 +145,9 @@ class JenkinsJobScheduler(Scheduler):
             self._upload_private_key(key=key)
 
     def _key_exists(self):
-        ''' Sjekker om det allerede eksisterer en deploy key på github for dette repoet
+        ''' Checking if it already exists an deploy key in github repo for this repository
 
-        :return: True hvis nøkkelen eksisterer, False ellers
+        :return: True key exists, False otherwise
         '''
         res = requests.get(url=f'{GITHUB_API_URL}/{get_org_name(self._github_project)}/{get_repo_name(self._github_project)}/keys',
                            headers={"Authorization": f'token {self._env_store["GH_TOKEN"]}'})
