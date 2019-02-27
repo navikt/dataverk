@@ -1,22 +1,20 @@
 import re
-from dataverk.context.secset_replacer.finder import FileResourceFinder
 from string import Template
 import json
+
+from dataverk.context.secset_replacer.secrets_importer import SecretsImporter
 
 
 class Replacer:
 
-    REGEX = r"\${([A-z0-9_/]*)}"
+    def __init__(self, importer: SecretsImporter):
+        self._finder = importer
 
-    def __init__(self, finder: FileResourceFinder):
-        self._finder = finder
-
-    def get_filled_dict(self, string):
-        tokens = self._get_tokens(string)
-        token_value_map = self._finder.create_filled_resource(tokens)
+    def get_filled_mapping(self, string):
+        secret_name_value_map = self._finder.import_secrets()
         stemplate = Template(string)
-        filled_string = stemplate.safe_substitute(**token_value_map)
+        try:
+            filled_string = stemplate.substitute(**secret_name_value_map)
+        except KeyError:
+            raise KeyError(f"Could not find secret for token in settings mapping")
         return json.loads(filled_string)
-
-    def _get_tokens(self, string):
-        return re.findall(self.REGEX, string)
