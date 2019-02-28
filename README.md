@@ -5,7 +5,7 @@
 
 # Dataverk 
 
-Kodebasert ETL på NAIS med tilgangsstyring i Vault
+Kodebasert serverless ETL på NAIS med tilgangsstyring i Vault
 
 
 ## Relaterte  prosjekter
