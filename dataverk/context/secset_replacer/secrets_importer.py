@@ -54,3 +54,13 @@ class APISecretsImporter(SecretsImporter):
                                password=self._env_store["PASSWORD"],
                                mount_point=self._mount_point)
         return client.read(path=self._secrets_path)["data"]
+
+
+def get_secrets_importer(settings: Mapping, env_store: Mapping) -> SecretsImporter:
+    if env_store.get("SECRETS_FROM_FILES") is not None:
+        return FileSecretsImporter(resource=settings["pod_secret_mount_path"])
+    elif env_store.get("SECRETS_FROM_API") is not None:
+        return APISecretsImporter(resource=settings["secrets_url_path"], mount_point=settings["secrets_mount_path"],
+                                  secrets_path=settings["remote_secrets_path"], env_store=env_store)
+    else:
+        raise KeyError(f'No secrets sources found')

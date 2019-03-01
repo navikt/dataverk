@@ -1,6 +1,6 @@
 from . import connectors
 from . import utils
-from dataverk.context.settings import settings_store_factory
+from dataverk.context.settings import singleton_settings_store_factory
 from dataverk.api import _current_dir, read_sql, to_sql, write_notebook, read_kafka
 from dataverk.datapackage import Datapackage
 from pathlib import Path
@@ -16,6 +16,6 @@ __all__ = ['connectors',
            'utils',
            'write_notebook',
            'Datapackage',
-           'settings_store_factory',
+           'singleton_settings_store_factory',
            'read_kafka'
            ]
