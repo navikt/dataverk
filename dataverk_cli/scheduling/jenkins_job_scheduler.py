@@ -44,7 +44,13 @@ class JenkinsJobScheduler(Scheduler):
             self._create_new_jenkins_job(config_file_path=config_file_path)
 
     def delete_job(self):
-        self._jenkins_server.delete_job(self._package_name)
+        self._delete_cronjob()
+
+        try:
+            self._jenkins_server.delete_job(self._package_name)
+        except jenkins.NotFoundException:
+            raise UserWarning(f'No job with name {self._package_name} exists on jenkinsserver')
+
 
     def _edit_jenkins_job_config(self, config_file_path: Path=Path("jenkins_config.xml")):
         tag_value = {"scriptPath": 'Jenkinsfile',
@@ -216,3 +222,6 @@ class JenkinsJobScheduler(Scheduler):
         }
 
         return {'json': json.dumps(data), 'Submit': "OK"}
+
+    def _delete_cronjob(self):
+        self._jenkins_server.build_job(name="remove-cronjob", parameters={"PACKAGE_NAME": self._package_name})
