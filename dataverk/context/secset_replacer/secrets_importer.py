@@ -1,6 +1,8 @@
 from pathlib import Path
 from collections.abc import Mapping
 from abc import ABC, abstractmethod
+from urllib import parse
+from urllib.parse import ParseResult
 
 import hvac
 
@@ -24,7 +26,7 @@ class FileSecretsImporter(SecretsImporter):
     def import_secrets(self) -> Mapping:
         token_value_map = {}
         for secret in self._resource_path.iterdir():
-            token_value_map += self._import_secret_value(secret)
+            token_value_map.update(self._import_secret_value(secret))
         return token_value_map
 
     @staticmethod
@@ -58,9 +60,15 @@ class APISecretsImporter(SecretsImporter):
 
 def get_secrets_importer(settings: Mapping, env_store: Mapping) -> SecretsImporter:
     if env_store.get("SECRETS_FROM_FILES") is not None:
-        return FileSecretsImporter(resource=settings["pod_secret_mount_path"])
+        return FileSecretsImporter(resource=settings["secret_path"])
     elif env_store.get("SECRETS_FROM_API") is not None:
-        return APISecretsImporter(resource=settings["secrets_url_path"], mount_point=settings["secrets_mount_path"],
-                                  secrets_path=settings["remote_secrets_path"], env_store=env_store)
+        parsed_url = _parse_url(settings["remote_secrets_url"])
+        return APISecretsImporter(resource=f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}",
+                                  mount_point=settings["auth_method"],
+                                  secrets_path=parsed_url.path, env_store=env_store)
     else:
         raise KeyError(f'No secrets sources found')
+
+
+def _parse_url(url: str) -> ParseResult:
+    return parse.urlparse(url)

@@ -2,23 +2,25 @@
 # Import statements
 # =================
 import unittest
-import json
-from tempfile import TemporaryDirectory
-from dataverk.context.secrets_importer import SecretsFromFilesImporter, SecretsFromApiImporter, get_secrets_importer
+from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
+from dataverk.context.secset_replacer.secrets_importer import get_secrets_importer, APISecretsImporter, FileSecretsImporter
 from pathlib import Path
 
 # Common input parameters
 # =======================
-SETTINGS_TEMPLATE = {
+TEST_SETTINGS_CONTENT = {
     "value1": "${REPLACE_ME1}",
     "value2": {
         "value3": "${REPLACE_ME2}"
     },
-    "secrets_path": ""
+    "auth_method": "auth",
+    "secret_path": "",
+    "remote_secrets_url": "https://vault.no:443/path/to/secrets"
 }
 
 REPLACE_ME1 = "replaced_value_1"
 REPLACE_ME2 = "replaced_value_2"
+
 
 # Base classes
 # ============
@@ -29,25 +31,25 @@ class Base(unittest.TestCase):
     This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
     def setUp(self):
-        self._tmp_secrets_files_path = self._create_tmp_secrets_dir()
-        self._settings = SETTINGS_TEMPLATE
-        self._settings["secrets_path"] = self._tmp_secrets_files_path
+        self.tmp_secrets_dir = self._create_tmp_secrets_dir()
+        self.settings = TEST_SETTINGS_CONTENT
+        self.settings["secret_path"] = self.tmp_secrets_dir.name
 
     def tearDown(self):
-        self._tmp_secrets_files_path.cleanup()
+        self.tmp_secrets_dir.cleanup()
 
     def _create_tmp_secrets_dir(self):
-        tmp_secrets_dir = TemporaryDirectory()
-        secret_file_1_path = Path(tmp_secrets_dir.name).joinpath("REPLACE_ME1")
-        secret_file_2_path = Path(tmp_secrets_dir.name).joinpath("REPLACE_ME2")
+        tmp_secrets_dir = WindowsSafeTempDirectory()
+        secret_file_1_path = Path(tmp_secrets_dir.name).joinpath("REPLACE_ME1").absolute()
+        secret_file_2_path = Path(tmp_secrets_dir.name).joinpath("REPLACE_ME2").absolute()
 
-        with Path(secret_file_1_path.name).open('w') as secret_file_1:
+        with Path(secret_file_1_path).open('w') as secret_file_1:
             secret_file_1.write(REPLACE_ME1)
 
-        with Path(secret_file_2_path.name).open('w') as secret_file_2:
+        with Path(secret_file_2_path).open('w') as secret_file_2:
             secret_file_2.write(REPLACE_ME2)
 
-        return tmp_secrets_dir.name
+        return tmp_secrets_dir
 
 # Test classes
 # ============
@@ -63,71 +65,34 @@ class Instantiation(Base):
     # ==========================
     # Test factory method
     def test_get_secrets_importer_secrets_from_file(self):
-        env_store = {"SECRETS_FROM_FILE": "True"}
-        secret_importer = get_secrets_importer(env_store=env_store)
-        self.assertIsInstance(secret_importer, SecretsFromFilesImporter)
+        env_store = {"SECRETS_FROM_FILES": "True"}
+        secret_importer = get_secrets_importer(self.settings, env_store)
+        self.assertIsInstance(secret_importer, FileSecretsImporter)
 
     def test_get_secrets_importer_secrets_from_api(self):
         env_store = {"SECRETS_FROM_API": "True"}
-        secret_importer = get_secrets_importer(env_store=env_store)
-        self.assertIsInstance(secret_importer, SecretsFromApiImporter)
+        secret_importer = get_secrets_importer(self.settings, env_store)
+        self.assertIsInstance(secret_importer, APISecretsImporter)
 
     def test_get_secrets_importer_raise_warning(self):
         env_store = {}
-        with self.assertRaises(Warning):
-            get_secrets_importer(env_store=env_store)
+        with self.assertRaises(KeyError):
+            get_secrets_importer(settings=self.settings, env_store=env_store)
 
     # Input arguments outside constraints
     # ===================================
-
-
-class Set(Base):
-    """
-    Tests all aspects of setting attributes
-
-    Tests include: setting attributes of wrong type, setting attributes outside their constraints, etc.
-    """
-    pass
-
-    # Set attribute wrong type
-    # ========================
-
-    # Set attribute outside constraint
-    # ================================
-
-
-class MethodsInput(Base):
-    """
-    Tests methods which take input parameters
-
-    Tests include: passing invalid input, etc.
-    """
-    pass
-
-
-class MethodsReturnType(Base):
-    """
-    Tests methods' output types
-    """
-    # def test_secrets_replacement_from_files(self):
-    #     env_store = {"SECRETS_FROM_FILES": "True"}
-    #     secrets_importer = get_secrets_importer(env_store=env_store)
-    #
-    #     settings = secrets_importer.apply_secrets(self._settings)
-    #
-    #     self.assertEqual(settings["value1"], REPLACE_ME1)
-    #     self.assertEqual(settings["value3"], REPLACE_ME2)
-
-
-class MethodsReturnUnits(Base):
-    """
-    Tests methods' output units where applicable
-    """
-    pass
 
 
 class MethodsReturnValues(Base):
     """
     Tests values of methods against known values
     """
-    pass
+
+    def test_get_secrets_from_file(self):
+        env_store = {"SECRETS_FROM_FILES": "True"}
+        secrets_importer = get_secrets_importer(self.settings, env_store)
+        secrets = secrets_importer.import_secrets()
+
+        self.assertEqual(secrets["REPLACE_ME1"], REPLACE_ME1)
+        self.assertEqual(secrets["REPLACE_ME2"], REPLACE_ME2)
+
