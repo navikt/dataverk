@@ -1,4 +1,3 @@
-import re
 from string import Template
 import json
 
