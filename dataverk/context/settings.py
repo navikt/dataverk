@@ -1,7 +1,7 @@
 
 """ Funksjoner som setter sammen og tilgjengeliggjør data definerte konfigurasjoner i dataverk.
 """
-
+import json
 from collections.abc import Mapping
 from dataverk.context.settings_classes import SettingsStore
 from pathlib import Path
@@ -25,7 +25,7 @@ def singleton_settings_store_factory() -> Mapping:
     global _settings_store_ref
     if _settings_store_ref is None:
         resource_files = resource_discoverer.search_for_files(start_path=Path("."),
-                                                              file_names=('settings.json', '.env_test'))
+                                                              file_names=('settings.json', '.env'))
         _settings_store_ref = _create_settings_store(resource_files)
     return _settings_store_ref
 
@@ -62,4 +62,4 @@ def _try_apply_secrets(settings: Mapping, env_store: Mapping):
 def _apply_secrets(env_store, settings):
     importer = secrets_importer.get_secrets_importer(settings, env_store)
     replacer = Replacer(importer)
-    return replacer.get_filled_mapping(str(settings))
+    return replacer.get_filled_mapping(json.dumps(settings))

@@ -64,8 +64,8 @@ def get_secrets_importer(settings: Mapping, env_store: Mapping) -> SecretsImport
     elif env_store.get("SECRETS_FROM_API") is not None:
         parsed_url = _parse_url(settings["remote_secrets_url"])
         return APISecretsImporter(resource=f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}",
-                                  mount_point=settings["auth_method"],
-                                  secrets_path=parsed_url.path, env_store=env_store)
+                                  mount_point=settings["secrets_auth_method"],
+                                  secrets_path=parsed_url.path[1:], env_store=env_store)
     else:
         raise KeyError(f'No secrets sources found')
 
