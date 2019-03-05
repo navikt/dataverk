@@ -8,8 +8,8 @@ from pathlib import Path
 from dataverk.utils import file_functions
 from .env_store import EnvStore
 from dataverk.utils import resource_discoverer
-from dataverk.context.secset_replacer import secrets_importer
-from dataverk.context.secset_replacer.replacer import Replacer
+from dataverk.context import secrets_importer
+from dataverk.context.replacer import Replacer
 
 _settings_store_ref = None  # SettingsStore ref for create_singleton_settings_store()
 

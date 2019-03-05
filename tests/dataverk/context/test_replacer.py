@@ -3,9 +3,9 @@
 # =================
 import unittest
 import json
-from dataverk.context.secset_replacer.replacer import Replacer
+from dataverk.context.replacer import Replacer
 from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
-from dataverk.context.secset_replacer.secrets_importer import get_secrets_importer
+from dataverk.context.secrets_importer import get_secrets_importer
 from pathlib import Path
 # Common input parameters
 # =======================

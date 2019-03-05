@@ -1,7 +1,7 @@
 from string import Template
 import json
 
-from dataverk.context.secset_replacer.secrets_importer import SecretsImporter
+from dataverk.context.secrets_importer import SecretsImporter
 
 
 class Replacer:
