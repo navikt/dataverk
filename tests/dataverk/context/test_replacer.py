@@ -14,7 +14,7 @@ TEST_SETTINGS_CONTENT = {
     "value2": {
         "value3": "${REPLACE_ME2}"
     },
-    "auth_method": "auth",
+    "secrets_auth_method": "auth",
     "secret_path": "",
     "remote_secrets_url": "https://vault.no:443/path/to/secrets"
 }
