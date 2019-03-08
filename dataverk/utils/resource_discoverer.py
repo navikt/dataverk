@@ -2,7 +2,7 @@ from pathlib import Path
 from collections.abc import Sequence
 
 
-def search_for_files(start_path: Path, file_names: tuple, levels: int) -> dict:
+def search_for_files(start_path: Path, file_names: tuple, levels: int=1) -> dict:
     """
     Searches from the current path and up the path hierarchy
 

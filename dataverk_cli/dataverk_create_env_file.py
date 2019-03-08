@@ -6,35 +6,32 @@ PASSWORD_STRING = "PASSWORD="
 SETTINGS_REPO_STRING = "SETTINGS_REPO="
 TEMPLATE_REPO_STRING = "TEMPLATES_REPO="
 GITHUB_TOKEN_STRING = "GH_TOKEN="
+ENVIRONMENT_STRING = "SECRETS_FROM_API=\"True\""
+
 
 class CreateEnvFile:
-    ''' Klasse for å generere .env fil for dataverk
+    ''' Class for generating .env file for dataverk internal projects
 
     '''
 
-    def __init__(self, user_ident: str, password: str, github_token: str, settings_repo: str, template_repo: str, destination: str=None):
-        self._verify_input_types(user_ident=user_ident, password=password, github_token=github_token, template_repo=template_repo, settings_repo=settings_repo)
-        if destination is not None:
-            self._verify_destination(destination)
-            try:
-                with open(os.path.join(destination, ".env"), 'w') as env_file:
-                    print(USER_IDENT_STRING + user_ident, file=env_file)
-                    print(PASSWORD_STRING + password, file=env_file)
-                    print(GITHUB_TOKEN_STRING + github_token, file=env_file)
-                    print(SETTINGS_REPO_STRING + settings_repo, file=env_file)
-                    print(TEMPLATE_REPO_STRING + template_repo, file=env_file)
-            except OSError:
-                raise OSError(f'Klarte ikke generere ny .env fil')
-        else:
-            try:
-                with open(".env", 'w') as env_file:
-                    print(USER_IDENT_STRING + user_ident, file=env_file)
-                    print(PASSWORD_STRING + password, file=env_file)
-                    print(GITHUB_TOKEN_STRING + github_token, file=env_file)
-                    print(SETTINGS_REPO_STRING + settings_repo, file=env_file)
-                    print(TEMPLATE_REPO_STRING + template_repo, file=env_file)
-            except OSError:
-                raise OSError(f'Klarte ikke generere ny .env fil')
+    def __init__(self, user_ident: str, password: str, github_token: str, settings_repo: str, template_repo: str, destination: str='.'):
+        self._verify_input_types(user_ident=user_ident, password=password, github_token=github_token,
+                                 template_repo=template_repo, settings_repo=settings_repo)
+        self._verify_destination(destination)
+        self._set_env_values(user_ident=user_ident, password=password, github_token=github_token,
+                             template_repo=template_repo, settings_repo=settings_repo, destination=destination)
+
+    def _set_env_values(self, destination, user_ident, password, github_token, settings_repo, template_repo):
+        try:
+            with open(os.path.join(destination, ".env"), 'w') as env_file:
+                print(USER_IDENT_STRING + user_ident, file=env_file)
+                print(PASSWORD_STRING + password, file=env_file)
+                print(GITHUB_TOKEN_STRING + github_token, file=env_file)
+                print(SETTINGS_REPO_STRING + settings_repo, file=env_file)
+                print(TEMPLATE_REPO_STRING + template_repo, file=env_file)
+                print(ENVIRONMENT_STRING, file=env_file)
+        except OSError:
+            raise OSError(f'Klarte ikke generere ny .env fil')
 
     def _verify_input_types(self, user_ident, password, github_token, settings_repo, template_repo):
         if not isinstance(user_ident, str):
@@ -53,11 +50,11 @@ class CreateEnvFile:
             raise TypeError(f'Sti for lagring av .env må være av type string')
         elif not os.path.exists(path=path):
             raise ValueError(f'Ønsket sti for lagring av .env fil eksisterer ikke')
-        elif not os.path.isdir(path=path):
+        elif not os.path.isdir(path):
             raise ValueError(f'Ønsket sti er ikke en mappe')
 
 
-def run(destination: str=None):
+def run(destination: str):
     default_settings_repo = "https://github.com/navikt/dataverk_settings.git"
     default_template_repo = "https://github.com/navikt/dataverk_settings.git"
 

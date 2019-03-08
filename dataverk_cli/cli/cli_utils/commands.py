@@ -10,7 +10,7 @@ def add_create_env_file_command(sub_arg_parser):
                                         help="Viser programversjon")
     parser_create_env_file.add_argument('-h', '--help', action='help', help="Viser denne hjelpemeldingen")
     parser_create_env_file.add_argument('-d', '--destination', dest="destination", action='store', metavar='<path>',
-                                        default=None, help="Sti til ønsket lagringslokasjon for .env fil. "
+                                        default='.', help="Sti til ønsket lagringslokasjon for .env fil. "
                                                            "Dersom denne ikke spesifiseres vil .env filen "
                                                            "legges i stien som skriptet kjøres fra.")
 

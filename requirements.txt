@@ -12,6 +12,7 @@ google-cloud-storage==1.14.0
 google-resumable-media==0.3.2
 googleapis-common-protos==1.5.8
 google-cloud-bigquery==1.9.0
+hvac==0.7.2
 importlib_resources==1.0.2
 ipykernel==5.1.0
 jenkins==1.0.2
