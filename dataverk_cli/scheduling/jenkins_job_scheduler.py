@@ -1,17 +1,10 @@
 import jenkins
 import yaml
-import requests
-import json
-from Cryptodome.PublicKey import RSA
 from collections.abc import Mapping
 from xml.etree import ElementTree
 from pathlib import Path
-from string import Template
 from .scheduler import Scheduler
-from dataverk_cli.cli.cli_utils.repo_info import get_org_name, get_repo_name
-
-
-GITHUB_API_URL = "https://api.github.com/repos"
+from dataverk_cli.scheduling.deploy_key import DeployKey
 
 
 class JenkinsJobScheduler(Scheduler):
@@ -19,14 +12,14 @@ class JenkinsJobScheduler(Scheduler):
 
     """
 
-    def __init__(self, settings_store: Mapping, env_store: Mapping, repo_path: str="."):
-        super().__init__(settings_store, env_store, repo_path=repo_path)
+    def __init__(self, settings_store: Mapping, env_store: Mapping, remote_repo_url: str, deploy_key: DeployKey):
+        super().__init__(settings_store, env_store, remote_repo_url)
 
         self._jenkins_server = jenkins.Jenkins(url=self._settings_store["jenkins"]["url"],
                                                username=self._env_store['USER_IDENT'],
                                                password=self._env_store['PASSWORD'])
         self._package_name = settings_store["package_name"]
-        self._deploy_key_name = f'{get_repo_name(self._github_project)}-ci'
+        self._deploy_key = deploy_key
 
     def job_exist(self):
         return self._jenkins_server.job_exists(name=self._package_name)
@@ -34,7 +27,6 @@ class JenkinsJobScheduler(Scheduler):
     def configure_job(self):
         self._edit_jenkins_job_config()
         self._edit_cronjob_config()
-        self._setup_deploy_key()
 
         config_file_path = Path('jenkins_config.xml')
         if self._jenkins_server.job_exists(name=self._package_name):
@@ -55,7 +47,7 @@ class JenkinsJobScheduler(Scheduler):
         tag_value = {"scriptPath": 'Jenkinsfile',
                      "projectUrl": self._github_project,
                      "url": self._github_project_ssh,
-                     "credentialsId": self._deploy_key_name}
+                     "credentialsId": self._deploy_key.name}
 
         xml = ElementTree.parse(config_file_path)
         xml_root = xml.getroot()
@@ -128,89 +120,6 @@ class JenkinsJobScheduler(Scheduler):
                 yamlfile.write(yaml.dump(cronjob_config, default_flow_style=False))
         except OSError:
             raise OSError(f'Finner ikke cronjob.yaml fil på Path({cronjob_file_path})')
-
-    def _setup_deploy_key(self) -> None:
-        ''' Setter opp deploy key mot github for jenkins-server
-
-        :return: None
-        '''
-        if not self._key_exists():
-            key = self._generate_deploy_key()
-            self._upload_public_key(key=key)
-            self._upload_private_key(key=key)
-
-    def _key_exists(self):
-        ''' Sjekker om det allerede eksisterer en deploy key på github for dette repoet
-
-        :return: True hvis nøkkelen eksisterer, False ellers
-        '''
-        res = requests.get(url=f'{GITHUB_API_URL}/{get_org_name(self._github_project)}/{get_repo_name(self._github_project)}/keys',
-                           headers={"Authorization": f'token {self._env_store["GH_TOKEN"]}'})
-        if not res.ok:
-            res.raise_for_status()
-
-        for key in json.loads(res.content.decode("utf-8")):
-            if key["title"] == self._deploy_key_name:
-                return True
-
-        return False
-
-    def _generate_deploy_key(self, key_length: int=4096):
-        ''' Genererer et SSH nøkkelpar
-
-        :return: SSH public/private nøkkelpar
-        '''
-        return RSA.generate(key_length)
-
-    def _upload_public_key(self, key) -> None:
-        ''' Laster opp public nøkkelen til repositoriet på github
-
-        :param key: ssh nøkkel
-        :return: None
-        '''
-        public_key = key.publickey().exportKey(format='OpenSSH').decode(encoding="utf-8")
-        res = requests.post(url=f'{GITHUB_API_URL}/{get_org_name(self._github_project)}/{get_repo_name(self._github_project)}/keys',
-                            headers={"Authorization": f'token {self._env_store["GH_TOKEN"]}'},
-                            data=json.dumps({"title": f'{self._deploy_key_name}', "key": public_key, "read_only": True}))
-        if res.status_code != 201:
-            res.raise_for_status()
-
-    def _upload_private_key(self, key) -> None:
-        ''' Laster opp private nøkkelen til jenkins-serveren
-
-        :param key: ssh nøkkel
-        :return: None
-        '''
-        jenkins_crumb = requests.get(f'{self._settings_store["jenkins"]["url"]}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)',
-                                     auth=(self._env_store["USER_IDENT"], self._env_store["PASSWORD"])).text
-
-        payload = self._compose_credential_payload(key=key)
-
-        res = requests.post(f'{self._settings_store["jenkins"]["url"]}/credentials/store/system/domain/_/createCredentials',
-                            auth=(self._env_store["USER_IDENT"], self._env_store["PASSWORD"]),
-                            headers={jenkins_crumb.split(":")[0]: jenkins_crumb.split(":")[1]},
-                            data=payload)
-
-        if not res.ok:
-            res.raise_for_status()
-
-    def _compose_credential_payload(self, key):
-        priv_key = key.exportKey().decode(encoding="utf-8")
-
-        data = {
-            'credentials': {
-                'scope': "GLOBAL",
-                'username': self._deploy_key_name,
-                'id': self._deploy_key_name,
-                'privateKeySource': {
-                    'privateKey': priv_key,
-                    'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey$DirectEntryPrivateKeySource"
-                },
-                'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey"
-            }
-        }
-
-        return {'json': json.dumps(data), 'Submit': "OK"}
 
     def _delete_cronjob(self):
         self._jenkins_server.build_job(name="remove-cronjob", parameters={"PACKAGE_NAME": self._package_name})
