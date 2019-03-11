@@ -3,8 +3,9 @@
 # =================
 import unittest
 import json
-from tempfile import TemporaryDirectory
+from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
 from dataverk_cli.scheduling.deploy_key import DeployKey
+from dataverk_cli.cli.cli_utils import repo_info
 from git import Repo
 
 # Common input parameters
@@ -32,7 +33,7 @@ SETTINGS_TEMPLATE = {
 
 ENV_STORE_TEMPLATE = {
     "USER_IDENT": "my-ident",
-    "PASSWORD": "password"
+    "PASSWORD": "password",
 }
 
 JENKINS_CREDENTIAL_WRAPPER_TEMPLATE = {
@@ -63,22 +64,7 @@ class Base(unittest.TestCase):
     This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
     def setUp(self):
-        self.local_repo, self.local_repo_dir = self.create_tmp_repo()
-
-        self.deploy_key = DeployKey(settings_store=SETTINGS_TEMPLATE,
-                                    env_store=ENV_STORE_TEMPLATE,
-                                    repo_path=self.local_repo_dir.name)
-
-    def tearDown(self):
-        self.local_repo.close()
-        self.local_repo_dir.cleanup()
-
-    def create_tmp_repo(self) -> (Repo, TemporaryDirectory):
-        tmpdir = TemporaryDirectory()
-        repo = Repo.init(tmpdir.name)
-        repo.create_remote("origin", url="https://my/remote/repo.git")
-        repo.index.commit("initial commit")
-        return repo, tmpdir
+        pass
 
 
 class MethodsReturnValues(Base):
@@ -94,6 +80,6 @@ class MethodsReturnValues(Base):
         expected_credentials["credentials"]["privateKeySource"]["privateKey"] = priv_key
         expected_payload["json"] = json.dumps(expected_credentials)
 
-        credential_payload = self.deploy_key._compose_credential_payload(key=key)
+        credential_payload = DeployKey._compose_credential_payload(deploy_key_name="repo-ci", key=key)
 
         self.assertEqual(credential_payload, expected_payload)

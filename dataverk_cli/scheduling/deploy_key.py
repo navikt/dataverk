@@ -81,7 +81,7 @@ class DeployKey:
         jenkins_crumb = requests.get(f'{self._settings_store["jenkins"]["url"]}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)',
                                      auth=(self._env_store["USER_IDENT"], self._env_store["PASSWORD"])).text
 
-        payload = self._compose_credential_payload(key=key)
+        payload = self._compose_credential_payload(deploy_key_name=self._deploy_key_name, key=key)
         res = requests.post(f'{self._settings_store["jenkins"]["url"]}/credentials/store/system/domain/_/createCredentials',
                             auth=(self._env_store["USER_IDENT"], self._env_store["PASSWORD"]),
                             headers={jenkins_crumb.split(":")[0]: jenkins_crumb.split(":")[1]},
@@ -89,13 +89,14 @@ class DeployKey:
         if not res.ok:
             res.raise_for_status()
 
-    def _compose_credential_payload(self, key):
+    @staticmethod
+    def _compose_credential_payload(deploy_key_name: str, key):
         priv_key = key.exportKey().decode(encoding="utf-8")
         data = {
             'credentials': {
                 'scope': "GLOBAL",
-                'username': self._deploy_key_name,
-                'id': self._deploy_key_name,
+                'username': deploy_key_name,
+                'id': deploy_key_name,
                 'privateKeySource': {
                     'privateKey': priv_key,
                     'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey$DirectEntryPrivateKeySource"

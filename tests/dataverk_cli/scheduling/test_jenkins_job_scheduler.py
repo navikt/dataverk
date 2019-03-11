@@ -2,12 +2,12 @@
 # Import statements
 # =================
 import unittest
-import json
 import yaml
 from xml.etree import ElementTree
-from tempfile import TemporaryDirectory
 from pathlib import Path
 from dataverk_cli.scheduling.jenkins_job_scheduler import JenkinsJobScheduler
+from dataverk_cli.cli.cli_utils import repo_info
+from tempfile import TemporaryDirectory
 from git import Repo
 
 # Common input parameters
@@ -38,23 +38,15 @@ ENV_STORE_TEMPLATE = {
     "PASSWORD": "password"
 }
 
-JENKINS_CREDENTIAL_WRAPPER_TEMPLATE = {
-    "json": "",
-    "Submit": "OK"
-}
 
-JENKINS_CREDENTIAL_TEMPLATE = {
-    'credentials': {
-        'scope': "GLOBAL",
-        'username': "repo-ci",
-        'id': "repo-ci",
-        'privateKeySource': {
-            'privateKey': "",
-            'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey$DirectEntryPrivateKeySource"
-        },
-        'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey"
-     }
-}
+class MockDeployKey:
+
+    def __init__(self, remote_repo_url: str):
+        self._deploy_key_name = f'{repo_info.get_repo_name(remote_repo_url)}-ci'
+
+    @property
+    def name(self):
+        return self._deploy_key_name
 
 
 # Base classes
@@ -67,10 +59,12 @@ class Base(unittest.TestCase):
     """
     def setUp(self):
         self._local_repo, self._local_repo_path = self.create_tmp_repo()
+        self._remote_repo_url = repo_info.get_remote_url(self._local_repo_path.name)
 
         self._scheduler = JenkinsJobScheduler(settings_store=SETTINGS_TEMPLATE,
                                               env_store=ENV_STORE_TEMPLATE,
-                                              repo_path=self._local_repo_path.name)
+                                              remote_repo_url=self._remote_repo_url,
+                                              deploy_key=MockDeployKey(self._remote_repo_url))
 
     def tearDown(self):
         self._local_repo.close()
@@ -85,29 +79,6 @@ class Base(unittest.TestCase):
 
 # Test classes
 # ============
-
-
-class MethodsInput(Base):
-    """
-    Tests methods which take input parameters
-
-    Tests include: passing invalid input, etc.
-    """
-    pass
-
-
-class MethodsReturnType(Base):
-    """
-    Tests methods' output types
-    """
-    pass
-
-
-class MethodsReturnUnits(Base):
-    """
-    Tests methods' output units where applicable
-    """
-    pass
 
 
 class MethodsReturnValues(Base):
@@ -142,19 +113,6 @@ class MethodsReturnValues(Base):
             edited_jenkins_config = jenkins_config.read()
 
         self.assertEqual(edited_jenkins_config, jenkins_config_ref)
-
-    def test__compose_credential_payload(self):
-        key = self._scheduler._generate_deploy_key(key_length=1024)
-        priv_key = key.exportKey().decode(encoding="utf-8")
-
-        expected_payload = JENKINS_CREDENTIAL_WRAPPER_TEMPLATE
-        expected_credentials = JENKINS_CREDENTIAL_TEMPLATE
-        expected_credentials["credentials"]["privateKeySource"]["privateKey"] = priv_key
-        expected_payload["json"] = json.dumps(expected_credentials)
-
-        credential_payload = self._scheduler._compose_credential_payload(key=key)
-
-        self.assertEqual(credential_payload, expected_payload)
 
 
 CRONJOB_YAML_TEMPLATE = '''

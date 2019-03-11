@@ -62,18 +62,9 @@ class MethodsReturnValues(Base):
         self.assertEqual(scheduler_type, scheduler_factory.Schedulers.JENKINS,
                               f"Scheduler({scheduler_type}) should be of type({scheduler_factory.Schedulers.JENKINS})")
 
-        scheduler_type = scheduler_factory.read_scheduler_from_settings(self.travis_settings_store)
-        self.assertEqual(scheduler_type, scheduler_factory.Schedulers.TRAVIS,
-                              f"Scheduler({scheduler_type}) should be of type({scheduler_factory.Schedulers.TRAVIS})")
-
-        scheduler_type = scheduler_factory.read_scheduler_from_settings(self.circle_ci_settings_store)
-        self.assertEqual(scheduler_type, scheduler_factory.Schedulers.CIRCLE_CI,
-                              f"Scheduler({scheduler_type}) should be of type({scheduler_factory.Schedulers.CIRCLE_CI})")
 
     def test_test_read_scheduler_from_settings__jenkins_is_main(self):
-        all_schedulers_settings_store = {**self.circle_ci_settings_store,
-                                         **self.travis_settings_store,
-                                         **self.jenkins_settings_store}
+        all_schedulers_settings_store = {**self.jenkins_settings_store}
 
         scheduler_type = scheduler_factory.read_scheduler_from_settings(all_schedulers_settings_store)
         self.assertEqual(scheduler_type, scheduler_factory.Schedulers.JENKINS,
