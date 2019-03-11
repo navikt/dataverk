@@ -4,7 +4,7 @@
 import unittest
 import json
 from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
-from dataverk_cli.scheduling.deploy_key import DeployKey
+from dataverk_cli.deploy.deploy_key import DeployKey
 from dataverk_cli.cli.cli_utils import repo_info
 from git import Repo
 

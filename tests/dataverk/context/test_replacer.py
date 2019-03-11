@@ -5,7 +5,7 @@ import unittest
 import json
 from dataverk.context.replacer import Replacer
 from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
-from dataverk.context.secrets_importer import get_secrets_importer
+from dataverk.context.values_importer import get_secrets_importer
 from pathlib import Path
 # Common input parameters
 # =======================
@@ -62,8 +62,8 @@ class MethodsReturnValues(Base):
         env_store = {"SECRETS_FROM_FILES": "True"}
         secrets_importer = get_secrets_importer(self.settings, env_store)
 
-        replacer = Replacer(secrets_importer)
-        settings_with_secrets = replacer.get_filled_mapping(json.dumps(self.settings))
+        replacer = Replacer(secrets_importer.import_values())
+        settings_with_secrets = replacer.get_filled_mapping(json.dumps(self.settings), json.loads)
 
         self.assertEqual(settings_with_secrets["value1"], REPLACE_ME1)
         self.assertEqual(settings_with_secrets["value2"]["value3"], REPLACE_ME2)

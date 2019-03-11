@@ -8,7 +8,7 @@ from pathlib import Path
 from dataverk.utils import file_functions
 from .env_store import EnvStore
 from dataverk.utils import resource_discoverer
-from dataverk.context import secrets_importer
+from dataverk.context import values_importer
 from dataverk.context.replacer import Replacer
 
 _settings_store_ref = None  # SettingsStore ref for create_singleton_settings_store()
@@ -60,6 +60,6 @@ def _try_apply_secrets(settings: Mapping, env_store: Mapping):
 
 
 def _apply_secrets(env_store, settings):
-    importer = secrets_importer.get_secrets_importer(settings, env_store)
+    importer = values_importer.get_secrets_importer(settings, env_store)
     replacer = Replacer(importer)
     return replacer.get_filled_mapping(json.dumps(settings))

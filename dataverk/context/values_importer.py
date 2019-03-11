@@ -7,42 +7,42 @@ from urllib.parse import ParseResult
 import hvac
 
 
-class SecretsImporter(ABC):
+class ValuesImporter(ABC):
 
     def __init__(self, resource):
         self._resource = resource
 
     @abstractmethod
-    def import_secrets(self) -> Mapping:
+    def import_values(self) -> Mapping:
         pass
 
 
-class FileSecretsImporter(SecretsImporter):
+class FileValuesImporter(ValuesImporter):
 
     def __init__(self, resource):
         super().__init__(resource)
         self._resource_path = Path(resource)
 
-    def import_secrets(self) -> Mapping:
+    def import_values(self) -> Mapping:
         token_value_map = {}
-        for secret in self._resource_path.iterdir():
-            token_value_map.update(self._import_secret_value(secret))
+        for value in self._resource_path.iterdir():
+            token_value_map.update(self._import_value(value))
         return token_value_map
 
     @staticmethod
-    def _import_secret_value(secret):
+    def _import_value(value):
         token_value_map = {}
         try:
-            f = secret.open("r")
+            f = value.open("r")
         except OSError:
-            raise Warning(f"Could not open secret={secret}")
+            raise Warning(f"Could not open value={value}")
         else:
-            token_value_map[secret.name] = f.read()
+            token_value_map[value.name] = f.read()
             f.close()
         return token_value_map
 
 
-class APISecretsImporter(SecretsImporter):
+class APIValuesImporter(ValuesImporter):
 
     def __init__(self, resource, mount_point, secrets_path, env_store):
         super().__init__(resource)
@@ -50,7 +50,7 @@ class APISecretsImporter(SecretsImporter):
         self._env_store = env_store
         self._secrets_path = secrets_path
 
-    def import_secrets(self) -> Mapping:
+    def import_values(self) -> Mapping:
         client = hvac.Client(url=self._resource)
         client.auth.ldap.login(username=self._env_store["USER_IDENT"],
                                password=self._env_store["PASSWORD"],
@@ -58,14 +58,14 @@ class APISecretsImporter(SecretsImporter):
         return client.read(path=self._secrets_path)["data"]
 
 
-def get_secrets_importer(settings: Mapping, env_store: Mapping) -> SecretsImporter:
+def get_secrets_importer(settings: Mapping, env_store: Mapping) -> ValuesImporter:
     if env_store.get("SECRETS_FROM_FILES") is not None:
-        return FileSecretsImporter(resource=settings["secret_path"])
+        return FileValuesImporter(resource=settings["secret_path"])
     elif env_store.get("SECRETS_FROM_API") is not None:
         parsed_url = _parse_url(settings["remote_secrets_url"])
-        return APISecretsImporter(resource=f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}",
-                                  mount_point=settings["secrets_auth_method"],
-                                  secrets_path=parsed_url.path[1:], env_store=env_store)
+        return APIValuesImporter(resource=f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}",
+                                 mount_point=settings["secrets_auth_method"],
+                                 secrets_path=parsed_url.path[1:], env_store=env_store)
     else:
         raise KeyError(f'No secrets sources found')
 
