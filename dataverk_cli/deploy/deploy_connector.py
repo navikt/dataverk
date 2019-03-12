@@ -7,7 +7,7 @@ class DeployConnector:
     """ Connector to build server for setting up CI/CD
     """
 
-    def __init__(self, job_name: str, build_server: jenkins.Jenkins):
+    def __init__(self, job_name: str, build_server):
         self._job_name = job_name
         self._build_server = build_server
 
