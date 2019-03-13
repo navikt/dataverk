@@ -1,10 +1,20 @@
 import argparse
+import json
+from pathlib import Path
 
+from dataverk.utils.file_functions import json_to_dict
+
+from dataverk.connectors import ElasticsearchConnector
+
+from dataverk_cli.cli.cli_utils.env_store_functions import safe_create_env_store
+
+from dataverk_cli.dataverk_publish import PublishDataPackage
 from git import GitError
 
+from dataverk.context import settings
 from dataverk_cli import dataverk_create_env_file, __version__
 from dataverk_cli.dataverk_notebook2script import notebook2script
-from dataverk_cli.dataverk_publish import publish_datapackage
+from dataverk_cli import dataverk_publish
 from dataverk_cli.cli.cli_utils import commands
 from dataverk_cli.cli.cli_command_handlers import init_handler, schedule_handler, delete_handler
 from dataverk_cli.dataverk_factory import get_datapackage_object, Action
@@ -63,7 +73,12 @@ def main():
         elif args.command == "notebook2script":
             notebook2script()
         elif args.command == "publish":
-            publish_datapackage()
+            env_store = safe_create_env_store()
+            settings_store = settings.singleton_settings_store_factory()
+            es_index = ElasticsearchConnector(settings_store)
+            datapackage_metadata = json_to_dict(Path("datapackage.json"))
+            datapackage = PublishDataPackage(settings_store, env_store, es_index, datapackage_metadata)
+            datapackage.publish()
 
     except KeyboardInterrupt as user_cancel:
         print(user_cancel)
@@ -79,10 +94,6 @@ def main():
 
     finally:
         print(f"dataverk-cli {args.command} completed")
-
-
-
-
 
 
 if __name__ == "__main__":

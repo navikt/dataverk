@@ -14,8 +14,8 @@ from git import Repo
 # =======================
 class BuildServerMock:
 
-    def __init__(self, exising_jobs: list=[]):
-        self._existing_jobs = exising_jobs
+    def __init__(self, existing_jobs: list=[]):
+        self._existing_jobs = existing_jobs
 
     def job_exists(self, name):
         if name in self._existing_jobs:
@@ -37,8 +37,8 @@ class BuildServerMock:
 
 
 class FaultyBuildServerMock:
-    def __init__(self, exising_jobs: list=[]):
-        self._existing_jobs = exising_jobs
+    def __init__(self, existing_jobs: list=[]):
+        self._existing_jobs = existing_jobs
 
     def job_exists(self, name):
         if name in self._existing_jobs:
@@ -118,7 +118,7 @@ class MethodsInput(Base):
     """
 
     def test_delete_job_job_does_not_exist(self):
-        build_server = BuildServerMock(exising_jobs=[])
+        build_server = BuildServerMock(existing_jobs=[])
         deploy_conn = DeployConnector(job_name=self.job_name, build_server=build_server)
         with self.assertRaises(UserWarning):
             deploy_conn.delete_job()
@@ -132,7 +132,7 @@ class MethodsInput(Base):
 
     def test_configure_job_invalid(self):
         configpath = Path(self.tmp_dir.name).joinpath("jenkins_config.xml")
-        deploy_conn = DeployConnector(job_name=self.job_name, build_server=FaultyBuildServerMock(exising_jobs=[]))
+        deploy_conn = DeployConnector(job_name=self.job_name, build_server=FaultyBuildServerMock(existing_jobs=[]))
         with self.assertRaises(jenkins.JenkinsException):
             deploy_conn.configure_job(config_path=configpath)
 

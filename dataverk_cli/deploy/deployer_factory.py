@@ -8,7 +8,7 @@ class BuildServer(Enum):
     JENKINS = 1
 
 
-def get_deploy_connector(settings_store: Mapping, env_store: Mapping, build_server: jenkins.Jenkins):
+def create_deploy_connector(settings_store: Mapping, env_store: Mapping):
 
     if env_store is None:
         raise TypeError("env_store cannot be None")
@@ -20,7 +20,8 @@ def get_deploy_connector(settings_store: Mapping, env_store: Mapping, build_serv
 
     # Factory
     if build_server_type is BuildServer.JENKINS:
-        return DeployConnector(settings_store["package_name"], build_server)
+        jenkins_connector = create_jenkins_connector(settings_store, env_store)
+        return DeployConnector(settings_store["package_name"], jenkins_connector)
     else:
         raise KeyError(f"Build server matching BuildServer({build_server_type}) could not be found")
 
@@ -29,3 +30,9 @@ def read_build_server_from_settings(settings_store: Mapping):
     if settings_store.get("jenkins") is not None:
         return BuildServer.JENKINS
     raise LookupError(f"settings_store({settings_store} does not contain valid scheduler configurations)")
+
+
+def create_jenkins_connector(settings_store, env_store):
+    return jenkins.Jenkins(url=settings_store["jenkins"]["url"],
+                           username=env_store['USER_IDENT'],
+                           password=env_store['PASSWORD'])

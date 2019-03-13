@@ -1,4 +1,3 @@
-import jenkins
 from .dataverk_base import DataverkBase
 from dataverk_cli.deploy import deployer_factory
 from collections.abc import Mapping
@@ -10,11 +9,8 @@ class DataverkDelete(DataverkBase):
     def __init__(self, settings: Mapping, envs: Mapping):
         super().__init__(settings=settings, envs=envs)
 
-        jenkins_server = jenkins.Jenkins(url=self._settings_store["jenkins"]["url"],
-                                         username=envs['USER_IDENT'],
-                                         password=envs['PASSWORD'])
         try:
-            self._scheduler = deployer_factory.get_deploy_connector(settings_store=settings, env_store=envs, build_server=jenkins_server)
+            self._scheduler = deployer_factory.create_deploy_connector(settings_store=settings, env_store=envs)
         except LookupError:
             self._scheduler = None
 
