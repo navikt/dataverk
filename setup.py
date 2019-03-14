@@ -16,7 +16,7 @@ setup(
     name='dataverk',
     version=__version__,
     packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_cli', 'dataverk.context',
-              'dataverk_cli.scheduling', 'dataverk_cli.cli.cli_command_handlers', 'dataverk_cli.cli.cli_utils', 'dataverk_cli.templates'],
+              'dataverk_cli.deploy', 'dataverk_cli.cli.cli_command_handlers', 'dataverk_cli.cli.cli_utils', 'dataverk_cli.templates'],
     python_requires='>=3.6',
     install_requires=install_requires,
     entry_points={

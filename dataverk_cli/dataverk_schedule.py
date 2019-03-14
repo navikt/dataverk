@@ -29,7 +29,7 @@ class DataverkSchedule(DataverkBase):
 
     def _edit_config_files(self, remote_repo_url, deploy_key: DeployKey):
         deploy_config.edit_service_user_config(settings_store=self._settings_store,
-                                               service_account_file=Path('service_account_file.yaml'))
+                                               service_account_file=Path('service_account.yaml'))
         deploy_config.edit_cronjob_config(settings_store=self._settings_store, yaml_path=Path("cronjob.yaml"))
         deploy_config.edit_jenkins_job_config(remote_repo_url=remote_repo_url, credential_id=deploy_key.name,
-                                              config_file_path=Path("jenkins_job_config.xml"))
+                                              config_file_path=Path("jenkins_config.xml"))

@@ -3,7 +3,7 @@ from collections.abc import Mapping
 from abc import ABC, abstractmethod
 from urllib import parse
 from urllib.parse import ParseResult
-
+import json
 import hvac
 
 
@@ -55,7 +55,14 @@ class APIValuesImporter(ValuesImporter):
         client.auth.ldap.login(username=self._env_store["USER_IDENT"],
                                password=self._env_store["PASSWORD"],
                                mount_point=self._mount_point)
-        return client.read(path=self._secrets_path)["data"]
+
+        values = json.dumps(client.read(path=self._secrets_path)["data"])
+        return self._clean_json_string(json.dumps(values))
+
+    def _clean_json_string(self, values_string: str):
+        values_string = values_string.replace(r"\n", "").replace(r"ẗ", "").replace(r"\r", "")
+        return json.loads(values_string)
+
 
 
 def get_secrets_importer(settings: Mapping, env_store: Mapping) -> ValuesImporter:

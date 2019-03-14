@@ -53,13 +53,10 @@ def _read_envs(env_path):
 
 
 def _try_apply_secrets(settings: Mapping, env_store: Mapping):
-    try:
-        return _apply_secrets(env_store, settings)
-    except KeyError:
-        return settings
+    return _apply_secrets(env_store, settings)
 
 
 def _apply_secrets(env_store, settings):
     importer = values_importer.get_secrets_importer(settings, env_store)
-    replacer = Replacer(importer)
-    return replacer.get_filled_mapping(json.dumps(settings))
+    replacer = Replacer(importer.import_values())
+    return replacer.get_filled_mapping(json.dumps(settings), json.loads)
