@@ -15,7 +15,7 @@ def edit_cronjob_config(settings_store: Mapping, yaml_path: Path = Path('cronjob
                      "vks_auth_path": settings_store["vault"]["auth_uri"],
                      "vks_kv_path": settings_store["vault"]["secrets_uri"],
                      "namespace": settings_store["nais_namespace"],
-                     "schedule": settings_store["update_schedule"]}
+                     "schedule": f"\"{settings_store['update_schedule']}\""}
 
     replacer = Replacer(tag_value_map)
     complete_cronjob_config = replacer.get_filled_mapping(cronjob_config, str)
