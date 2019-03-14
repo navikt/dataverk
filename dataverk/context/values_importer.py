@@ -56,7 +56,7 @@ class APIValuesImporter(ValuesImporter):
                                password=self._env_store["PASSWORD"],
                                mount_point=self._mount_point)
 
-        values = json.dumps(client.read(path=self._secrets_path)["data"])
+        values = client.read(path=self._secrets_path)["data"]
         return self._clean_json_string(json.dumps(values))
 
     def _clean_json_string(self, values_string: str):
