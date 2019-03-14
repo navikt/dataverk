@@ -5,7 +5,9 @@
 
 # Dataverk 
 
-Kodebasert serverless ETL på NAIS med tilgangsstyring i Vault
+Kodebasert serverless ETL på NAIS med tilgangsstyring i Vault.
+
+Docs: https://dataverk.readthedocs.io/en/latest/
 
 
 ## Relaterte  prosjekter
