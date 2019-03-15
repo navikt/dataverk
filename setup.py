@@ -2,7 +2,7 @@
 from setuptools import setup
 from pathlib import Path
 
-#Gjør README.md om til den lange beskrivelsen på PiPy
+# Gjør README.md om til den lange beskrivelsen på PiPy
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
@@ -10,7 +10,7 @@ with Path("dataverk/VERSION").open("r") as fh:
     __version__ = fh.read()
 
 with open('requirements.txt') as f:
-	install_requires = f.read().strip().split('\n')
+    install_requires = f.read().strip().split('\n')
 
 setup(
     name='dataverk',
@@ -27,7 +27,7 @@ setup(
     package_data={'dataverk': ['VERSION'],
                   'dataverk_cli': ['templates/*']},
 
-     # metadata to display on PyPI
+    # metadata to display on PyPI
     author="NAV IKT",
     author_email="paul.bencze@nav.no",
     description="Serverless ETL framework",
