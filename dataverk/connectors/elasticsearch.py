@@ -9,7 +9,7 @@ class ElasticsearchConnector(BaseConnector):
     """Elasticsearch connection"""
 
     def __init__(self, settings: Mapping, host="elastic_host"):
-        super(self.__class__, self).__init__()
+        super().__init__()
 
         ssl_context = create_default_context()
         self.host_uri = settings["index_connections"][host]

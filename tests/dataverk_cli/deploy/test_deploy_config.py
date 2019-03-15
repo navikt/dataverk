@@ -2,12 +2,11 @@
 # Import statements
 # =================
 import unittest
-import json
 import yaml
-from xml.etree import ElementTree
-from tempfile import TemporaryDirectory
+from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
+from dataverk_cli.deploy import deploy_config
+from dataverk_cli.cli.cli_utils import repo_info
 from pathlib import Path
-from dataverk_cli.scheduling.jenkins_job_scheduler import JenkinsJobScheduler
 from git import Repo
 
 # Common input parameters
@@ -19,8 +18,8 @@ SETTINGS_TEMPLATE = {
   "update_schedule": "* * 31 2 *",
 
   "vault": {
-    "auth_uri": "https://vault.auth.uri.com",
-    "secrets_uri": "https://vault.secrets.uri.com",
+    "auth_uri": "/path/to/auth",
+    "secrets_uri": "/path/to/kv",
     "vks_auth_path": "/path/to/auth",
     "vks_kv_path": "/path/to/kv",
     "vks_vault_role": "role_name",
@@ -38,24 +37,6 @@ ENV_STORE_TEMPLATE = {
     "PASSWORD": "password"
 }
 
-JENKINS_CREDENTIAL_WRAPPER_TEMPLATE = {
-    "json": "",
-    "Submit": "OK"
-}
-
-JENKINS_CREDENTIAL_TEMPLATE = {
-    'credentials': {
-        'scope': "GLOBAL",
-        'username': "repo-ci",
-        'id': "repo-ci",
-        'privateKeySource': {
-            'privateKey': "",
-            'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey$DirectEntryPrivateKeySource"
-        },
-        'stapler-class': "com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey"
-     }
-}
-
 
 # Base classes
 # ============
@@ -66,18 +47,16 @@ class Base(unittest.TestCase):
     This class defines a common `setUp` method that defines attributes which are used in the various tests.
     """
     def setUp(self):
+        pass
         self._local_repo, self._local_repo_path = self.create_tmp_repo()
 
-        self._scheduler = JenkinsJobScheduler(settings_store=SETTINGS_TEMPLATE,
-                                              env_store=ENV_STORE_TEMPLATE,
-                                              repo_path=self._local_repo_path.name)
-
     def tearDown(self):
+        pass
         self._local_repo.close()
         self._local_repo_path.cleanup()
 
-    def create_tmp_repo(self) -> (Repo, TemporaryDirectory):
-        tmpdir = TemporaryDirectory()
+    def create_tmp_repo(self) -> (Repo, WindowsSafeTempDirectory):
+        tmpdir = WindowsSafeTempDirectory()
         repo = Repo.init(tmpdir.name)
         repo.create_remote("origin", url="https://my/remote/repo.git")
         repo.index.commit("initial commit")
@@ -85,29 +64,6 @@ class Base(unittest.TestCase):
 
 # Test classes
 # ============
-
-
-class MethodsInput(Base):
-    """
-    Tests methods which take input parameters
-
-    Tests include: passing invalid input, etc.
-    """
-    pass
-
-
-class MethodsReturnType(Base):
-    """
-    Tests methods' output types
-    """
-    pass
-
-
-class MethodsReturnUnits(Base):
-    """
-    Tests methods' output units where applicable
-    """
-    pass
 
 
 class MethodsReturnValues(Base):
@@ -121,56 +77,55 @@ class MethodsReturnValues(Base):
         with yamlpath.open('w') as yamlfile:
             yamlfile.write(CRONJOB_YAML_TEMPLATE)
 
-        self._scheduler._edit_cronjob_config(yaml_path=yamlpath)
+        deploy_config.edit_cronjob_config(settings_store=SETTINGS_TEMPLATE, yaml_path=yamlpath)
 
         with yamlpath.open(mode="r", encoding="utf-8") as yamlfile:
             edited_yaml = yaml.load(yamlfile.read())
 
-        self.assertEqual(edited_yaml, yaml_reference)
+        self.assertEqual(yaml_reference, edited_yaml)
+
+    def test__edit_service_account_config(self):
+        yamlpath = Path(self._local_repo_path.name).joinpath("cronjob.yaml")
+        yaml_reference = yaml.load(SERVICE_ACCOUNT_REFERENCE)
+
+        with yamlpath.open('w') as yamlfile:
+            yamlfile.write(SERVICE_ACCOUNT_TEMPLATE)
+
+        deploy_config.edit_service_user_config(settings_store=SETTINGS_TEMPLATE, service_account_file=yamlpath)
+
+        with yamlpath.open(mode="r", encoding="utf-8") as yamlfile:
+            edited_yaml = yaml.load(yamlfile.read())
+
+        self.assertEqual(yaml_reference, edited_yaml)
 
     def test__edit_jenkins_job_config(self):
         configpath = Path(self._local_repo_path.name).joinpath("jenkins_config.xml")
-        xml_root = ElementTree.fromstring(JENKINS_CONFIG_REFERENCE)
-        jenkins_config_ref = ElementTree.tostring(xml_root).decode("utf-8")
 
         with configpath.open('w') as configfile:
             configfile.write(JENKINS_CONFIG_TEMPLATE)
 
-        self._scheduler._edit_jenkins_job_config(config_file_path=configpath)
+        deploy_config.edit_jenkins_job_config(repo_info.get_remote_url(self._local_repo_path.name), credential_id="repo-ci", config_file_path=configpath)
 
         with configpath.open(mode="r", encoding="utf-8") as jenkins_config:
             edited_jenkins_config = jenkins_config.read()
 
-        self.assertEqual(edited_jenkins_config, jenkins_config_ref)
-
-    def test__compose_credential_payload(self):
-        key = self._scheduler._generate_deploy_key(key_length=1024)
-        priv_key = key.exportKey().decode(encoding="utf-8")
-
-        expected_payload = JENKINS_CREDENTIAL_WRAPPER_TEMPLATE
-        expected_credentials = JENKINS_CREDENTIAL_TEMPLATE
-        expected_credentials["credentials"]["privateKeySource"]["privateKey"] = priv_key
-        expected_payload["json"] = json.dumps(expected_credentials)
-
-        credential_payload = self._scheduler._compose_credential_payload(key=key)
-
-        self.assertEqual(credential_payload, expected_payload)
+        self.assertEqual(JENKINS_CONFIG_REFERENCE, edited_jenkins_config)
 
 
 CRONJOB_YAML_TEMPLATE = '''
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: dataverk-job
-  namespace: namespace
+  name: ${package_name}
+  namespace: ${namespace}
 spec:
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-          - image: path
-            name: dataverk-cronjob
+          - image: mitt.image.endpoint.no:1234/package_name
+            name: ${package_name}-cronjob
             volumeMounts:
             - mountPath: /mount/path
               name: vault-secrets
@@ -179,11 +134,11 @@ spec:
             - name: VKS_VAULT_ADDR
               value: https://vault.auth.uri.com
             - name: VKS_AUTH_PATH
-              value: /
+              value: ${vks_auth_path}
             - name: VKS_KV_PATH
-              value: /
+              value: ${vks_kv_path}
             - name: VKS_VAULT_ROLE
-              value: dataverk
+              value: ${package_name}
             - name: VKS_SECRET_DEST_PATH
               value: /
             image: my-init-container-image
@@ -192,13 +147,13 @@ spec:
             - mountPath: /mount/path
               name: vault-secrets
           restartPolicy: Never
-          serviceAccount: dataverk
-          serviceAccountName: dataverk
+          serviceAccount: ${package_name}
+          serviceAccountName: ${package_name}
           volumes:
           - emptyDir:
               medium: Memory
             name: vault-secrets
-  schedule: ''
+  schedule: '* * 31 2 *'
 '''
 
 CRONJOB_YAML_REFERENCE = '''
@@ -245,6 +200,26 @@ spec:
   schedule: '* * 31 2 *'
 '''
 
+SERVICE_ACCOUNT_TEMPLATE = '''
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ${service_account}
+  namespace: dataverk
+  labels:
+    team: dataverk
+'''
+
+SERVICE_ACCOUNT_REFERENCE = '''
+apiVersion: v1
+kind: ServiceAccount
+metadata: 
+  name: package_name
+  namespace: dataverk
+  labels:
+    team: dataverk
+'''
+
 JENKINS_CONFIG_TEMPLATE = '''
 <flow-definition plugin="workflow-job@2.24">
   <actions />
@@ -253,7 +228,7 @@ JENKINS_CONFIG_TEMPLATE = '''
   <properties>
     <org.jenkinsci.plugins.workflow.job.properties.DisableConcurrentBuildsJobProperty />
     <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.2">
-      <projectUrl></projectUrl>
+      <projectUrl>${projectUrl}</projectUrl>
       <displayName />
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
     <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
@@ -270,8 +245,8 @@ JENKINS_CONFIG_TEMPLATE = '''
       <configVersion>2</configVersion>
       <userRemoteConfigs>
         <hudson.plugins.git.UserRemoteConfig>
-          <url></url>
-          <credentialsId>github-token</credentialsId>
+          <url>${url}</url>
+          <credentialsId>${credentialsId}</credentialsId>
         </hudson.plugins.git.UserRemoteConfig>
       </userRemoteConfigs>
       <branches>
@@ -283,7 +258,7 @@ JENKINS_CONFIG_TEMPLATE = '''
       <submoduleCfg class="list" />
       <extensions />
     </scm>
-    <scriptPath></scriptPath>
+    <scriptPath>${scriptPath}</scriptPath>
     <lightweight>true</lightweight>
   </definition>
   <triggers />

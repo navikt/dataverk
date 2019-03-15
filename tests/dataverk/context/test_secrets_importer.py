@@ -3,7 +3,7 @@
 # =================
 import unittest
 from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
-from dataverk.context.secrets_importer import get_secrets_importer, APISecretsImporter, FileSecretsImporter
+from dataverk.context.values_importer import get_secrets_importer, APIValuesImporter, FileValuesImporter
 from pathlib import Path
 
 # Common input parameters
@@ -67,12 +67,12 @@ class Instantiation(Base):
     def test_get_secrets_importer_secrets_from_file(self):
         env_store = {"SECRETS_FROM_FILES": "True"}
         secret_importer = get_secrets_importer(self.settings, env_store)
-        self.assertIsInstance(secret_importer, FileSecretsImporter)
+        self.assertIsInstance(secret_importer, FileValuesImporter)
 
     def test_get_secrets_importer_secrets_from_api(self):
         env_store = {"SECRETS_FROM_API": "True"}
         secret_importer = get_secrets_importer(self.settings, env_store)
-        self.assertIsInstance(secret_importer, APISecretsImporter)
+        self.assertIsInstance(secret_importer, APIValuesImporter)
 
     def test_get_secrets_importer_raise_warning(self):
         env_store = {}
@@ -91,7 +91,7 @@ class MethodsReturnValues(Base):
     def test_get_secrets_from_file(self):
         env_store = {"SECRETS_FROM_FILES": "True"}
         secrets_importer = get_secrets_importer(self.settings, env_store)
-        secrets = secrets_importer.import_secrets()
+        secrets = secrets_importer.import_values()
 
         self.assertEqual(secrets["REPLACE_ME1"], REPLACE_ME1)
         self.assertEqual(secrets["REPLACE_ME2"], REPLACE_ME2)

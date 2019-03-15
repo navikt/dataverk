@@ -16,7 +16,7 @@ def create_env_store():
     return EnvStore(path=Path(resource_files['.env']))
 
 
-def safe_create_env_store(args):
+def safe_create_env_store():
     # Is project internal
     try:
         env_store = create_env_store()

@@ -93,11 +93,6 @@ class MethodsReturnValues(Base):
     Tests values of methods against known values
     """
 
-    def test_create_settings_store_normal_case(self):
-        res = settings._create_settings_store(self.test_resource_files)
-        for key in SETTINGS_TEST_CONTENT:
-            self.assertTrue(key in res, f" key={key} should be in {res}")
-
     def test_create_env_store(self):
         expected_env_store = {
             "USER_IDENT": "testusername",

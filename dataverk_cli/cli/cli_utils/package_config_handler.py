@@ -11,7 +11,7 @@ def get_package_configuration(args, initialize: bool=False) -> (MutableMapping, 
     :return: settings_dict, env_store
     '''
 
-    env_store = env_store_functions.safe_create_env_store(args)
+    env_store = env_store_functions.safe_create_env_store()
 
     if initialize:
         settings_dict = setting_store_functions.create_settings_dict(args=args, env_store=env_store)

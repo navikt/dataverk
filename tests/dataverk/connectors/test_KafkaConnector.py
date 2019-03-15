@@ -6,8 +6,6 @@ import json
 import pandas as pd
 from datetime import datetime
 from unittest import mock
-from dataverk.connectors import KafkaConnector
-from dataclasses import dataclass
 
 
 # Common input parameters
