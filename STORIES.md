@@ -1,4 +1,3 @@
-## 1 - Starte nytt prosjekt
 ### Hva ØNSKER JEG Å GJØRE?  
 Opprette mappe med undermapper og nødvendige filer: datapackage.json, LISENCE.md, README.md METADATA.md  
 Legge inn navn på prosjektet/datapakken i mappenavn + i filer (?)  
