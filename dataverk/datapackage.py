@@ -2,6 +2,7 @@ import pandas as pd
 import json
 import requests
 import datetime
+import uuid
 from enum import Enum
 from dataverk.connectors import OracleConnector, SQLiteConnector, StorageConnector
 from dataverk.utils import resource_discoverer, notebook2script, get_notebook_name
@@ -66,7 +67,8 @@ class Datapackage:
         self.datapackage_metadata = self._create_datapackage()
     
     def _package_top_dir(self) -> Path:
-        return Path(self.search_start_path).parent.absolute()
+        #return Path(self.search_start_path).parent.absolute()
+        return Path(self.search_start_path).absolute()
     
     def _get_metadata(self): 
 
@@ -78,7 +80,7 @@ class Datapackage:
     def _get_local_file(self, file):
 
         try:
-            with self.dir_path.joinpath(file).open(mode='r', encoding="utf-8") as f:
+            with self.dir_path.joinpath(file).open(mode='w', encoding="utf-8") as f:
                 return f.read()
         except OSError:
             return None
@@ -87,31 +89,36 @@ class Datapackage:
     def _get_metadata_from_local_files(self):
 
         # TODO move check ealier in  chain
-        metadata = self.resource_files.get('METADATA.json', None)
-        licence =  self.resource_files.get('LICENSE.md', None)
-        readme =  self.resource_files.get('README.md', None)
-        requirements = self.resource_files.get('requirements.txt', None)
-
+        metadata = self.resource_files.get('METADATA.json', None).open().read()
         if metadata is None:
             metadata = {}
-        elif type(metadata) is object:
-            return metadata
-        else:
+        
+        if type(metadata) is not object:
             try:
                 metadata = json.loads(metadata)
             except:
-                metadata = {}
+                pass
 
-        if licence is not None:
+        try:
+            license =  self.resource_files.get('LICENSE.md', None).open().read()
             metadata['license'] = license
+        except:
+            pass
 
-        if readme is not None:
+        try:
+            readme =  self.resource_files.get('README.md', None).open().read()
             metadata['readme'] = readme
+        except:
+            pass
         
-        if requirements is not None:
+        try: 
+            requirements = self.resource_files.get('requirements.txt', None).open().read()
             metadata['requirements'] = requirements
+        except:
+            pass
 
         return metadata
+
         
 
     def _get_from_repo(self, repo, file):
@@ -165,24 +172,29 @@ class Datapackage:
         if metadata.get('public', False) is True:
             self.is_public = True
      
-        metadata['updated'] = datetime.datetime.utcnow()
+        metadata['updated'] = datetime.datetime.utcnow().isoformat()
         metadata['version'] = "0.0.1"
    
         metadata['bucket_name'] = metadata.get('bucket_name', 'default-bucket-nav-opendata')
 
  
         validate_bucket_name(metadata["bucket_name"])
-        # TODO: Er det virkelig påkrevet?
-        # validate_datapackage_name(metadata["datapackage_name"])
+        # TODO: Erik: Er det påkrevet?
+        #validate_datapackage_name(metadata["datapackage_name"])
 
         try:
-            with self.dir_path.joinpath('METADATA.json').open(mode='w', encoding="utf-8") as f:
+            with self.resource_files['METADATA.json'].open(mode='w', encoding="utf-8") as f:
                 f.write(json.dumps(metadata, indent=2))
         except:
             pass
-                
+
+        datapackage_metadata = {}   
         # TODO: drop?
-        datapackage_metadata = {'readme': metadata['readme']}
+        try:
+            datapackage_metadata = {'readme': metadata['readme']}
+        except:
+            pass
+
         datapackage_metadata.update(metadata)
 
         return datapackage_metadata
@@ -352,6 +364,10 @@ class Datapackage:
 
         self.datapackage_metadata['resources'] = resources
         self.datapackage_metadata['views'] = self.views
+  
+        if self.datapackage_metadata.get('id', None) is None:
+            self.datapackage_metadata['id'] = str(uuid.uuid4())
+
 
         if storage is None: # write to local file
             with self.dir_path.joinpath('datapackage.json').open('w') as outfile:
@@ -363,6 +379,9 @@ class Datapackage:
 
             for filename, df in self.resources.items():
                 df.to_csv(data_path.joinpath(f'{filename}.csv'), index=False, sep=',')
+
+            self._convert_notebook_to_code()
+            
         else: # write to storage
             try:
                 connector = StorageConnector(storage=storage, settings=self.settings)

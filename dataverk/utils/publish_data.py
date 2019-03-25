@@ -7,7 +7,7 @@ def upload_to_storage_bucket(dir_path: str, conn: BucketStorageConnector, datapa
 
     :param dir_path: str: path to directory where generated resources ar located locally
     :param conn: BucketStorageConnector object: the connection object for chosen bucket storage.
-                 If no bucket storage connector is configured (conn=None) no resources shall be published to bucket storage
+                 If no bucket storage connector is configured (conn=None) no resources are published to bucket storage
     :param datapackage_key_prefix: str: prefix for datapackage key
     :return: None
     '''

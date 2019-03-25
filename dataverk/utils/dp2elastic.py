@@ -23,6 +23,7 @@ def dp2elastic(dp = None, elasticdoc = None):
     with open(fname_out,'w') as f: 
         f.write(json.dumps(js))
     print(f"{fname_out} generated from datapackage.json")
+    return js
 
 
 if __name__ == '__main__': fire.Fire(dp2elastic)
