@@ -28,21 +28,18 @@ class Datapackage:
         self.search_start_path = search_start_path
         self.dir_path = self._package_top_dir()
 
-        try:
-            self.context = settings['context']
-        except:
-            self.context = Context.LOCAL
-            pass
-
-        self.datapackage_metadata = self._create_datapackage()
-
         # TODO: look for settings in 1) parameter 2) path/bucket/vault uri in env variable 'DATAVERK_SETTINGS' 3) file in same directory 
 
-        """  if resource_files is not None:
+        if resource_files is not None:
             self.resource_files = resource_files
         else:
             self.resource_files = resource_discoverer.search_for_files(start_path=Path(search_start_path),
-                                                                       file_names=('settings.json', '.env'), levels=4)
+                                                                       file_names=('settings.json', 
+                                                                       '.env', 
+                                                                       'METADATA.json', 
+                                                                       'README.md',
+                                                                       'LICENSE.md',
+                                                                       'requirements.txt'), levels=4)
 
         try:
             env_store = EnvStore(Path(self.resource_files[".env"]))
@@ -55,12 +52,21 @@ class Datapackage:
         except:
             self.settings = None
             pass
-        """
+      
+        # TODO check first
+        if self.settings is None:
+            self.settings = settings
 
-        self.settings = settings
+        try:
+            self.context = settings['context']
+        except:
+            self.context = Context.LOCAL
+            pass
+
+        self.datapackage_metadata = self._create_datapackage()
     
     def _package_top_dir(self) -> Path:
-        return Path(self.search_start_path).resolve() #.parent.absolute()
+        return Path(self.search_start_path).parent.absolute()
     
     def _get_metadata(self): 
 
@@ -80,10 +86,11 @@ class Datapackage:
 
     def _get_metadata_from_local_files(self):
 
-        metadata = self._get_local_file('METADATA.json')
-        licence =  self._get_local_file('LICENSE.md')
-        readme =  self._get_local_file('README.md')
-        requirements = self._get_local_file('requirements.txt')
+        # TODO move check ealier in  chain
+        metadata = self.resource_files.get('METADATA.json', None)
+        licence =  self.resource_files.get('LICENSE.md', None)
+        readme =  self.resource_files.get('README.md', None)
+        requirements = self.resource_files.get('requirements.txt', None)
 
         if metadata is None:
             metadata = {}
@@ -165,7 +172,7 @@ class Datapackage:
 
  
         validate_bucket_name(metadata["bucket_name"])
-        # TODO: Kan vi tillate '/' ?
+        # TODO: Er det virkelig påkrevet?
         # validate_datapackage_name(metadata["datapackage_name"])
 
         try:
