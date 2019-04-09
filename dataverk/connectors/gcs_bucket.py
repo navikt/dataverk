@@ -8,7 +8,6 @@ class GCSStreamConnector:
 
     def __init__(self, bucket_name: str, storage_client: Client, encrypted=True):
         """Init"""
-        super(self.__class__, self).__init__(settings={}, encrypted=encrypted)
         try:
             self.bucket = self._get_bucket(storage_client, bucket_name)
             # Reload fetches the current ACL from Cloud Storage.
