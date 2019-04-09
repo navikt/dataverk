@@ -50,6 +50,9 @@ class EnvStore(Mapping):
     def items(self):
         return self._env_store.items()
 
+    def update(self, envs):
+        self._env_store.update(envs)
+
     def __contains__(self, o: object) -> bool:
         return o in self._env_store
 

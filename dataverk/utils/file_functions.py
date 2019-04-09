@@ -1,9 +1,33 @@
 import os
 import errno
-from pathlib import Path
 import json
 import shutil
 import stat
+import requests
+from pathlib import Path
+from google.cloud import storage
+from urllib3.exceptions import LocationParseError
+from urllib3.util import url
+from dataverk.connectors.gcs_bucket import GCSStreamConnector
+
+
+def get_package_resource(resource_name: str, base_path: str, http_headers: dict):
+    try:
+        parsed_url = url.parse_url(base_path)
+    except LocationParseError:
+        # parse_url throws exception with local windows paths
+        return read_file(Path(base_path).joinpath(resource_name))
+    else:
+        if parsed_url.scheme == "http" or parsed_url.scheme == "https":
+            return requests.get(f"{base_path}/{resource_name}",
+                                headers=http_headers).text
+        elif parsed_url.scheme == "gs":
+            storage_client = storage.Client()
+            bucket_conn = GCSStreamConnector(bucket_name=parsed_url.host, storage_client=storage_client)
+            return bucket_conn.read(f"{parsed_url.path[1:]}/{resource_name}")
+        else:
+            return read_file(Path(base_path).joinpath(resource_name))
+
 
 def write_file(path, content):
     if not os.path.exists(os.path.dirname(path)):
