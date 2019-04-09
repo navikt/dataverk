@@ -2,6 +2,7 @@ from .base import BaseConnector
 from .sqldb import SQLDbConnector
 from .jsonstat import JSONStatConnector
 from .elasticsearch import ElasticsearchConnector
+from .gcs_bucket import GCSStreamConnector
 from .google_storage import GoogleStorageConnector
 from .file_storage import FileStorageConnector
 from .storage import StorageConnector
@@ -26,4 +27,5 @@ __all__ = [
             'SQLiteConnector',
             'KafkaConnector',
             'PostgresConnector',
+            'GCSStreamConnector',
            ]
