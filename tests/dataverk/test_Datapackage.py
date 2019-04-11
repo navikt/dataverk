@@ -2,6 +2,7 @@
 # Import statements
 # =================
 import copy
+import datetime
 import os
 import json
 import pandas as pd
@@ -19,6 +20,11 @@ metadata_file_template = {
   "license": "Test license"
 }
 
+invalid_metadata = {
+  "updated": "today",
+  "datapackage_name": "nav-datapakke123",
+  "license": "Test license"
+}
 
 # Base classes
 # ============
@@ -47,7 +53,7 @@ class Instantiation(Base):
 
     # Input arguments outside constraints
     # ===================================
-    def test_invalid_bucket_or_datapackage_names(self):
+    def test_invalid_bucket_name(self):
         invalid_names = ["_name", "-name", "name with spaces", "name_", "name-", "Name", "name_with_underscore"]
 
         for bucket_name in invalid_names:
@@ -56,6 +62,10 @@ class Instantiation(Base):
                 metadata["bucket_name"] = bucket_name
                 with self.assertRaises(NameError):
                     Datapackage(metadata)
+
+    def test_missing_bucket_name(self):
+        with self.assertRaises(KeyError):
+            datapackage = Datapackage(invalid_metadata)
 
 
 class Set(Base):
@@ -126,5 +136,5 @@ class MethodsReturnValues(Base):
                                       dataset_name=dataset_name,
                                       dataset_description="This is a description")
         metadata = self.datapackage.datapackage_metadata
-        expected = {'updated': '2019-04-10', 'bucket_name': 'nav-bucket123', 'datapackage_name': 'nav-datapakke123', 'license': None, 'version': '0.0.1', 'readme': None, 'views': [], 'resources': [{'name': 'persons', 'path': 'resources/persons.csv', 'format': 'csv', 'mediatype': 'text/csv', 'schema': {'fields': [{'name': 'name', 'description': '', 'type': 'string'}, {'name': 'age', 'description': '', 'type': 'number'}]}}], 'datasets': {'persons': 'This is a description'}}
+        expected = {'updated': datetime.date.today().strftime('%Y-%m-%d'), 'bucket_name': 'nav-bucket123', 'datapackage_name': 'nav-datapakke123', 'license': None, 'version': '0.0.1', 'readme': None, 'views': [], 'resources': [{'name': 'persons', 'path': 'resources/persons.csv', 'format': 'csv', 'mediatype': 'text/csv', 'schema': {'fields': [{'name': 'name', 'description': '', 'type': 'string'}, {'name': 'age', 'description': '', 'type': 'number'}]}}], 'datasets': {'persons': 'This is a description'}}
         self.assertEquals(expected, metadata)

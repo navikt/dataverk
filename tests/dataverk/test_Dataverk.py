@@ -1,8 +1,38 @@
+import json
 import unittest
+from pathlib import Path
+
+import urllib3
 
 from dataverk.dataverk import Dataverk
 from dataverk.datapackage import Datapackage
 from os import environ
+
+from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
+
+SETTINGS = {
+    "package_name": "min-pakke",
+    "index_connections": {
+    "elastic_host": "https://es-index.no",
+    "index": "index-name"
+    },
+
+    "bucket_storage_connections": {
+    "github": {
+      "publish": "True",
+      "host": "https://raw.githubusercontent.com"
+    }
+    },
+}
+
+METADATA = {
+    "bucket_name": "my-bucket",
+    "id": "my-package-id"
+}
+
+INVALID_METADATA = {
+    "id": "my-package-id"
+}
 
 class DataverkTest(unittest.TestCase):
 
@@ -10,10 +40,12 @@ class DataverkTest(unittest.TestCase):
         environ["DATAVERK_NO_SETTINGS_SECRETS"] = "true"
 
     def test_init(self):
-        dv = Dataverk("/Users/sondre/Development/dataverk/tests/dataverk/")
-
-    def test_publish(self):
-        dv = Dataverk("/Users/sondre/Development/dataverk/tests/dataverk/")
-        datapackage = Datapackage({"meta": "data"})
-        dv.publish(datapackage=datapackage)
-
+        tempdir = WindowsSafeTempDirectory()
+        with Path(tempdir.name).joinpath("settings.json").open("w") as settings_file:
+            settings_file.write(json.dumps(SETTINGS))
+        dv = Dataverk(tempdir.name)
+        datapackage = Datapackage(METADATA)
+        self.assertEqual(dv.context.settings, SETTINGS)
+        self.assertTrue("bucket_name" in datapackage.datapackage_metadata)
+        self.assertTrue("id" in datapackage.datapackage_metadata)
+        tempdir.cleanup()
