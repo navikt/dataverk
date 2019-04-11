@@ -1,3 +1,4 @@
+import json
 from collections import Mapping
 
 import urllib3
@@ -33,11 +34,11 @@ class PackagePublisher:
         for bucket_type in self._settings_store["bucket_storage_connections"]:
             if self._is_publish_set(bucket_type=bucket_type):
                 self.upload_to_storage_bucket(datapackage_metadata=self.datapackage_json,
-                                                      conn=get_storage_connector(bucket_type=BucketType(bucket_type),
-                                                                                 bucket_name=self.datapackage_json.get("bucket_name"),
-                                                                                 settings=self._settings_store,
-                                                                                 encrypted=False),
-                                                      datapackage_key_prefix=self._datapackage_key_prefix(
+                                              conn=get_storage_connector(bucket_type=BucketType(bucket_type),
+                                                                         bucket_name=self.datapackage_json.get("bucket_name"),
+                                                                         settings=self._settings_store,
+                                                                         encrypted=False),
+                                              datapackage_key_prefix=self._datapackage_key_prefix(
                                                           self._settings_store["package_name"]),
                                               resources=resources)
 
@@ -51,10 +52,10 @@ class PackagePublisher:
         :return: None
         '''
         if conn is not None:
-            conn.write(datapackage_metadata, datapackage_key_prefix + 'datapackage.json', "fmt")
-            for filename, df in resources:
-                csv_string = df.to_csv(sep=";", encoding="utf-8")
-                conn.upload_blob(csv_string, f'{datapackage_key_prefix}resources/{filename}')
+            conn.write(json.dumps(datapackage_metadata), datapackage_key_prefix + 'datapackage.json', "fmt")
+            for filename, df in resources.items():
+                csv_string = df.to_csv(sep=",", encoding="utf-8")
+                conn.write(csv_string, f'{datapackage_key_prefix}resources/{filename}.csv', 'fmt')
 
 
 
