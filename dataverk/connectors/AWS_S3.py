@@ -10,8 +10,8 @@ class S3Connector(BucketStorageConnector):
         self.s3_api_url = settings["bucket_storage_connections"]["dataverk_s3"]["host"]
         self.bucket_name = bucket_name
 
-    def write(self, source_string: str, destination_blob_name: str, fmt: str=".csv", metadata: dict={}):
-        res = requests.put(url=f'{self.s3_api_url}/{self.bucket_name}/{destination_blob_name}',
+    def write(self, source_string: str, destination_blob_name: str, fmt: str="csv", metadata: dict={}):
+        res = requests.put(url=f'{self.s3_api_url}/{self.bucket_name}/{destination_blob_name}.{fmt}',
                            data=source_string,
                            headers={'content-type': 'text/plain'})
 

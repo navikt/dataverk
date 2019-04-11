@@ -52,10 +52,10 @@ class PackagePublisher:
         :return: None
         '''
         if conn is not None:
-            conn.write(json.dumps(datapackage_metadata), datapackage_key_prefix + 'datapackage.json', "fmt")
+            conn.write(json.dumps(datapackage_metadata), datapackage_key_prefix + 'datapackage', "json")
             for filename, df in resources.items():
                 csv_string = df.to_csv(sep=",", encoding="utf-8")
-                conn.write(csv_string, f'{datapackage_key_prefix}resources/{filename}.csv', 'fmt')
+                conn.write(csv_string, f'{datapackage_key_prefix}resources/{filename}', 'csv')
 
 
 
