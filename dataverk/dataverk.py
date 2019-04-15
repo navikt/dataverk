@@ -1,12 +1,19 @@
 import pandas as pd
 from collections import Mapping, Sequence
+
+from dataverk.datapackage import Datapackage
+
 from dataverk import DataverkContext
 from dataverk.connectors import OracleConnector, SQLiteConnector, PostgresConnector, KafkaConnector
-
+from dataverk.elastic_search_updater import ElasticSearchUpdater
+from dataverk.connectors.elasticsearch import ElasticsearchConnector
+from dataverk.package_publisher import PackagePublisher
 
 class Dataverk:
 
     def __init__(self, resource_path: str=".", auth_token: str=None):
+        # TODO elastic search connector for publish
+        # TODO make context builder
         self._context = DataverkContext(resource_path, auth_token)
 
     @property
@@ -68,6 +75,19 @@ class Dataverk:
         else:
             raise NotImplementedError(f"{connector} is not a valid connector type. Valid types are oracle, "
                                       f"sqllite and postgres")
+
+    def publish(self, datapackage: Datapackage):
+        resources = datapackage.resources
+        metadata = datapackage.datapackage_metadata
+
+        # Publish resources to buckets
+        package_publisher = PackagePublisher(datapackage_metadata=metadata, settings_store=self._context.settings, env_store={})
+        package_publisher.publish(resources=resources)
+
+        # Publish metadata to elastic search
+        es_conn = ElasticsearchConnector(self._context.settings)
+        eu = ElasticSearchUpdater(es_conn, metadata)
+        eu.publish()
 
     def _get_sql_query(self, sql):
         if self._is_sql_file(sql):

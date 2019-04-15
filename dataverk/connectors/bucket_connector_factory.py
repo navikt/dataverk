@@ -1,3 +1,6 @@
+from urllib3.exceptions import LocationParseError
+from urllib3.util import url
+
 from dataverk.connectors.bucket_storage_base import BucketStorageConnector
 from dataverk.connectors.google_storage import GoogleStorageConnector
 from dataverk.connectors.azure_blob_storage import AzureStorageConnector
@@ -19,12 +22,28 @@ def get_storage_connector(bucket_type: BucketType, bucket_name: str, settings: M
     if bucket_type == BucketType.AWS_S3:
         return AWSS3Connector(bucket_name=bucket_name, settings=settings, encrypted=encrypted)
     elif bucket_type == BucketType.DATAVERK_S3:
-        return S3Connector(bucket_name=bucket_name, settings=settings, encrypted=encrypted)
+        return S3Connector(bucket_name=bucket_name, s3_endpoint=settings["bucket_storage_connections"]["dataverk_s3"]["host"], encrypted=encrypted)
     elif bucket_type == BucketType.GCS:
-        return GoogleStorageConnector(bucket_name=bucket_name, settings=settings, encrypted=encrypted)
+        project = _gcp_project_name(settings)
+        credentials = _gcp_credentials(settings)
+        return GoogleStorageConnector(bucket_name=bucket_name, gcp_project=project, gcp_credentials=credentials, encrypted=encrypted)
     elif bucket_type == BucketType.AZURE:
         return AzureStorageConnector(bucket_name=bucket_name, settings=settings, encrypted=encrypted)
     elif bucket_type == BucketType.GITHUB:
         return None
     else:
         raise ValueError(f'Bucket type {bucket_type} is not supported')
+
+
+def _gcp_project_name(settings):
+    try:
+        return settings["bucket_storage_connections"]["google_cloud"]["client"]
+    except KeyError:
+        return None
+
+
+def _gcp_credentials(settings):
+    try:
+        return settings["bucket_storage_connections"]["google_cloud"]["credentials"]
+    except KeyError:
+        return None

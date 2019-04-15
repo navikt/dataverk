@@ -64,8 +64,14 @@ class APIValuesImporter(ValuesImporter):
         return json.loads(values_string)
 
 
+class NullValuesImporter(ValuesImporter):
+
+    def import_values(self):
+        return {"": ""}
+
 
 def get_secrets_importer(settings: Mapping, env_store: Mapping) -> ValuesImporter:
+    # TODO add null object support
     if env_store.get("SECRETS_FROM_FILES") is not None:
         return FileValuesImporter(resource=settings["secret_path"])
     elif env_store.get("SECRETS_FROM_API") is not None:
@@ -73,6 +79,8 @@ def get_secrets_importer(settings: Mapping, env_store: Mapping) -> ValuesImporte
         return APIValuesImporter(resource=f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}",
                                  mount_point=settings["secrets_auth_method"],
                                  secrets_path=parsed_url.path[1:], env_store=env_store)
+    elif env_store.get("DATAVERK_NO_SETTINGS_SECRETS"):
+        return NullValuesImporter(resource=None)
     else:
         raise KeyError(f'No secrets sources found')
 

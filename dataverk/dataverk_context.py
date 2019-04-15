@@ -10,21 +10,31 @@ class DataverkContext:
 
     def __init__(self, resource_path: str=".", auth_token: str=None):
         self._resource_path = resource_path
-        self._settings_store = {}
-        self._env_store = EnvStore()
         self._http_headers = self._set_http_headers(auth_token)
+        self._env_store = EnvStore()
+        self._settings_store = self._load_settings()
+        self._load_and_apply_secrets()
+        self._metadata = self._load_metadata()
 
     @property
     def settings(self):
         return self._settings_store
 
+    @property
+    def metadata(self):
+        return self._metadata
+
+    # TODO fetch env from local ?
     def set_envs_from_file(self, local_env_file: str):
         self._env_store = EnvStore(Path(local_env_file))
 
-    def load_settings(self):
-        self._settings_store = json.loads(file_functions.get_package_resource("settings.json", self._resource_path, self._http_headers))
+    def _load_settings(self):
+        return json.loads(file_functions.get_package_resource("settings.json", self._resource_path, self._http_headers))
 
-    def load_secrets(self):
+    def _load_metadata(self):
+        return json.loads(file_functions.get_package_resource("METADATA.json", self._resource_path, self._http_headers))
+
+    def _load_and_apply_secrets(self):
         self._try_apply_secrets(self.settings, self._env_store)
 
     def get_sql_query(self, sql: str):

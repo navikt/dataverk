@@ -6,9 +6,8 @@ from collections.abc import Mapping
 
 class BucketStorageConnector(ABC, BaseConnector):
 
-    def __init__(self, settings: Mapping, encrypted=True):
+    def __init__(self, encrypted=True):
         super().__init__(encrypted=encrypted)
-        self.settings = settings
 
     def write(self, source_string: str, destination_blob_name: str, fmt: str, metadata: dict={}):
         raise NotImplementedError(f'Abstract method. Needs to be implemented in subclass')
