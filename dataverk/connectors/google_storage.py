@@ -3,24 +3,21 @@ from io import BytesIO
 from datetime import timedelta
 from google.cloud import exceptions
 from google.oauth2 import service_account
-from collections.abc import Mapping
 from dataverk.connectors.bucket_storage_base import BucketStorageConnector
 
 
 class GoogleStorageConnector(BucketStorageConnector):
     """Google Storage connector"""
 
-    def __init__(self, bucket_name: str, settings: Mapping, encrypted=True):
+    def __init__(self, bucket_name: str, gcp_project: str=None, gcp_credentials: service_account.Credentials=None, encrypted=True):
         """Init"""
 
-        super(self.__class__, self).__init__(settings=settings, encrypted=encrypted)
+        super(self.__class__, self).__init__(encrypted=encrypted)
 
         try:
             # Instantiate a client
-            gcloud_credentials = service_account.Credentials.from_service_account_info(
-                self.settings["bucket_storage_connections"]["google_cloud"]["credentials"])
-            storage_client = storage.Client(project=settings["bucket_storage_connections"]["google_cloud"]["client"],
-                                            credentials=gcloud_credentials)
+            storage_client = storage.Client(project=gcp_project,
+                                            credentials=gcp_credentials)
 
             self.bucket = self._get_bucket(storage_client, bucket_name)
 

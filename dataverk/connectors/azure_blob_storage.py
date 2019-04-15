@@ -11,7 +11,7 @@ class AzureStorageConnector(BucketStorageConnector):
     def __init__(self, bucket_name: str, settings: Mapping, encrypted=True):
         """Init"""
 
-        super(self.__class__, self).__init__(settings=settings, encrypted=encrypted)
+        super(self.__class__, self).__init__(encrypted=encrypted)
 
         try:
             # AZURE_STORAGE_ACCOUNT_NAME must be set: os.environ['AZURE_STORAGE_ACCOUNT_NAME'] = "..."

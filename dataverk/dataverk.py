@@ -81,12 +81,12 @@ class Dataverk:
         metadata = datapackage.datapackage_metadata
 
         # Publish resources to buckets
-        package_publisher = PackagePublisher(datapackage_metadata=metadata,settings_store=self._context.settings, env_store={})
+        package_publisher = PackagePublisher(datapackage_metadata=metadata, settings_store=self._context.settings, env_store={})
         package_publisher.publish(resources=resources)
 
         # Publish metadata to elastic search
         es_conn = ElasticsearchConnector(self._context.settings)
-        eu = ElasticSearchUpdater(es_conn,metadata)
+        eu = ElasticSearchUpdater(es_conn, metadata)
         eu.publish()
 
     def _get_sql_query(self, sql):

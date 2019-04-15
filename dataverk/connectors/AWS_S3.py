@@ -1,13 +1,12 @@
 import requests
 from dataverk.connectors.bucket_storage_base import BucketStorageConnector
-from collections.abc import Mapping
 
 
 class S3Connector(BucketStorageConnector):
 
-    def __init__(self, bucket_name: str, settings: Mapping, encrypted=True):
-        super().__init__(settings=settings, encrypted=encrypted)
-        self.s3_api_url = settings["bucket_storage_connections"]["dataverk_s3"]["host"]
+    def __init__(self, bucket_name: str, s3_endpoint: str, encrypted=True):
+        super().__init__(encrypted=encrypted)
+        self.s3_api_url = s3_endpoint
         self.bucket_name = bucket_name
 
     def write(self, source_string: str, destination_blob_name: str, fmt: str="csv", metadata: dict={}):

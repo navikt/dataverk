@@ -5,10 +5,10 @@ import shutil
 import stat
 import requests
 from pathlib import Path
-from google.cloud import storage
 from urllib3.exceptions import LocationParseError
 from urllib3.util import url
-from dataverk.connectors.gcs_bucket import GCSStreamConnector
+
+from dataverk.connectors import GoogleStorageConnector
 
 
 def get_package_resource(resource_name: str, base_path: str, http_headers: dict):
@@ -22,8 +22,7 @@ def get_package_resource(resource_name: str, base_path: str, http_headers: dict)
             return requests.get(f"{base_path}/{resource_name}",
                                 headers=http_headers).text
         elif parsed_url.scheme == "gs":
-            storage_client = storage.Client()
-            bucket_conn = GCSStreamConnector(bucket_name=parsed_url.host, storage_client=storage_client)
+            bucket_conn = GoogleStorageConnector(bucket_name=parsed_url.host)
             return bucket_conn.read(f"{parsed_url.path[1:]}/{resource_name}")
         else:
             return read_file(Path(base_path).joinpath(resource_name))

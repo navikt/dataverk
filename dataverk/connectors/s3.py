@@ -11,7 +11,7 @@ class AWSS3Connector(BucketStorageConnector):
     # Init
     def __init__(self, bucket_name: str, settings: Mapping, encrypted=True):
 
-        super(self.__class__, self).__init__(settings=settings, encrypted=encrypted)
+        super(self.__class__, self).__init__(encrypted=encrypted)
 
         ssl_context = create_default_context()
 
