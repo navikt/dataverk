@@ -43,8 +43,10 @@ class DataverkTest(unittest.TestCase):
         tempdir = WindowsSafeTempDirectory()
         with Path(tempdir.name).joinpath("settings.json").open("w") as settings_file:
             settings_file.write(json.dumps(SETTINGS))
+        with Path(tempdir.name).joinpath("METADATA.json").open("w") as metadata_file:
+            metadata_file.write(json.dumps(METADATA))
         dv = Dataverk(tempdir.name)
-        datapackage = Datapackage(METADATA)
+        datapackage = Datapackage(dv.context.metadata)
         self.assertEqual(dv.context.settings, SETTINGS)
         self.assertTrue("bucket_name" in datapackage.datapackage_metadata)
         self.assertTrue("id" in datapackage.datapackage_metadata)
