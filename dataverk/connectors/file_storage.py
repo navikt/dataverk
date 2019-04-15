@@ -1,7 +1,7 @@
 import os
 import json
 from dataverk.connectors.base import BaseConnector
-from dataverk.utils import write_file, read_file
+from dataverk.utils.file_functions import write_file, read_file
 from dataverk.context.settings_classes import SettingsStore
 
 
