@@ -15,18 +15,12 @@ with open('requirements.txt') as f:
 setup(
     name='dataverk',
     version=__version__,
-    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_cli', 'dataverk.context',
-              'dataverk_cli.deploy', 'dataverk_cli.cli.cli_command_handlers', 'dataverk_cli.cli.cli_utils', 'dataverk_cli.templates'],
+    packages=['dataverk', 'dataverk.utils'],
     python_requires='>=3.6',
     install_requires=install_requires,
-    entry_points={
-        'console_scripts': [
-            'dataverk-cli = dataverk_cli.dataverk_cli_entrypoint:main'
-        ]
+    package_data={
+        'dataverk': ['VERSION']
     },
-    package_data={'dataverk': ['VERSION'],
-                  'dataverk_cli': ['templates/*']},
-
     # metadata to display on PyPI
     author="NAV IKT",
     author_email="paul.bencze@nav.no",

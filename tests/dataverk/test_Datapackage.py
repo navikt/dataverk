@@ -1,15 +1,10 @@
 # -*- coding: utf-8 -*-
 # Import statements
 # =================
-import copy
 import datetime
-import os
-import json
 import pandas as pd
 from unittest import TestCase
 from dataverk.datapackage import Datapackage
-from pathlib import Path
-from dataverk.utils import resource_discoverer
 
 # Common input parameters
 # =======================
@@ -53,33 +48,10 @@ class Instantiation(Base):
 
     # Input arguments outside constraints
     # ===================================
-    def test_invalid_bucket_name(self):
-        invalid_names = ["_name", "-name", "name with spaces", "name_", "name-", "Name", "name_with_underscore"]
-
-        for bucket_name in invalid_names:
-            with self.subTest(msg="Invalid data package name", _input=bucket_name):
-                metadata = copy.deepcopy(metadata_file_template)
-                metadata["bucket_name"] = bucket_name
-                with self.assertRaises(NameError):
-                    Datapackage(metadata)
 
     def test_missing_bucket_name(self):
         with self.assertRaises(KeyError):
             datapackage = Datapackage(invalid_metadata)
-
-
-class Set(Base):
-    """
-    Tests all aspects of setting attributes
-
-    Tests include: setting attributes of wrong type, setting attributes outside their constraints, etc.
-    """
-
-    # Set attribute wrong type
-    # ========================
-
-    # Set attribute outside constraint
-    # ================================
 
 
 class MethodsInput(Base):
