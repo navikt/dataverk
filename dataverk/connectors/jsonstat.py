@@ -4,7 +4,7 @@ from pyjstat import pyjstat
 from collections import OrderedDict
 import pandas as pd
 import ast
-from dataverk.connectors import BaseConnector 
+from dataverk.connectors import BaseConnector
 
 
 class JSONStatConnector(BaseConnector):
@@ -13,7 +13,7 @@ class JSONStatConnector(BaseConnector):
     """
     
     def __init__(self):
-        super(JSONStatConnector, self).__init__()
+        super().__init__()
      
     def get_pandas_df(self, url, params=None, table_format='json'):
         """

@@ -1,7 +1,6 @@
-import os
 from io import BytesIO
 from datetime import timedelta
-from dataverk.connectors.bucket_storage_base import BucketStorageConnector
+from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
 from collections.abc import Mapping
 
 

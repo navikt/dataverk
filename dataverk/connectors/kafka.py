@@ -27,7 +27,7 @@ class KafkaConnector(BaseConnector):
         :param topics: Sequence of topics to subscribe to
         :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset)
         """
-        super(KafkaConnector, self).__init__()
+        super().__init__()
         self._topics = topics
         self._fetch_mode = fetch_mode
         self._schema_cache = {}

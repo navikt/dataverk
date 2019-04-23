@@ -6,27 +6,19 @@ from pathlib import Path
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with Path("dataverk/VERSION").open("r") as fh:
+with Path("nav_dataverk/VERSION").open("r") as fh:
     __version__ = fh.read()
 
 with open('requirements.txt') as f:
     install_requires = f.read().strip().split('\n')
 
 setup(
-    name='dataverk',
+    name='nav-dataverk',
     version=__version__,
-    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk_cli', 'dataverk.context',
-              'dataverk_cli.deploy', 'dataverk_cli.cli.cli_command_handlers', 'dataverk_cli.cli.cli_utils', 'dataverk_cli.templates'],
+    packages=['nav_dataverk', 'nav_dataverk.connectors', 'nav_dataverk.utils', 'nav_dataverk.context'],
     python_requires='>=3.6',
     install_requires=install_requires,
-    entry_points={
-        'console_scripts': [
-            'dataverk-cli = dataverk_cli.dataverk_cli_entrypoint:main'
-        ]
-    },
-    package_data={'dataverk': ['VERSION'],
-                  'dataverk_cli': ['templates/*']},
-
+    package_data={'nav_dataverk': ['VERSION']},
     # metadata to display on PyPI
     author="NAV IKT",
     author_email="paul.bencze@nav.no",

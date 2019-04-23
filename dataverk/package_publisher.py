@@ -1,14 +1,7 @@
 import json
 from collections import Mapping
-
-import urllib3
-from dataverk.connectors.bucket_storage_base import BucketStorageConnector
-
-from dataverk.connectors.elasticsearch import ElasticsearchConnector
+from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
 from dataverk.connectors.bucket_connector_factory import get_storage_connector, BucketType
-from dataverk.utils import publish_data
-from pathlib import Path
-from datetime import datetime
 
 
 class PackagePublisher:

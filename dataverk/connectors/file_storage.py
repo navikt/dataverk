@@ -1,9 +1,8 @@
 import os
 import json
-from dataverk.connectors.base import BaseConnector
-from dataverk.utils.file_functions import write_file, read_file
+from dataverk.connectors.abc.base import BaseConnector
+#from dataverk.utils.file_functions import write_file, read_file
 from dataverk.context.settings_classes import SettingsStore
-
 
 
 class FileStorageConnector(BaseConnector):
@@ -33,14 +32,14 @@ class FileStorageConnector(BaseConnector):
             path = self.path
              
         try:
-            write_file(f'{path}/{destination_blob_name}.{fmt}', source_string)
+            #write_file(f'{path}/{destination_blob_name}.{fmt}', source_string)
             self.log(f'{self.__class__}: String (format: {fmt}) written to file: {path}/{destination_blob_name}.{fmt}') 
         except:
             raise ValueError(f'Error writing {destination_blob_name} to file: {path}/{destination_blob_name}.{fmt}')
 
         if metadata is not None:
             try: 
-                write_file(f'{path}/{destination_blob_name}.meta', json.dumps(metadata))
+                #write_file(f'{path}/{destination_blob_name}.meta', json.dumps(metadata))
                 self.log('f{self.__class__}: Metadata written to file: {path}/{destination_blob_name}.meta') 
             except:
                 raise ValueError(f'Error writing {destination_blob_name} metadata to file: {path}/{destination_blob_name}.meta')
@@ -55,7 +54,7 @@ class FileStorageConnector(BaseConnector):
         else:
             path = self.path
 
-        return read_file(f'{self.path}/{file_name}')     
+        return None #read_file(f'{self.path}/{file_name}')
 
 
     def delete(self, file_name):
@@ -81,9 +80,9 @@ class FileStorageConnector(BaseConnector):
 
         blob_id = os.path.splitext(blob_name)[0]
 
-        blob = read_file(f'{path}/{blob_id}.meta')
+        #blob = read_file(f'{path}/{blob_id}.meta')
 
-        blob = json.loads(blob)
+       #blob = json.loads(blob)
 
         if format == 'markdown':
             items = []

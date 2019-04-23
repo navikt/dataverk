@@ -1,27 +1,19 @@
-from .base import BaseConnector
-from .sqldb import SQLDbConnector
-from .jsonstat import JSONStatConnector
-from .elasticsearch import ElasticsearchConnector
-from .google_storage import GoogleStorageConnector
-from .file_storage import FileStorageConnector
-from .storage import StorageConnector
-from .s3 import AWSS3Connector
-from .ssb_api import SSBConnector
-from .oracle import OracleConnector
-from .sqlite import SQLiteConnector
-from .kafka import KafkaConnector
-from .postgres import PostgresConnector
+from dataverk.connectors.abc.base import BaseConnector
+from dataverk.connectors.jsonstat import JSONStatConnector
+from dataverk.connectors.google_storage import GoogleStorageConnector
+from dataverk.connectors.file_storage import FileStorageConnector
+from dataverk.connectors.oracle import OracleConnector
+from dataverk.connectors.sqlite import SQLiteConnector
+from dataverk.connectors.kafka import KafkaConnector
+from dataverk.connectors.postgres import PostgresConnector
+from dataverk.connectors.s3 import S3Connector
+
 
 __all__ = [
-            #'BaseConnector',
-            #'SQLDbConnector',
             'JSONStatConnector',
-            #'ElasticsearchConnector',
+            'S3Connector',
             'GoogleStorageConnector',
-            'StorageConnector',
             'FileStorageConnector',
-            'AWSS3Connector',
-            'SSBConnector',
             'OracleConnector',
             'SQLiteConnector',
             'KafkaConnector',

@@ -1,5 +1,4 @@
 from collections import Mapping
-from uuid import uuid4
 
 import urllib3
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
@@ -19,9 +18,10 @@ class ElasticSearchUpdater:
         try:
             id = self.datapackage_json["id"]
             js = {
+                'id': self.datapackage_json["id"],
                 'name': self.datapackage_json.get('id', ''),
                 'title': self.datapackage_json.get('title', ''),
-                'updated': datetime.now(),
+                'updated': datetime.now().isoformat(),
                 'keywords': self.datapackage_json.get('keywords', []),
                 'accessRights': self.datapackage_json.get('accessRights', ''),
                 'description': self.datapackage_json.get('description', ''),

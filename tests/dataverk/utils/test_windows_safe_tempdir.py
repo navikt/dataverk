@@ -1,7 +1,7 @@
 from unittest import TestCase
 from pathlib import Path
 
-from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
+from tests.windows_safe_tempdir import WindowsSafeTempDirectory
 
 
 class TestWindowsSafeTempDirectory(TestCase):

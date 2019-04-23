@@ -2,7 +2,7 @@
 # Import statements
 # =================
 import unittest
-from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
+from tests.windows_safe_tempdir import WindowsSafeTempDirectory
 from dataverk.context.values_importer import get_secrets_importer, APIValuesImporter, FileValuesImporter
 from pathlib import Path
 

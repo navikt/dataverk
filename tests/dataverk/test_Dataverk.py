@@ -2,13 +2,10 @@ import json
 import unittest
 from pathlib import Path
 
-import urllib3
-
 from dataverk.dataverk import Dataverk
-from dataverk.datapackage import Datapackage
 from os import environ
 
-from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
+from tests.windows_safe_tempdir import WindowsSafeTempDirectory
 
 SETTINGS = {
     "package_name": "min-pakke",
@@ -34,6 +31,7 @@ INVALID_METADATA = {
     "id": "my-package-id"
 }
 
+
 class DataverkTest(unittest.TestCase):
 
     def setUp(self):
@@ -46,8 +44,11 @@ class DataverkTest(unittest.TestCase):
         with Path(tempdir.name).joinpath("METADATA.json").open("w") as metadata_file:
             metadata_file.write(json.dumps(METADATA))
         dv = Dataverk(tempdir.name)
-        datapackage = Datapackage(dv.context.metadata)
         self.assertEqual(dv.context.settings, SETTINGS)
-        self.assertTrue("bucket_name" in datapackage.datapackage_metadata)
-        self.assertTrue("id" in datapackage.datapackage_metadata)
         tempdir.cleanup()
+
+    def test__is_sql_file(self):
+        sql_path = "./myquery.sql"
+        sql_query = "SELECT * FROM mytable"
+        self.assertEqual(Dataverk._is_sql_file(source=sql_path), True)
+        self.assertEqual(Dataverk._is_sql_file(source=sql_query), False)

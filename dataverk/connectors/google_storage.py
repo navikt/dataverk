@@ -1,21 +1,25 @@
+from collections import Mapping
+
 import google.cloud.storage as storage
 from io import BytesIO
 from datetime import timedelta
 from google.cloud import exceptions
 from google.oauth2 import service_account
-from dataverk.connectors.bucket_storage_base import BucketStorageConnector
+from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
 
 
 class GoogleStorageConnector(BucketStorageConnector):
     """Google Storage connector"""
 
-    def __init__(self, bucket_name: str, gcp_project: str=None, gcp_credentials: service_account.Credentials=None, encrypted=True):
+    def __init__(self, bucket_name: str, settings: Mapping):
         """Init"""
 
-        super(self.__class__, self).__init__(encrypted=encrypted)
+        super().__init__()
 
         try:
-            # Instantiate a client
+            gcp_project = self._gcp_project_name(settings)
+            gcp_credentials = self._gcp_credentials(settings)
+
             storage_client = storage.Client(project=gcp_project,
                                             credentials=gcp_credentials)
 
@@ -125,6 +129,18 @@ class GoogleStorageConnector(BucketStorageConnector):
 
         if format == 'object':
             return blob
+
+    def _gcp_project_name(self, settings):
+        try:
+            return settings["bucket_storage_connections"]["google_cloud"]["client"]
+        except KeyError:
+            return None
+
+    def _gcp_credentials(self, settings):
+        try:
+            return settings["bucket_storage_connections"]["google_cloud"]["credentials"]
+        except KeyError:
+            return None
 
     def _make_blob_public(self, blob_name):
         """Makes a blob publicly accessible."""
