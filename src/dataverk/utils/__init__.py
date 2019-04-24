@@ -1,4 +1,3 @@
-from dataverk.mixins.logger_mixin import LoggerMixin
 from .dp2elastic import dp2elastic
 
 

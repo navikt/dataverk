@@ -4,7 +4,8 @@ from collections import Sequence
 from dataverk.context import EnvStore
 
 from dataverk import DataverkContext
-from dataverk.connectors import KafkaConnector, db_connector_factory
+from dataverk.connectors import KafkaConnector
+from dataverk.connectors import db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from dataverk.package_publisher import PackagePublisher

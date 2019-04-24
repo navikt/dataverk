@@ -16,13 +16,14 @@ from subprocess import call
 
 sys.path.append(os.path.join(os.getcwd(), os.pardir))
 
-import dataverk
+from src import dataverk
 from dataverk import api
-from dataverk.datapackage import Datapackage
-from dataverk import utils
-from dataverk.connectors import JSONStatConnector, StorageConnector, FileStorageConnector, GoogleStorageConnector, \
+from src.dataverk import Datapackage
+import utils
+from src.dataverk import JSONStatConnector, StorageConnector, FileStorageConnector, GoogleStorageConnector, \
     SQLiteConnector, ElasticsearchConnector, BaseConnector, OracleConnector
-from dataverk.context import EnvStore, settings_classes, settings
+from src.dataverk import EnvStore, settings
+from context import settings_classes
 
 root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 

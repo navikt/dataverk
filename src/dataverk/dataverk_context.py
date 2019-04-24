@@ -1,6 +1,7 @@
 import json
 from collections import Mapping
-from dataverk.context import EnvStore, values_importer
+from dataverk.context import EnvStore
+from dataverk.context import values_importer
 from dataverk.context.replacer import Replacer
 from dataverk.utils import file_functions
 
