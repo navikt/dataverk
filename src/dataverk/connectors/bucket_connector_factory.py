@@ -18,7 +18,7 @@ def get_storage_connector(bucket_type: BucketType, bucket_name: str, settings: M
     if bucket_type == BucketType.DATAVERK_S3:
         return S3Connector(bucket_name=bucket_name, s3_endpoint=settings["bucket_storage_connections"]["dataverk_s3"]["host"])
     elif bucket_type == BucketType.GCS:
-        return GoogleStorageConnector(bucket_name=bucket_name, gcp_project=project, gcp_credentials=credentials, encrypted=encrypted)
+        return GoogleStorageConnector(bucket_name=bucket_name, settings=settings)
     elif bucket_type == BucketType.AZURE:
         return AzureStorageConnector(bucket_name=bucket_name, settings=settings, encrypted=encrypted)
     elif bucket_type == BucketType.GITHUB:
