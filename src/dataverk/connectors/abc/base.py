@@ -17,10 +17,3 @@ class BaseConnector(ABC, AuthMixin, LoggerMixin):
         self.user = self.get_user()
         if self._is_authorized() is not True:
             raise AuthError("auth", "not authorized")
-
-    @abstractmethod
-    def get_pandas_df(self, query):
-        """Get Pandas dataframe
-
-        """
-        raise NotImplementedError()
