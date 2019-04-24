@@ -1,7 +1,6 @@
 from dataverk.connectors.abc.base import BaseConnector
 from dataverk.connectors.jsonstat import JSONStatConnector
 from dataverk.connectors.google_storage import GoogleStorageConnector
-from dataverk.connectors.file_storage import FileStorageConnector
 from dataverk.connectors.oracle import OracleConnector
 from dataverk.connectors.sqlite import SQLiteConnector
 from dataverk.connectors.kafka import KafkaConnector
@@ -13,7 +12,6 @@ __all__ = [
             'JSONStatConnector',
             'S3Connector',
             'GoogleStorageConnector',
-            'FileStorageConnector',
             'OracleConnector',
             'SQLiteConnector',
             'KafkaConnector',

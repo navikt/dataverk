@@ -8,7 +8,7 @@ from pathlib import Path
 from urllib3.exceptions import LocationParseError
 from urllib3.util import url
 
-from dataverk.connectors import GoogleStorageConnector
+from dataverk.connectors.google_storage import GoogleStorageConnector
 
 
 def get_package_resource(resource_name: str, base_path: str, http_headers: dict):

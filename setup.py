@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-from setuptools import setup
+from setuptools import setup, find_packages
 from pathlib import Path
 
 # Gjør README.md om til den lange beskrivelsen på PiPy
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with Path("dataverk/VERSION").open("r") as fh:
+with Path("VERSION").open("r") as fh:
     __version__ = fh.read()
 
 with open('requirements.txt') as f:
@@ -15,10 +15,13 @@ with open('requirements.txt') as f:
 setup(
     name='dataverk',
     version=__version__,
-    packages=['dataverk', 'dataverk.connectors', 'dataverk.utils', 'dataverk.context'],
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     python_requires='>=3.6',
     install_requires=install_requires,
-    package_data={'dataverk': ['VERSION']},
+    package_data={
+        'dataverk': ['VERSION']
+    },
     # metadata to display on PyPI
     author="NAV IKT",
     author_email="paul.bencze@nav.no",
