@@ -3,13 +3,12 @@ import cx_Oracle
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
-
 from urllib import parse
-from dataverk.connectors import BaseConnector
 from collections.abc import Mapping
+from dataverk.connectors.abc.db_base import DBBaseConnector
 
 
-class OracleConnector(BaseConnector):
+class OracleConnector(DBBaseConnector):
     """Common oracle connector methods
 
     Troubleshooting:
@@ -26,7 +25,7 @@ class OracleConnector(BaseConnector):
     """
 
     def __init__(self, settings_store: Mapping, source=None):
-        super(OracleConnector, self).__init__()
+        super().__init__()
 
         self._settings = settings_store
         self._source = source

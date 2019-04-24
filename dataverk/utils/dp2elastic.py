@@ -1,7 +1,7 @@
 import json, fire, re, os.path
-from .notebookname import get_notebook_name 
 
-def dp2elastic(dp = None, elasticdoc = None):
+
+def dp2elastic(dp=None, elasticdoc=None):
     dic = json.load(open('datapackage.json', 'r'))
     path = dic.get('path','')
     path = path.rstrip('\/')

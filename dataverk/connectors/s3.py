@@ -1,63 +1,28 @@
-import boto3
-from dataverk.connectors.bucket_storage_base import BucketStorageConnector
-from collections.abc import Mapping
-from ssl import create_default_context
+import requests
+from dataverk.connectors import BaseConnector
 
 
-# AWS S3
-class AWSS3Connector(BucketStorageConnector):
-    """Amazon S3 Storage compatible connection"""
+class S3Connector(BaseConnector):
 
-    # Init
-    def __init__(self, bucket_name: str, settings: Mapping, encrypted=True):
+    def __init__(self, bucket_name: str, s3_endpoint: str):
+        super().__init__()
+        self.s3_api_url = s3_endpoint
+        self.bucket_name = bucket_name
 
-        super(self.__class__, self).__init__(encrypted=encrypted)
+    def write(self, source_string: str, destination_blob_name: str, fmt: str="csv", metadata: dict={}):
+        res = requests.put(url=f'{self.s3_api_url}/{self.bucket_name}/{destination_blob_name}.{fmt}',
+                           data=source_string,
+                           headers={'content-type': 'text/plain'})
 
-        ssl_context = create_default_context()
-
-        self.s3 = boto3.resource(
-            service_name='s3',
-            aws_access_key_id=settings["bucket_storage_connections"]["aws_s3"]["access_key"],
-            aws_secret_access_key=settings["bucket_storage_connections"]["aws_s3"]["secret_key"],
-            verify=ssl_context.load_default_certs(),
-            endpoint_url=settings["bucket_storage_connections"]["aws_s3"]["host"]
-        )
-
-        if not self.s3.Bucket(bucket_name) in self.s3.buckets.all():
-            self._create_bucket(bucket_name)
-
-        self.bucket = self.s3.Bucket(bucket_name)
-
-    def write(self, source_string: str, destination_blob_name: str, fmt: str="", metadata: dict={}):
-        obj = self.s3.Object(self.bucket.name, destination_blob_name)
-        obj.put(Body=source_string)
+        if res.status_code != 200:
+            res.raise_for_status()
+        self.log(f'{self.__class__}: Object {destination_blob_name} written to bucket {self.bucket_name}')
 
     def read(self, blob_name: str):
-        obj = self.s3.Object(self.bucket.name, blob_name)
+        res = requests.get(url=f'{self.s3_api_url}/{self.bucket_name}/{blob_name}')
+
+        if res.status_code != 200:
+            res.raise_for_status()
+
         self.log(f'{self.__class__}: Object {blob_name} read to string')
-        return obj.get()['Body'].read().decode('utf-8')
-
-    def upload_blob(self, source_file_name: str, destination_blob_name: str):
-        self.bucket.upload_file(source_file_name, destination_blob_name)
-        self.log(f'{self.__class__}: File {source_file_name} uploaded to {destination_blob_name}')
-
-    def delete_blob(self, blob_name: str):
-        obj = self.s3.Object(self.bucket.name, blob_name)
-        obj.delete()
-        self.log(f'{self.__class__}: Object {blob_name} deleted from bucket {self.bucket.name}')
-
-    def download_blob(self, blob_name: str, destination_path: str):
-        self.bucket.download_file(blob_name, destination_path)
-        self.log(f'{self.__class__}: File {blob_name} downloaded to {destination_path}')
-
-    def get_blob_metadata(self, blob_name: str, format: str='markdown'):
-        pass
-
-    def list_bucket_objects(self):
-        for obj in self.bucket.objects.all():
-            print(obj)
-
-    def _create_bucket(self, bucket_name):
-        self.s3.create_bucket(Bucket=bucket_name)
-        self.log(f'{self.__class__}: Bucket {bucket_name} created')
-
+        return res.text

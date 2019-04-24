@@ -1,10 +1,10 @@
+import requests
 from elasticsearch import Elasticsearch
 from dataverk.connectors import BaseConnector
 from collections.abc import Mapping
 from ssl import create_default_context
 
 
-# Elasticsearch
 class ElasticsearchConnector(BaseConnector):
     """Elasticsearch connection"""
 
@@ -13,6 +13,7 @@ class ElasticsearchConnector(BaseConnector):
 
         ssl_context = create_default_context()
         self.host_uri = settings["index_connections"][host]
+        self.es_token = settings["index_connections"]["token"]
 
         if self.host_uri is None:
             raise ValueError(f'Connection settings are not available for the host: {host}')
@@ -93,12 +94,11 @@ class ElasticsearchConnector(BaseConnector):
 
         self.es.indices.create(index=self.index, body=body)
 
-    def write(self, id, doc):
+    def write(self, dp_id, doc):
         """Add or update document"""
-
-        res = self.es.index(index=self.index, doc_type="dp", id=id, body=doc)
-        self.es.indices.refresh(index=self.index)
-        self.log(f'{self.__class__}: Document {id} of type {self.index} indexed to elastic index: {self.index}.')
+        res = requests.post(self.host_uri, json=doc, params={"token": self.es_token},
+                            headers={"Content-Type": "application/json"})
+        self.log(f'{self.__class__}: Document {dp_id} of type {self.index} indexed to elastic index: {self.index}.')
         return res
 
     def get(self, id):

@@ -7,7 +7,6 @@ import tempfile
 
 
 from dataverk.context.env_store import EnvStore
-from tests.settings_resource_test_mixin import SettingsResourceTestMixin
 
 
 # Common input parameters

@@ -9,7 +9,9 @@ __pycache__/
 # Python Pipenv
 Pipfile
 Pipfile.lock
-dataverk.egg-info
+nav_dataverk.egg-info
+build
+dist
 
 # Jupyter Notebook
 .ipynb_checkpoints

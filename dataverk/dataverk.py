@@ -1,20 +1,21 @@
 import pandas as pd
-from collections import Mapping, Sequence
+from collections import Sequence
 
-from dataverk.datapackage import Datapackage
+from dataverk.context import EnvStore
 
 from dataverk import DataverkContext
-from dataverk.connectors import OracleConnector, SQLiteConnector, PostgresConnector, KafkaConnector
+from dataverk.connectors import KafkaConnector, db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from dataverk.package_publisher import PackagePublisher
 
+
 class Dataverk:
 
-    def __init__(self, resource_path: str=".", auth_token: str=None):
-        # TODO elastic search connector for publish
+    def __init__(self, resource_path: str=".", env_file: str='.env', auth_token: str=None):
         # TODO make context builder
-        self._context = DataverkContext(resource_path, auth_token)
+        env_store = EnvStore.safe_create(env_file)
+        self._context = DataverkContext(env_store, resource_path, auth_token)
 
     @property
     def context(self):
@@ -28,7 +29,7 @@ class Dataverk:
         :param connector: str: Database connector (default oracle)
         :return: pd.Dataframe: Dataframe with result
         """
-        conn = self._get_db_connector(settings_store=self.context.settings, connector=connector, source=source)
+        conn = db_connector_factory.get_db_connector(settings_store=self.context.settings, connector=connector, source=source)
         query = self._get_sql_query(sql=sql)
 
         return conn.get_pandas_df(query=query)
@@ -54,29 +55,11 @@ class Dataverk:
         :param connector: str: Connector type (default: Oracle)
         :param if_exists: str: Action if table already exists in database (default: replace)
         """
-        conn = self._get_db_connector(settings_store=self._context.settings, connector=connector, source=sink)
+        conn = db_connector_factory.get_db_connector(settings_store=self._context.settings, connector=connector, source=sink)
 
         return conn.persist_pandas_df(table, schema=schema, df=df, if_exists=if_exists)
 
-    def _get_db_connector(self, settings_store: Mapping, connector: str, source: str):
-        """ Factory function returning connector type
-
-        :param settings_store: Mapping object with project specific configurations
-        :param connector: str: Connector type
-        :param source: str
-        :return:
-        """
-        if connector.lower() == 'oracle':
-            return OracleConnector(settings_store=settings_store, source=source)
-        elif connector.lower() == 'sqllite':
-            return SQLiteConnector(source=source)
-        elif connector.lower() == 'postgres':
-            return PostgresConnector(settings_store=settings_store, source=source)
-        else:
-            raise NotImplementedError(f"{connector} is not a valid connector type. Valid types are oracle, "
-                                      f"sqllite and postgres")
-
-    def publish(self, datapackage: Datapackage):
+    def publish(self, datapackage):
         resources = datapackage.resources
         metadata = datapackage.datapackage_metadata
 

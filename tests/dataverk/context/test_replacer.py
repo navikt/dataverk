@@ -4,7 +4,7 @@
 import unittest
 import json
 from dataverk.context.replacer import Replacer
-from dataverk.utils.windows_safe_tempdir import WindowsSafeTempDirectory
+from tests.windows_safe_tempdir import WindowsSafeTempDirectory
 from dataverk.context.values_importer import get_secrets_importer
 from pathlib import Path
 # Common input parameters

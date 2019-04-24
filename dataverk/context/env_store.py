@@ -28,6 +28,13 @@ class EnvStore(Mapping):
 
         self._env_store = {**env_setter, **tmp_dict}
 
+    @classmethod
+    def safe_create(cls, env_file):
+        path = None
+        if Path(env_file).exists():
+            path = Path(env_file)
+        return cls(path)
+
     def __getitem__(self, key: str):
         if not isinstance(key, str):
             raise ValueError("field should be a str")

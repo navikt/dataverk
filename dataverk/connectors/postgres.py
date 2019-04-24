@@ -1,16 +1,15 @@
 import time
 import pandas as pd
-#from postgresadapter import PostgresAdapter
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
-from dataverk.connectors import SQLDbConnector
 from collections.abc import Mapping
+from dataverk.connectors.abc.db_base import DBBaseConnector
 
 
-class PostgresConnector(SQLDbConnector):
+class PostgresConnector(DBBaseConnector):
 
     def __init__(self, settings_store: Mapping, source=None):
-        super(PostgresConnector, self).__init__()
+        super().__init__()
 
         self.settings = settings_store
         self.source = source
