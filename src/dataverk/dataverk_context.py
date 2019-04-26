@@ -31,7 +31,7 @@ class DataverkContext:
         return json.loads(file_functions.get_package_resource("METADATA.json", self._resource_path, self._http_headers))
 
     def _load_and_apply_secrets(self):
-        self._try_apply_secrets(self.settings, self._env_store)
+        self._settings_store = self._try_apply_secrets(self._settings_store, self._env_store)
 
     def get_sql_query(self, sql: str):
         return file_functions.get_package_resource(sql, self._resource_path, self._http_headers)
