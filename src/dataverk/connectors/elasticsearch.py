@@ -96,8 +96,17 @@ class ElasticsearchConnector(BaseConnector):
 
     def write(self, dp_id, doc):
         """Add or update document"""
-        res = requests.post(self.host_uri, json=doc, params={"token": self.es_token},
-                            headers={"Content-Type": "application/json"})
+        try:
+            res = requests.post(self.host_uri, json=doc, params={"token": self.es_token},
+                                headers={"Content-Type": "application/json"})
+            res.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise requests.exceptions.HTTPError(f"Unable to update ES index:\n"
+                                                f"{str(err)}")
+        except requests.exceptions.RequestException as err:
+            raise requests.exceptions.RequestException(f"ES index connection error:\n"
+                                                       f"{str(err)}")
+
         self.log(f'{self.__class__}: Document {dp_id} of type {self.index} indexed to elastic index: {self.index}.')
         return res
 
