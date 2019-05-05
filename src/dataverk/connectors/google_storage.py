@@ -11,7 +11,7 @@ from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
 class GoogleStorageConnector(BucketStorageConnector):
     """Google Storage connector"""
 
-    def __init__(self, bucket_name: str, settings: Mapping):
+    def __init__(self, bucket_name: str, settings: Mapping={}):
         """Init"""
 
         super().__init__()
