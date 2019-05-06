@@ -41,7 +41,7 @@ class KafkaConnector(BaseConnector):
 
         :return: pd.Dataframe containing kafka messages read. NB! Commits offset
         """
-        df = pd.DataFrame.from_dict(self._read_kafka(max_mesgs))
+        df = pd.DataFrame.from_records(self._read_kafka(max_mesgs))
         self._commit_offsets()
 
         return df
