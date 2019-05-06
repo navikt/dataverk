@@ -63,7 +63,7 @@ class KafkaConnector(BaseConnector):
             else:
                 mesg = self._decode_avro_message(schema=schema, message=message)
 
-            data.append(message)
+            data.append(mesg)
             if self._is_requested_messages_read(message, max_mesgs, len(data)):
                 break
 
