@@ -1,0 +1,10 @@
+
+.. _s3:
+
+S3Connector
+===========
+
+.. module:: dataverk.connectors.s3
+
+.. autoclass:: S3Connector
+    :members:
