@@ -32,7 +32,7 @@ class PackagePublisher:
                                                                          settings=self._settings_store,
                                                                          encrypted=False),
                                               datapackage_key_prefix=self._datapackage_key_prefix(
-                                                          self._settings_store["package_name"]),
+                                                  self.datapackage_json.get("name")),
                                               resources=resources)
 
     def upload_to_storage_bucket(self, datapackage_metadata, resources, conn: BucketStorageConnector, datapackage_key_prefix: str) -> None:
