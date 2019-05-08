@@ -26,6 +26,7 @@ Installation
    :caption: Contents:
 
    api/api
+   notebooks/notebooks
 
 
 
