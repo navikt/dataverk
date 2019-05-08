@@ -8,7 +8,6 @@ from os import environ
 from tests.windows_safe_tempdir import WindowsSafeTempDirectory
 
 SETTINGS = {
-    "package_name": "min-pakke",
     "index_connections": {
     "elastic_host": "https://es-index.no",
     "index": "index-name"
