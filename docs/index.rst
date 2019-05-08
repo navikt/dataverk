@@ -6,9 +6,26 @@
 Welcome to Dataverk's documentation!
 ====================================
 
+
+Dataverk is a Python package for creating Python based ETL(Extract Transform Load) jobs. Dataverk's goal is to handle
+integration with other internal resources; databases, APIs and authentication services so the user can focus on the
+actual goal.
+
+
+Installation
+--------------
+::
+
+   pip install dataverk
+
+
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+
+   api/api
 
 
 
