@@ -36,17 +36,17 @@ class KafkaConnector(BaseConnector):
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
         self._schema_registry_url = self._safe_get_nested(settings=settings, keys=("kafka", "schema_registry"), default="http://localhost:8081")
 
-    def get_pandas_df(self, numb_of_msgs=None):
+    def get_pandas_df(self, max_mesgs=None):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
 
         :return: pd.Dataframe containing kafka messages read. NB! Commits offset
         """
-        df = pd.DataFrame.from_dict(self._read_kafka())
+        df = pd.DataFrame.from_records(self._read_kafka(max_mesgs))
         self._commit_offsets()
 
         return df
         
-    def _read_kafka(self):
+    def _read_kafka(self, max_mesgs):
 
         start_time = time.time()
 
@@ -64,7 +64,7 @@ class KafkaConnector(BaseConnector):
                 mesg = self._decode_avro_message(schema=schema, message=message)
 
             data.append(mesg)
-            if self._is_requested_messages_read(message):
+            if self._is_requested_messages_read(message, max_mesgs, len(data)):
                 break
 
         self.log(f"({len(data)} messages read from kafka stream {self._topics} in {time.time() - start_time} sec. Fetch mode {self._fetch_mode}")
@@ -129,8 +129,13 @@ class KafkaConnector(BaseConnector):
     def _append_to_df(self, df: pd.DataFrame, message_value):
         return pd.concat([df, pd.DataFrame(json.loads(message_value), index=[0])], ignore_index=True)
 
-    def _is_requested_messages_read(self, message):
-        return message.timestamp >= self._read_until_timestamp
+    def _is_requested_messages_read(self, message, max_mesgs, mesgs_read):
+        if message.timestamp >= self._read_until_timestamp:
+            return True
+        elif max_mesgs is not None:
+            if mesgs_read >= max_mesgs:
+                return True
+        return False
 
     def _commit_offsets(self):
         """ Commits the offsets to kafka when the KafkaConsumer object is configured with group_id
