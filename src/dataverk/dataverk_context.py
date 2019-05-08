@@ -14,21 +14,13 @@ class DataverkContext:
         self._env_store = env_store
         self._settings_store = self._load_settings()
         self._load_and_apply_secrets()
-        self._metadata = self._load_metadata()
 
     @property
     def settings(self):
         return self._settings_store
 
-    @property
-    def metadata(self):
-        return self._metadata
-
     def _load_settings(self):
         return json.loads(file_functions.get_package_resource("settings.json", self._resource_path, self._http_headers))
-
-    def _load_metadata(self):
-        return json.loads(file_functions.get_package_resource("METADATA.json", self._resource_path, self._http_headers))
 
     def _load_and_apply_secrets(self):
         self._settings_store = self._try_apply_secrets(self._settings_store, self._env_store)
