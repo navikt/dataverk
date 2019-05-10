@@ -3,7 +3,6 @@ import json
 import struct
 import requests
 import avro
-import avro.io
 import io
 import time
 from kafka import KafkaConsumer
