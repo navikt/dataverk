@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from dataverk.mixins.logger_mixin import LoggerMixin
 from dataverk.mixins.auth_mixin import AuthMixin, AuthError
@@ -6,7 +6,7 @@ from prometheus_client import Summary
 
 
 # Create a metric to track time spent and requests made.
-REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request', None)
+REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
 
 
 class BaseConnector(ABC, AuthMixin, LoggerMixin):
