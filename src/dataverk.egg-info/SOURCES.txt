@@ -4,6 +4,7 @@ VERSION
 requirements.txt
 setup.py
 src/dataverk/__init__.py
+src/dataverk/datapackage.py
 src/dataverk/dataverk.py
 src/dataverk/dataverk_context.py
 src/dataverk/elastic_search_updater.py
@@ -41,4 +42,6 @@ src/dataverk/mixins/logger_mixin.py
 src/dataverk/utils/__init__.py
 src/dataverk/utils/dp2elastic.py
 src/dataverk/utils/file_functions.py
+src/dataverk/utils/metadata_utils.py
 src/dataverk/utils/nbstripout.py
+src/dataverk/utils/validators.py

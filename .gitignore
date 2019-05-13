@@ -31,3 +31,5 @@ dist
 **ca-bundle.crt
 **.idea
 
+settings.json
+test.py
