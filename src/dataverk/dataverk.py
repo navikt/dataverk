@@ -1,5 +1,5 @@
 import pandas as pd
-from collections import Sequence
+from collections.abc import Sequence
 
 from dataverk.context import EnvStore
 

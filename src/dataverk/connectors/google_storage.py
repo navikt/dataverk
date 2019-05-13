@@ -1,8 +1,9 @@
-from collections import Mapping
-
+from collections.abc import Mapping
+import os
 import google.cloud.storage as storage
 from io import BytesIO
 from datetime import timedelta
+import google.auth
 from google.cloud import exceptions
 from google.oauth2 import service_account
 from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
@@ -16,19 +17,27 @@ class GoogleStorageConnector(BucketStorageConnector):
 
         super().__init__()
 
-        try:
-            gcp_project = self._gcp_project_name(settings)
-            gcp_credentials = self._gcp_credentials(settings)
+        gcp_credentials = self._gcp_credentials(settings)
+  
+        if gcp_credentials is not None: # from settings file or secrets
+            try:
+                gcp_credentials = self._gcp_credentials(settings)
+                storage_client = storage.Client(credentials=gcp_credentials)
+                self.bucket = self._get_bucket(storage_client, bucket_name)
+                # Reload fetches the current ACL from Cloud Storage.
+                self.bucket.acl.reload()
+            except Exception as ex:
+                print(ex)
+        else: # from environment
+            try:
+                storage_client = storage.Client()
+                self.bucket = self._get_bucket(storage_client, bucket_name)
+                # Reload fetches the current ACL from Cloud Storage.
+                self.bucket.acl.reload()
+            except Exception as ex:
+                print(ex)
 
-            storage_client = storage.Client(project=gcp_project,
-                                            credentials=gcp_credentials)
-
-            self.bucket = self._get_bucket(storage_client, bucket_name)
-
-            # Reload fetches the current ACL from Cloud Storage.
-            self.bucket.acl.reload()
-        except Exception as ex:
-            print(ex)
+        
 
     def write(self, source_string: str, destination_blob_name: str, fmt: str, metadata: dict = {}):
         """Write string to a bucket."""
@@ -36,21 +45,15 @@ class GoogleStorageConnector(BucketStorageConnector):
 
             name = f'{destination_blob_name}.{fmt}'
             blob = self.bucket.blob(name)
-            """
-            try:
-                blob.delete()
-            except:
-                pass
-            """
-
-            # blob.content_type = f'application/{fmt}'
+            #blob.content_type = f'application/{fmt}'
             # blob.content_language = 'en-US'
             # blob.content_encoding='utf-8'
             blob.cache_control = 'no-cache'
-            blob.content_type = 'text/plain'
+            #blob.content_type = 'text/plain'
             blob.metadata = metadata
             blob.upload_from_string(source_string)
-            blob.make_public()
+            if metadata.get('accessRights','').lower() == 'open':
+                blob.make_public()
 
             self.log(f'{self.__class__}: String (format: {fmt}) written to {blob.public_url}')
             return f'{blob.public_url}'
@@ -138,9 +141,13 @@ class GoogleStorageConnector(BucketStorageConnector):
 
     def _gcp_credentials(self, settings):
         try:
-            return settings["bucket_storage_connections"]["google_cloud"]["credentials"]
+            info = settings["bucket_storage_connections"]["google_cloud"]["credentials"]
+            scope = 'https://www.googleapis.com/auth/cloud-platform'
+            credentials = service_account.Credentials.from_service_account_info(info, scopes=(scope,))
+            return credentials
         except KeyError:
             return None
+
 
     def _make_blob_public(self, blob_name):
         """Makes a blob publicly accessible."""

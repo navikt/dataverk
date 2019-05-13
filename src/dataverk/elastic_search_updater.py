@@ -26,6 +26,8 @@ class ElasticSearchUpdater:
                 'accessRights': self.datapackage_json.get('accessRights', ''),
                 'description': self.datapackage_json.get('description', ''),
                 'publisher': self.datapackage_json.get('publisher', ''),
+                'user': self.datapackage_json.get('user', ''),
+                'package': self.datapackage_json.get('package', ''),
                 'geo': self.datapackage_json.get('geo', []),
                 'provenance': self.datapackage_json.get('provenance', ''),
                 'uri': f'{self.datapackage_json.get("path", "")}/datapackage.json'

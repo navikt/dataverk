@@ -79,10 +79,8 @@ def get_secrets_importer(settings: Mapping, env_store: Mapping) -> ValuesImporte
         return APIValuesImporter(resource=f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}",
                                  mount_point=settings["secrets_auth_method"],
                                  secrets_path=parsed_url.path[1:], env_store=env_store)
-    elif env_store.get("DATAVERK_NO_SETTINGS_SECRETS"):
-        return NullValuesImporter(resource=None)
     else:
-        raise KeyError(f'No secrets sources found')
+        return NullValuesImporter(resource=None)
 
 
 def _parse_url(url: str) -> ParseResult:

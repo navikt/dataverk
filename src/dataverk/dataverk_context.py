@@ -1,5 +1,5 @@
 import json
-from collections import Mapping
+from collections.abc import Mapping
 from dataverk.context import EnvStore
 from dataverk.context import values_importer
 from dataverk.context.replacer import Replacer

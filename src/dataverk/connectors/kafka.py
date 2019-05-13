@@ -6,7 +6,7 @@ import avro
 import io
 import time
 from kafka import KafkaConsumer
-from collections import Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from enum import Enum
 from datetime import datetime
 from dataverk.connectors import BaseConnector

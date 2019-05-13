@@ -32,7 +32,7 @@ class PackagePublisher:
                                                                          settings=self._settings_store,
                                                                          encrypted=False),
                                               datapackage_key_prefix=self._datapackage_key_prefix(
-                                                  self.datapackage_json.get("name")),
+                                                  self.datapackage_json.get("id")),
                                               resources=resources)
 
     def upload_to_storage_bucket(self, datapackage_metadata, resources, conn: BucketStorageConnector, datapackage_key_prefix: str) -> None:
@@ -45,10 +45,10 @@ class PackagePublisher:
         :return: None
         '''
         if conn is not None:
-            conn.write(json.dumps(datapackage_metadata), datapackage_key_prefix + 'datapackage', "json")
+            conn.write(json.dumps(datapackage_metadata), datapackage_key_prefix + 'datapackage', 'json', datapackage_metadata)
             for filename, df in resources.items():
                 csv_string = df.to_csv(sep=",", encoding="utf-8")
-                conn.write(csv_string, f'{datapackage_key_prefix}resources/{filename}', 'csv')
+                conn.write(csv_string, f'{datapackage_key_prefix}resources/{filename}', 'csv', datapackage_metadata)
 
 
 
