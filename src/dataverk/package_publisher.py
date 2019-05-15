@@ -15,17 +15,6 @@ class PackagePublisher:
         self._env_store = env_store
         self.datapackage_metadata = datapackage_metadata
 
-    def _datapackage_key_prefix(self, datapackage_name: str):
-        return datapackage_name + "/"
-
-    def _is_publish_set(self, bucket_type: str):
-        return (
-            self._settings_store["bucket_storage_connections"][bucket_type][
-                "publish"
-            ].lower()
-            == "true"
-        )
-
     def publish(self, resources):
         """ - Iterates through all bucket storage connections in the settings.json file and publishes the datapackage
             - Updates ES index with metadata for the datapackage
@@ -75,3 +64,15 @@ class PackagePublisher:
                 conn.write(
                     csv_string, f"{datapackage_key_prefix}resources/{filename}", "csv"
                 )
+
+    def _is_publish_set(self, bucket_type: str):
+        return (
+            self._settings_store["bucket_storage_connections"][bucket_type][
+                "publish"
+            ].lower()
+            == "true"
+        )
+
+    @staticmethod
+    def _datapackage_key_prefix(datapackage_name: str):
+        return datapackage_name + "/"
