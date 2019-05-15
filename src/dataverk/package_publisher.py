@@ -9,7 +9,7 @@ class PackagePublisher:
     def __init__(self, settings_store: Mapping, env_store: Mapping, datapackage_metadata: Mapping):
         self._settings_store = settings_store
         self._env_store = env_store
-        self.datapackage_json = datapackage_metadata
+        self.datapackage_metadata = datapackage_metadata
 
     def _datapackage_key_prefix(self, datapackage_name: str):
         return datapackage_name + '/'
@@ -26,13 +26,13 @@ class PackagePublisher:
 
         for bucket_type in self._settings_store["bucket_storage_connections"]:
             if self._is_publish_set(bucket_type=bucket_type):
-                self.upload_to_storage_bucket(datapackage_metadata=self.datapackage_json,
+                self.upload_to_storage_bucket(datapackage_metadata=self.datapackage_metadata,
                                               conn=get_storage_connector(bucket_type=BucketType(bucket_type),
-                                                                         bucket_name=self.datapackage_json.get("bucket_name"),
+                                                                         bucket_name=self.datapackage_metadata.get("bucket_name"),
                                                                          settings=self._settings_store,
                                                                          encrypted=False),
                                               datapackage_key_prefix=self._datapackage_key_prefix(
-                                                  self.datapackage_json.get("name")),
+                                                  self.datapackage_metadata.get("name")),
                                               resources=resources)
 
     def upload_to_storage_bucket(self, datapackage_metadata, resources, conn: BucketStorageConnector, datapackage_key_prefix: str) -> None:
