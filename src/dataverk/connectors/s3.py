@@ -11,7 +11,7 @@ class S3Connector(BaseConnector):
 
     def write(self, source_string: str, destination_blob_name: str, fmt: str="csv", metadata: dict={}):
         res = requests.put(url=f'{self.s3_api_url}/{self.bucket_name}/{destination_blob_name}.{fmt}',
-                           data=source_string,
+                           data=source_string.encode("utf-8"),
                            headers={'content-type': 'text/plain'})
 
         if res.status_code != 200:
