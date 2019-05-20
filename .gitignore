@@ -9,7 +9,7 @@ __pycache__/
 # Python Pipenv
 Pipfile
 Pipfile.lock
-*.egg-info
+*git .egg-info
 build
 dist
 
