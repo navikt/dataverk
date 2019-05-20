@@ -9,7 +9,7 @@ __pycache__/
 # Python Pipenv
 Pipfile
 Pipfile.lock
-nav_dataverk.egg-info
+*.egg-info
 build
 dist
 
