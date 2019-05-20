@@ -4,6 +4,7 @@ import json
 import datetime
 import sys
 import uuid
+import hashlib
 import re
 from .utils import (
     validators,
@@ -11,6 +12,7 @@ from .utils import (
 )
 from pathlib import Path
 from collections.abc import Mapping, Sequence
+	
 
 
 class Datapackage:
@@ -33,16 +35,20 @@ class Datapackage:
         
         project = metadata.get('project', None) 
         repo = metadata.get('repo', metadata.get('github-repo', '')) 
-        bucket= metadata.get('bucket', metadata.get('bucket-name', None))      
+        bucket_name = metadata.get('bucket_name', None)
+        validators.validate_bucket_name(bucket_name) 
         publisher = metadata.get('publisher', None)
         author = metadata.get('author', None)
+        dataset = metadata.get('dataset', None)
         name = metadata.get("name", None)
 
         if metadata.get('id', None) is not None:
             id = metadata['id']
         
         if id is None:
-            id = '-'.join(filter(None, (publisher, author, name)))
+            id_string = '-'.join(filter(None, (project, bucket_name, publisher, author, dataset, name)))
+            hash_object = hashlib.md5(id_string.encode())
+            id = hash_object.hexdigest()
 
         if id is None:
             id = uuid.uuid4()
@@ -50,14 +56,14 @@ class Datapackage:
         id = re.sub('[^0-9a-z]+', '-', id.lower())
 
         if store=='s3':
-            path = f's3://{bucket}/{id}'
-            store_path= f's3://{bucket}/{id}'
+            path = f's3://{bucket_name}/{id}'
+            store_path= f's3://{bucket_name}/{id}'
         elif store=='github':
-            path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{id}'
-            store_path = f'{bucket}/{id}'
+            path = f'https://raw.githubusercontent.com/{repo}/master/{bucket_name}/packages/{id}'
+            store_path = f'{bucket_name}/{id}'
         else: #defeault to gcs
-            path = f'https://storage.googleapis.com/{bucket}/{id}'
-            store_path = f'gs://{bucket}/{id}'
+            path = f'https://storage.googleapis.com/{bucket_name}/{id}'
+            store_path = f'gs://{bucket_name}/{id}'
 
 
         metadata['id'] = id

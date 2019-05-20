@@ -19,26 +19,15 @@ class GoogleStorageConnector(BucketStorageConnector):
 
         gcp_credentials = self._gcp_credentials(settings)
   
-        if gcp_credentials is not None: # from settings file or secrets
-            try:
-                gcp_credentials = self._gcp_credentials(settings)
-                storage_client = storage.Client(credentials=gcp_credentials)
-                self.bucket = self._get_bucket(storage_client, bucket_name)
-                # Reload fetches the current ACL from Cloud Storage.
-                self.bucket.acl.reload()
-            except Exception as ex:
-                print(ex)
-        else: # from environment
-            try:
-                storage_client = storage.Client()
-                self.bucket = self._get_bucket(storage_client, bucket_name)
-                # Reload fetches the current ACL from Cloud Storage.
-                self.bucket.acl.reload()
-            except Exception as ex:
-                print(ex)
+        try:
+            storage_client = storage.Client(credentials = gcp_credentials)
+            self.bucket = self._get_bucket(storage_client, bucket_name)
+            # Reload fetches the current ACL from Cloud Storage.
+            self.bucket.acl.reload()
+        except Exception as ex:
+            print(ex)
 
         
-
     def write(self, source_string: str, destination_blob_name: str, fmt: str, metadata: dict = {}):
         """Write string to a bucket."""
         try:

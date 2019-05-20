@@ -50,7 +50,3 @@ class PackagePublisher:
                 csv_string = df.to_csv(sep=",", encoding="utf-8")
                 conn.write(csv_string, f'{datapackage_key_prefix}resources/{filename}', 'csv', datapackage_metadata)
 
-
-
-
-

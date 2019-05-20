@@ -19,7 +19,7 @@ class ElasticSearchUpdater:
             id = self.datapackage_json["id"]
             js = {
                 'id': self.datapackage_json["id"],
-                'name': self.datapackage_json.get('id', ''),
+                'name': self.datapackage_json.get('name', ''),
                 'title': self.datapackage_json.get('title', ''),
                 'updated': datetime.now().isoformat(),
                 'keywords': self.datapackage_json.get('keywords', []),
