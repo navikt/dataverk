@@ -61,13 +61,13 @@ class Dataverk:
 
         return conn.persist_pandas_df(table, schema=schema, df=df, if_exists=if_exists)
 
-    def publish(self, datapackage):
+    def publish(self, datapackage, csv_sep: str=";"):
         resources = datapackage.resources
         metadata = datapackage.datapackage_metadata
 
         # Publish resources to buckets
         package_publisher = PackagePublisher(datapackage_metadata=metadata, settings_store=self._context.settings, env_store={})
-        package_publisher.publish(resources=resources)
+        package_publisher.publish(resources=resources, csv_sep=csv_sep)
 
         # Publish metadata to elastic search
         es_conn = ElasticsearchConnector(self._context.settings)

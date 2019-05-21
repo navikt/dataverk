@@ -1,18 +1,15 @@
 import copy
 import pandas as pd
-import json
 import datetime
-import sys
 import uuid
 import hashlib
 import re
-from .utils import (
+from dataverk.utils import (
     validators,
     metadata_utils
 )
-from pathlib import Path
 from collections.abc import Mapping, Sequence
-	
+from dataverk.connectors.bucket_connector_factory import BucketType
 
 
 class Datapackage:
@@ -25,51 +22,35 @@ class Datapackage:
         self.views = []
         self._datapackage_metadata = self._create_datapackage(dict(metadata))
 
-    
     def _create_datapackage(self, metadata):
         today = datetime.date.today().strftime('%Y-%m-%d')
 
-        store = metadata.get('store', 'gcs')
+        try:
+            bucket = metadata['bucket']
+        except KeyError:
+            raise AttributeError(f"<bucket> is required to be set in datapackage metadata")
+        else:
+            validators.validate_bucket_name(bucket)
 
-        id = None
-        
-        project = metadata.get('project', None) 
-        repo = metadata.get('repo', metadata.get('github-repo', '')) 
-        bucket_name = metadata.get('bucket_name', None)
-        validators.validate_bucket_name(bucket_name) 
-        publisher = metadata.get('publisher', None)
-        author = metadata.get('author', None)
-        dataset = metadata.get('dataset', None)
-        name = metadata.get("name", None)
+        try:
+            metadata['name']
+        except KeyError:
+            raise AttributeError(f"<name> is required to be set in datapackage metadata")
 
-        if metadata.get('id', None) is not None:
-            id = metadata['id']
-        
-        if id is None:
-            id_string = '-'.join(filter(None, (project, bucket_name, publisher, author, dataset, name)))
-            hash_object = hashlib.md5(id_string.encode())
-            id = hash_object.hexdigest()
+        # set defaults for store and repo when not specified
+        metadata['store'] = metadata.get('store', BucketType.GITHUB)
+        metadata['repo'] = metadata.get('repo', metadata.get('github-repo', ''))
 
-        if id is None:
-            id = uuid.uuid4()
+        try:
+            dp_id = metadata['id']
+        except KeyError:
+            dp_id = self._generate_id(metadata)
 
-        id = re.sub('[^0-9a-z]+', '-', id.lower())
+        metadata['id'] = dp_id
+        path, store_path = self._generate_paths(metadata)
 
-        if store=='s3':
-            path = f's3://{bucket_name}/{id}'
-            store_path= f's3://{bucket_name}/{id}'
-        elif store=='github':
-            path = f'https://raw.githubusercontent.com/{repo}/master/{bucket_name}/packages/{id}'
-            store_path = f'{bucket_name}/{id}'
-        else: #defeault to gcs
-            path = f'https://storage.googleapis.com/{bucket_name}/{id}'
-            store_path = f'gs://{bucket_name}/{id}'
-
-
-        metadata['id'] = id
         metadata['store_path'] = store_path
         metadata['path'] = path
-        metadata['store'] = store
         metadata['updated'] = today
         metadata['version'] = "0.0.1"
         metadata["views"] = []
@@ -86,12 +67,12 @@ class Datapackage:
         return self._resources
 
     @property
-    def id(self):
+    def dp_id(self):
         return self._datapackage_metadata.get("id")
 
     @property
     def project(self):
-        return self._datapackage_metadata["project"]
+        return self._datapackage_metadata.get("project")
 
     @property
     def path(self):
@@ -162,3 +143,38 @@ class Datapackage:
                 }
 
         self._datapackage_metadata["views"].append(view)
+
+    @staticmethod
+    def _generate_id(metadata):
+        project = metadata.get("project", None)
+        publisher = metadata.get("publisher", None)
+        author = metadata.get("author", None)
+        name = metadata.get("name", None)
+        bucket = metadata.get("bucket", None)
+
+        id_string = '-'.join(filter(None, (project, bucket, publisher, author, name)))
+        if id_string:
+            hash_object = hashlib.md5(id_string.encode())
+            dp_id = hash_object.hexdigest()
+            return re.sub('[^0-9a-z]+', '-', dp_id.lower())
+        else:
+            return uuid.uuid4()
+
+    @staticmethod
+    def _generate_paths(metadata):
+        store = metadata['store']
+        repo = metadata['repo']
+        bucket = metadata['bucket']
+        name = metadata['name']
+
+        if BucketType(store) is BucketType.DATAVERK_S3:
+            path = f's3://{bucket}/{name}'
+            store_path = f's3://{bucket}/{name}'
+        elif BucketType(store) is BucketType.GCS:
+            path = f'https://storage.googleapis.com/{bucket}/{name}'
+            store_path = f'gs://{bucket}/{name}'
+        else: #default is local storage
+            path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{name}'
+            store_path = f'{bucket}/{name}'
+
+        return path, store_path
