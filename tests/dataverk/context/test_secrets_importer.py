@@ -74,10 +74,6 @@ class Instantiation(Base):
         secret_importer = get_secrets_importer(self.settings, env_store)
         self.assertIsInstance(secret_importer, APIValuesImporter)
 
-    def test_get_secrets_importer_raise_warning(self):
-        env_store = {}
-        with self.assertRaises(KeyError):
-            get_secrets_importer(settings=self.settings, env_store=env_store)
 
     # Input arguments outside constraints
     # ===================================

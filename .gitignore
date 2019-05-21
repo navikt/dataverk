@@ -9,7 +9,7 @@ __pycache__/
 # Python Pipenv
 Pipfile
 Pipfile.lock
-nav_dataverk.egg-info
+*git .egg-info
 build
 dist
 
@@ -30,3 +30,6 @@ dist
 
 **ca-bundle.crt
 **.idea
+
+settings.json
+test.py
