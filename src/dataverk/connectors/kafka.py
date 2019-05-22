@@ -37,17 +37,29 @@ class KafkaConnector(BaseConnector):
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
         self._schema_registry_url = self._safe_get_nested(settings=settings, keys=("kafka", "schema_registry"), default="http://localhost:8081")
 
-    def get_pandas_df(self, max_mesgs=None):
+    def get_pandas_df(self, fields, max_mesgs=None):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
 
         :return: pd.Dataframe containing kafka messages read. NB! Commits offset
         """
-        df = pd.DataFrame.from_records(self._read_kafka(max_mesgs))
+        df = pd.DataFrame.from_records(self._read_kafka(max_mesgs, fields))
         self._commit_offsets()
 
         return df
-        
-    def _read_kafka(self, max_mesgs):
+
+    def get_message_fields(self):
+        for message in self._consumer:
+            try:
+                schema_res = self._get_schema_from_registry(message=message)
+                schema = schema_res.json()["schema"]
+            except (AttributeError, KeyError):
+                mesg = json.loads(message.value.decode('utf8'))
+            else:
+                mesg = self._decode_avro_message(schema=schema, message=message)
+
+            return mesg.keys()
+
+    def _read_kafka(self, max_mesgs, fields):
 
         start_time = time.time()
 
@@ -64,7 +76,7 @@ class KafkaConnector(BaseConnector):
             else:
                 mesg = self._decode_avro_message(schema=schema, message=message)
 
-            data.append(mesg)
+            data.append(self._extract_requested_fields(mesg, fields))
             if self._is_requested_messages_read(message, max_mesgs, len(data)):
                 break
 
@@ -143,3 +155,13 @@ class KafkaConnector(BaseConnector):
         """
         if self._consumer.config["group_id"] is not None:
             self._consumer.commit()
+
+    @staticmethod
+    def _extract_requested_fields(mesg, fields):
+        data = {}
+        for field in fields:
+            try:
+                data[field] = mesg[field]
+            except KeyError:
+                data[field] = None
+        return data

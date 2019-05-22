@@ -35,9 +35,21 @@ class Dataverk:
 
         return conn.get_pandas_df(query=query)
 
-    def read_kafka(self, topics: Sequence, fetch_mode: str = "from_beginning", max_mesgs: int=None) -> pd.DataFrame:
+    def read_kafka_message_fields(self, topics: Sequence, fetch_mode: str = "from_beginning") -> pd.DataFrame:
+        """ Read single kafka message from topic and return list of message fields
+
+        :param topics: Sequence of topics to subscribe to
+        :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset), default last_committed_offset
+        :return: pandas.Dataframe
+        """
+        consumer = KafkaConnector(settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
+
+        return consumer.get_message_fields()
+
+    def read_kafka(self, topics: Sequence, fields, fetch_mode: str = "from_beginning", max_mesgs: int=None) -> pd.DataFrame:
         """ Read kafka topics and return pandas dataframe
 
+        :param fields: requested fields in kafka message
         :param max_mesgs: max number of kafka messages to read
         :param topics: Sequence of topics to subscribe to
         :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset), default last_committed_offset
@@ -45,7 +57,7 @@ class Dataverk:
         """
         consumer = KafkaConnector(settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
 
-        return consumer.get_pandas_df(max_mesgs)
+        return consumer.get_pandas_df(fields=fields, max_mesgs=max_mesgs)
 
     def to_sql(self, df, table, sink=None, schema=None, connector='Oracle', if_exists: str = 'replace'):
         """ Write records in dataframe to a SQL database table
