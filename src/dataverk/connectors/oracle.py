@@ -78,13 +78,14 @@ class OracleConnector(DBBaseConnector):
             cur.execute(query)
             col_names = [x[0] for x in cur.description]
             results = cur.fetchall()
-            cur.close()
-            conn.close()
 
             end_time = time.time()
 
             df = pd.DataFrame(results, columns=col_names)
-            
+
+            cur.close()
+            conn.close()
+
             self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {query}')
 
             self._df = df
