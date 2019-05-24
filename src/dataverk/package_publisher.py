@@ -43,12 +43,13 @@ class PackagePublisher:
     def upload_to_storage_bucket(
         datapackage_metadata,
         resources,
+        csv_sep: str,
         conn: BucketStorageConnector,
         datapackage_key_prefix: str,
-        csv_sep: str=";"
     ) -> None:
         """ Publish data to bucket storage.
 
+        :param csv_sep: csv separator
         :param resources: datapackage data to be published
         :param datapackage_metadata: metadata assosciated with the datapackage
         :param conn: BucketStorageConnector object: the connection object for chosen bucket storage.
