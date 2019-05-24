@@ -40,7 +40,7 @@ class Dataverk:
 
         :param topics: Sequence of topics to subscribe to
         :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset), default last_committed_offset
-        :return: pandas.Dataframe
+        :return: list: fields in kafka message
         """
         consumer = KafkaConnector(settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
 

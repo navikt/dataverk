@@ -53,6 +53,10 @@ class KafkaConnector(BaseConnector):
         return df
 
     def get_message_fields(self):
+        """ Read single kafka message from topic and return message fields
+
+        :return: list: message fields
+        """
         for message in self._consumer:
             try:
                 schema_res = self._get_schema_from_registry(message=message)
