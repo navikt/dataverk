@@ -12,6 +12,7 @@ from collections.abc import Mapping, Sequence
 from enum import Enum
 from datetime import datetime
 from dataverk.connectors import BaseConnector
+from streamz import Stream
 
 
 class KafkaFetchMode(Enum):
@@ -37,18 +38,37 @@ class KafkaConnector(BaseConnector):
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
         self._schema_registry_url = self._safe_get_nested(settings=settings, keys=("kafka", "schema_registry"), default="http://localhost:8081")
 
-    def get_pandas_df(self, max_mesgs=None):
+    def get_pandas_df(self, strategy=None, fields=None, max_mesgs=None):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
 
         :return: pd.Dataframe containing kafka messages read. NB! Commits offset
         """
-        df = pd.DataFrame.from_records(self._read_kafka(max_mesgs))
+        if strategy is None:
+            records = self._read_kafka_raw(max_mesgs, fields)
+        else:
+            records = self._read_kafka_accumulated(max_mesgs, strategy)
+        df = pd.DataFrame.from_records(records)
         self._commit_offsets()
 
         return df
-        
-    def _read_kafka(self, max_mesgs):
 
+    def get_message_fields(self):
+        """ Read single kafka message from topic and return message fields
+
+        :return: list: message fields
+        """
+        for message in self._consumer:
+            try:
+                schema_res = self._get_schema_from_registry(message=message)
+                schema = schema_res.json()["schema"]
+            except (AttributeError, KeyError):
+                mesg = json.loads(message.value.decode('utf8'))
+            else:
+                mesg = self._decode_avro_message(schema=schema, message=message)
+
+            return mesg.keys()
+
+    def _read_kafka_raw(self, max_mesgs, fields):
         start_time = time.time()
 
         self.log(f"Reading kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
@@ -64,12 +84,32 @@ class KafkaConnector(BaseConnector):
             else:
                 mesg = self._decode_avro_message(schema=schema, message=message)
 
-            data.append(mesg)
+            data.append(self._extract_requested_fields(mesg, fields))
             if self._is_requested_messages_read(message, max_mesgs, len(data)):
                 break
 
         self.log(f"({len(data)} messages read from kafka stream {self._topics} in {time.time() - start_time} sec. Fetch mode {self._fetch_mode}")
 
+        return data
+
+    def _read_kafka_accumulated(self, max_mesgs, strategy):
+        data = dict()
+        stream = Stream()
+
+        stream.accumulate(strategy, start=data)
+
+        for message in self._consumer:
+            try:
+                schema_res = self._get_schema_from_registry(message=message)
+                schema = schema_res.json()["schema"]
+            except (AttributeError, KeyError):
+                mesg = json.loads(message.value.decode('utf8'))
+            else:
+                mesg = self._decode_avro_message(schema=schema, message=message)
+
+            stream.emit(mesg)
+            if self._is_requested_messages_read(message, max_mesgs, len(data)):
+                break
         return data
 
     def _get_schema_from_registry(self, message):
@@ -81,7 +121,8 @@ class KafkaConnector(BaseConnector):
             self._schema_cache[schema_id] = schema
             return schema
 
-    def _decode_avro_message(self, schema, message):
+    @staticmethod
+    def _decode_avro_message(schema, message):
         schema = avro.schema.Parse(schema)
         bytes_reader = io.BytesIO(message.value[5:])
         decoder = avro.io.BinaryDecoder(bytes_reader)
@@ -116,7 +157,8 @@ class KafkaConnector(BaseConnector):
                              enable_auto_commit=False,
                              consumer_timeout_ms=15000)
 
-    def _safe_get_nested(self, settings: Mapping, keys: tuple, default):
+    @staticmethod
+    def _safe_get_nested(settings: Mapping, keys: tuple, default):
         for key in keys:
             if key not in settings:
                 return default
@@ -124,10 +166,12 @@ class KafkaConnector(BaseConnector):
                 settings = settings[key]
         return settings
 
-    def _get_current_timestamp_in_ms(self):
+    @staticmethod
+    def _get_current_timestamp_in_ms():
         return int(datetime.now().timestamp() * 1000)
 
-    def _append_to_df(self, df: pd.DataFrame, message_value):
+    @staticmethod
+    def _append_to_df(df: pd.DataFrame, message_value):
         return pd.concat([df, pd.DataFrame(json.loads(message_value), index=[0])], ignore_index=True)
 
     def _is_requested_messages_read(self, message, max_mesgs, mesgs_read):
@@ -143,3 +187,16 @@ class KafkaConnector(BaseConnector):
         """
         if self._consumer.config["group_id"] is not None:
             self._consumer.commit()
+
+    @staticmethod
+    def _extract_requested_fields(mesg, fields):
+        data = {}
+        if fields is not None:
+            for field in fields:
+                try:
+                    data[field] = mesg[field]
+                except KeyError:
+                    data[field] = None
+            return data
+        else:
+            return mesg
