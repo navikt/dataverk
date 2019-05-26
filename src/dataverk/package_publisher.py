@@ -23,20 +23,20 @@ class PackagePublisher:
         """
 
         for bucket_type in self._settings_store["bucket_storage_connections"]:
-            if self._is_publish_set(bucket_type=bucket_type):
-                self.upload_to_storage_bucket(
-                    datapackage_metadata=self._datapackage_metadata,
-                    conn=get_storage_connector(
-                        bucket_type=BucketType(bucket_type),
-                        bucket_name=self._datapackage_metadata.get("bucket"),
-                        settings=self._settings_store,
-                        encrypted=False,
-                    ),
-                    datapackage_key_prefix=self._datapackage_key_prefix(
-                        self._datapackage_metadata.get("id")
-                    ),
-                    resources=resources
-                )
+            #if self._is_publish_set(bucket_type=bucket_type):
+            self.upload_to_storage_bucket(
+                datapackage_metadata=self._datapackage_metadata,
+                conn=get_storage_connector(
+                    bucket_type=BucketType(bucket_type),
+                    bucket_name=self._datapackage_metadata.get("bucket"),
+                    settings=self._settings_store,
+                    encrypted=False,
+                ),
+                datapackage_key_prefix=self._datapackage_key_prefix(
+                    self._datapackage_metadata.get("id")
+                ),
+                resources=resources
+            )
 
     @staticmethod
     def upload_to_storage_bucket(
@@ -69,6 +69,7 @@ class PackagePublisher:
                     csv_string, f"{datapackage_key_prefix}resources/{filename}", "csv", datapackage_metadata
                 )
 
+    """
     def _is_publish_set(self, bucket_type: str):
         return (
             self._settings_store["bucket_storage_connections"][bucket_type][
@@ -76,7 +77,8 @@ class PackagePublisher:
             ].lower()
             == "true"
         )
+    """
 
     @staticmethod
-    def _datapackage_key_prefix(datapackage_name: str):
-        return datapackage_name + "/"
+    def _datapackage_key_prefix(base: str):
+        return base + "/"
