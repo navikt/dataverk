@@ -15,7 +15,7 @@ class PackagePublisher:
         self._env_store = env_store
         self._datapackage_metadata = datapackage_metadata
 
-    def publish(self, resources, csv_sep):
+    def publish(self, resources):
         """ - Iterates through all bucket storage connections in the settings.json file and publishes the datapackage
             - Updates ES index with metadata for the datapackage
 
@@ -35,8 +35,7 @@ class PackagePublisher:
                     datapackage_key_prefix=self._datapackage_key_prefix(
                         self._datapackage_metadata.get("name")
                     ),
-                    resources=resources,
-                    csv_sep=csv_sep
+                    resources=resources
                 )
 
     @staticmethod
@@ -60,12 +59,14 @@ class PackagePublisher:
             conn.write(
                 json.dumps(datapackage_metadata),
                 datapackage_key_prefix + "datapackage",
-                "json",
+                "json", datapackage_metadata
             )
-            for filename, df in resources.items():
-                csv_string = df.to_csv(sep=csv_sep, encoding="utf-8")
+            for filename, item in resources.items():
+                df = item['df']
+                sep = item[ 'dsv_separator']
+                csv_string = df.to_csv(sep=sep, encoding="utf-8")
                 conn.write(
-                    csv_string, f"{datapackage_key_prefix}resources/{filename}", "csv"
+                    csv_string, f"{datapackage_key_prefix}resources/{filename}", "csv", datapackage_metadata
                 )
 
     def _is_publish_set(self, bucket_type: str):

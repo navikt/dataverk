@@ -1,4 +1,4 @@
-def get_schema(df, dataset_name, format, separator):
+def get_schema(df, dataset_name, format, dsv_separator):
     fields = []
 
     for name, dtype in zip(df.columns, df.dtypes):
@@ -18,11 +18,10 @@ def get_schema(df, dataset_name, format, separator):
         mediatype = 'text/csv'
 
     return {
-        'df': df,
         'name': dataset_name,
         'path': f'resources/{dataset_name}.{format}',
         'format': format,
-        'separator': separator,
+        'dsv_separator': dsv_separator,
         'mediatype': mediatype,
         'schema': {'fields': fields}
     }

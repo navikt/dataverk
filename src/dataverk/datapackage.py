@@ -82,7 +82,7 @@ class Datapackage:
     def uri(self):
         return self._datapackage_metadata.get("uri")
 
-    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="", format="csv", separator=","):
+    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="", format="csv", dsv_separator=","):
         """
         Adds a provided DataFrame as a resource in the Datapackage object with provided name and description.
 
@@ -93,12 +93,11 @@ class Datapackage:
         :return: None
         """
 
-        resource_metadata = metadata_utils.get_schema(df=df, dataset_name=dataset_name, format=format, separator=separator)
-
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
-        self.resources[dataset_name] = resource_metadata
+        self.resources[dataset_name] = metadata_utils.get_schema(df=df, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator)
+        self.resources[dataset_name]['df'] = df
         self._datapackage_metadata["datasets"][dataset_name] = dataset_description
-        #self._datapackage_metadata['resources'].append(metadata_utils.get_csv_schema(df, dataset_name, separator))
+        self._datapackage_metadata['resources'].append(metadata_utils.get_schema(df=df, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator))
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):

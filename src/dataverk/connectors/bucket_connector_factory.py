@@ -6,12 +6,12 @@ from enum import Enum
 from dataverk.connectors.s3 import S3Connector
 
 
-class BucketType(Enum):
-    AWS_S3 = "aws_s3"
-    DATAVERK_S3 = "dataverk_s3"
-    GCS = "google_cloud"
-    AZURE = "azure"
-    GITHUB = "github"
+class BucketType(str, Enum):
+    AWS_S3: str = "aws_s3"
+    DATAVERK_S3: str = "dataverk_s3"
+    GCS: str = "google_cloud"
+    AZURE: str = "azure"
+    GITHUB: str = "github"
 
 
 def get_storage_connector(bucket_type: BucketType, bucket_name: str, settings: Mapping, encrypted: bool=True) -> BucketStorageConnector:
