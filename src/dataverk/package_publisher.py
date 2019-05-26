@@ -43,7 +43,6 @@ class PackagePublisher:
     def upload_to_storage_bucket(
         datapackage_metadata,
         resources,
-        csv_sep: str,
         conn: BucketStorageConnector,
         datapackage_key_prefix: str,
     ) -> None:

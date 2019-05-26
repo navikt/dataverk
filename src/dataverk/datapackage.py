@@ -82,25 +82,29 @@ class Datapackage:
     def uri(self):
         return self._datapackage_metadata.get("uri")
 
-    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str=""):
+    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="", format="csv", separator=","):
         """
         Adds a provided DataFrame as a resource in the Datapackage object with provided name and description.
 
         :param df: DataFrame to add as resource
         :param dataset_name: Name of the dataset
         :param dataset_description: Description of the dataset
+        :param separator: field separator
         :return: None
         """
 
+        resource_metadata = metadata_utils.get_schema(df=df, dataset_name=dataset_name, format=format, separator=separator)
+
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
-        self.resources[dataset_name] = df
+        self.resources[dataset_name] = resource_metadata
         self._datapackage_metadata["datasets"][dataset_name] = dataset_description
-        self._datapackage_metadata['resources'].append(metadata_utils.get_csv_schema(df, dataset_name))
+        #self._datapackage_metadata['resources'].append(metadata_utils.get_csv_schema(df, dataset_name, separator))
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
             raise TypeError(f'df must be of type pandas.Dataframe()')
         if not isinstance(dataset_name, str):
+            #TODO: check if valid filename
             raise TypeError(f'dataset_name must be of type string')
         if not isinstance(dataset_description, str):
             raise TypeError(f'dataset_description must be of type string')
