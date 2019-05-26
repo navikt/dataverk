@@ -33,7 +33,7 @@ class PackagePublisher:
                         encrypted=False,
                     ),
                     datapackage_key_prefix=self._datapackage_key_prefix(
-                        self._datapackage_metadata.get("name")
+                        self._datapackage_metadata.get("id")
                     ),
                     resources=resources
                 )
