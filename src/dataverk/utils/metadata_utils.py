@@ -1,4 +1,4 @@
-def get_schema(df, dataset_name, format, dsv_separator):
+def get_schema(df, path, dataset_name, format, dsv_separator):
     fields = []
 
     for name, dtype in zip(df.columns, df.dtypes):
@@ -19,9 +19,9 @@ def get_schema(df, dataset_name, format, dsv_separator):
 
     return {
         'name': dataset_name,
-        'path': f'resources/{dataset_name}.{format}',
+        'path': f'{path}/resources/{dataset_name}.{format}',
         'format': format,
-        'dsv_separator': dsv_separator,
+        'separator': separator,
         'mediatype': mediatype,
         'schema': {'fields': fields}
     }

@@ -33,12 +33,12 @@ class Datapackage:
             validators.validate_bucket_name(bucket)
 
         try:
-            metadata['name']
+            metadata['title']
         except KeyError:
-            raise AttributeError(f"<name> is required to be set in datapackage metadata")
+            raise AttributeError(f"<title> is required to be set in datapackage metadata")
 
         # set defaults for store and repo when not specified
-        metadata['store'] = metadata.get('store', BucketType.GITHUB)
+        metadata['store'] = metadata.get('store', BucketType.LOCAL)
         metadata['repo'] = metadata.get('repo', metadata.get('github-repo', ''))
 
         try:
@@ -82,6 +82,34 @@ class Datapackage:
     def uri(self):
         return self._datapackage_metadata.get("uri")
 
+    def _get_schema(self, df, path, dataset_name, format, dsv_separator):
+        fields = []
+
+        for name, dtype in zip(df.columns, df.dtypes):
+            # TODO : Bool and others
+            if str(dtype) == 'object':
+                dtype = 'string'
+            else:
+                dtype = 'number'
+
+            fields.append({'name': name, 'description': '', 'type': dtype})
+
+        if format == 'csv':
+            mediatype = 'text/csv'
+        elif format == 'json':
+            mediatype = 'application/json'
+        else:
+            mediatype = 'text/csv'
+
+        return {
+            'name': dataset_name,
+            'path': f'{path}/resources/{dataset_name}.{format}',
+            'format': format,
+            'dsv_separator': dsv_separator,
+            'mediatype': mediatype,
+            'schema': {'fields': fields}
+        }
+
     def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="", format="csv", dsv_separator=","):
         """
         Adds a provided DataFrame as a resource in the Datapackage object with provided name and description.
@@ -93,11 +121,12 @@ class Datapackage:
         :return: None
         """
 
+
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
-        self.resources[dataset_name] = metadata_utils.get_schema(df=df, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator)
+        self.resources[dataset_name] = self._get_schema(df=df, path=self.path, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator)
         self.resources[dataset_name]['df'] = df
         self._datapackage_metadata["datasets"][dataset_name] = dataset_description
-        self._datapackage_metadata['resources'].append(metadata_utils.get_schema(df=df, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator))
+        self._datapackage_metadata['resources'].append(self._get_schema(df=df, path=self.path, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator))
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
@@ -149,13 +178,11 @@ class Datapackage:
 
     @staticmethod
     def _generate_id(metadata):
-        project = metadata.get("project", None)
-        publisher = metadata.get("publisher", None)
         author = metadata.get("author", None)
-        name = metadata.get("name", None)
+        title = metadata.get("title", None)
         bucket = metadata.get("bucket", None)
 
-        id_string = '-'.join(filter(None, (project, bucket, publisher, author, name)))
+        id_string = '-'.join(filter(None, (bucket, author, title)))
         if id_string:
             hash_object = hashlib.md5(id_string.encode())
             dp_id = hash_object.hexdigest()
@@ -168,16 +195,16 @@ class Datapackage:
         store = metadata['store']
         repo = metadata['repo']
         bucket = metadata['bucket']
-        name = metadata['name']
+        id = metadata['id']
 
-        if BucketType(store) is BucketType.DATAVERK_S3:
-            path = f's3://{bucket}/{name}'
-            store_path = f's3://{bucket}/{name}'
+        if BucketType(store) is BucketType.NAIS:
+            path = f's3://{bucket}/{id}'
+            store_path = f's3://{bucket}/{id}'
         elif BucketType(store) is BucketType.GCS:
-            path = f'https://storage.googleapis.com/{bucket}/{name}'
-            store_path = f'gs://{bucket}/{name}'
+            path = f'https://storage.googleapis.com/{bucket}/{id}'
+            store_path = f'gs://{bucket}/{id}'
         else: #default is local storage
-            path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{name}'
-            store_path = f'{bucket}/{name}'
+            path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{id}'
+            store_path = f'{bucket}/{id}'
 
         return path, store_path
