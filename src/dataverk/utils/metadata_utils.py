@@ -21,7 +21,7 @@ def get_schema(df, path, dataset_name, format, dsv_separator):
         'name': dataset_name,
         'path': f'{path}/resources/{dataset_name}.{format}',
         'format': format,
-        'separator': separator,
+        'separator': dsv_separator,
         'mediatype': mediatype,
         'schema': {'fields': fields}
     }
