@@ -33,3 +33,5 @@ dist
 
 settings.json
 test.py
+
+**/*.egg-info

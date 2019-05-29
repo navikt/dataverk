@@ -4,24 +4,25 @@ from dataverk.connectors.azure_blob_storage import AzureStorageConnector
 from collections.abc import Mapping
 from enum import Enum
 from dataverk.connectors.s3 import S3Connector
+from os import environ
 
 
-class BucketType(Enum):
-    AWS_S3 = "aws_s3"
-    DATAVERK_S3 = "dataverk_s3"
-    GCS = "google_cloud"
-    AZURE = "azure"
-    GITHUB = "github"
+class BucketType(str, Enum):
+    NAIS: str = "nais"
+    GCS: str = "gs"
+    LOCAL: str = "local"
 
 
 def get_storage_connector(bucket_type: BucketType, bucket_name: str, settings: Mapping, encrypted: bool=True) -> BucketStorageConnector:
-    if bucket_type == BucketType.DATAVERK_S3:
-        return S3Connector(bucket_name=bucket_name, s3_endpoint=settings["bucket_storage_connections"]["dataverk_s3"]["host"])
+    if bucket_type == BucketType.NAIS:
+        try:
+            environ["DATAVERK_BUCKET_ENDPOINT"]
+        except KeyError:
+            raise EnvironmentError("DATAVERK_BUCKET_ENDPOINT environment variable must be set")
+        return S3Connector(bucket_name=bucket_name, s3_endpoint=environ["DATAVERK_BUCKET_ENDPOINT"])
     elif bucket_type == BucketType.GCS:
         return GoogleStorageConnector(bucket_name=bucket_name, settings=settings)
-    elif bucket_type == BucketType.AZURE:
-        return AzureStorageConnector(bucket_name=bucket_name, settings=settings, encrypted=encrypted)
-    elif bucket_type == BucketType.GITHUB:
+    elif bucket_type == BucketType.LOCAL:
         return None
     else:
         raise ValueError(f'Bucket type {bucket_type} is not supported')

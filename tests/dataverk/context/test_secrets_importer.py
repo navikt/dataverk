@@ -65,12 +65,12 @@ class Instantiation(Base):
     # ==========================
     # Test factory method
     def test_get_secrets_importer_secrets_from_file(self):
-        env_store = {"SECRETS_FROM_FILES": "True"}
+        env_store = {"DATAVERK_SECRETS_FROM_FILES": "True"}
         secret_importer = get_secrets_importer(self.settings, env_store)
         self.assertIsInstance(secret_importer, FileValuesImporter)
 
     def test_get_secrets_importer_secrets_from_api(self):
-        env_store = {"SECRETS_FROM_API": "True"}
+        env_store = {"DATAVERK_SECRETS_FROM_API": "True"}
         secret_importer = get_secrets_importer(self.settings, env_store)
         self.assertIsInstance(secret_importer, APIValuesImporter)
 
@@ -85,7 +85,7 @@ class MethodsReturnValues(Base):
     """
 
     def test_get_secrets_from_file(self):
-        env_store = {"SECRETS_FROM_FILES": "True"}
+        env_store = {"DATAVERK_SECRETS_FROM_FILES": "True"}
         secrets_importer = get_secrets_importer(self.settings, env_store)
         secrets = secrets_importer.import_values()
 

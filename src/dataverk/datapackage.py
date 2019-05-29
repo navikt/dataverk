@@ -4,10 +4,8 @@ import datetime
 import uuid
 import hashlib
 import re
-from dataverk.utils import (
-    validators,
-    metadata_utils
-)
+from os import environ
+from dataverk.utils import validators
 from collections.abc import Mapping, Sequence
 from dataverk.connectors.bucket_connector_factory import BucketType
 
@@ -28,17 +26,17 @@ class Datapackage:
         try:
             bucket = metadata['bucket']
         except KeyError:
-            raise AttributeError(f"<bucket> is required to be set in datapackage metadata")
+            raise AttributeError(f"bucket is required to be set in datapackage metadata")
         else:
             validators.validate_bucket_name(bucket)
 
         try:
-            metadata['name']
+            metadata['title']
         except KeyError:
-            raise AttributeError(f"<name> is required to be set in datapackage metadata")
+            raise AttributeError(f"title is required to be set in datapackage metadata")
 
         # set defaults for store and repo when not specified
-        metadata['store'] = metadata.get('store', BucketType.GITHUB)
+        metadata['store'] = metadata.get('store', BucketType.LOCAL)
         metadata['repo'] = metadata.get('repo', metadata.get('github-repo', ''))
 
         try:
@@ -82,25 +80,55 @@ class Datapackage:
     def uri(self):
         return self._datapackage_metadata.get("uri")
 
-    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str=""):
+    def _get_schema(self, df, path, dataset_name, format, dsv_separator):
+        fields = []
+
+        for name, dtype in zip(df.columns, df.dtypes):
+            # TODO : Bool and others
+            if str(dtype) == 'object':
+                dtype = 'string'
+            else:
+                dtype = 'number'
+
+            fields.append({'name': name, 'description': '', 'type': dtype})
+
+        if format == 'csv':
+            mediatype = 'text/csv'
+        elif format == 'json':
+            mediatype = 'application/json'
+        else:
+            mediatype = 'text/csv'
+
+        return {
+            'name': dataset_name,
+            'path': f'{path}/resources/{dataset_name}.{format}',
+            'format': format,
+            'dsv_separator': dsv_separator,
+            'mediatype': mediatype,
+            'schema': {'fields': fields}
+        }
+
+    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="", format="csv", dsv_separator=","):
         """
         Adds a provided DataFrame as a resource in the Datapackage object with provided name and description.
 
         :param df: DataFrame to add as resource
         :param dataset_name: Name of the dataset
         :param dataset_description: Description of the dataset
+        :param separator: field separator
         :return: None
         """
-
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
-        self.resources[dataset_name] = df
+        self.resources[dataset_name] = self._get_schema(df=df, path=self.path, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator)
+        self.resources[dataset_name]['df'] = df
         self._datapackage_metadata["datasets"][dataset_name] = dataset_description
-        self._datapackage_metadata['resources'].append(metadata_utils.get_csv_schema(df, dataset_name))
+        self._datapackage_metadata['resources'].append(self._get_schema(df=df, path=self.path, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator))
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
             raise TypeError(f'df must be of type pandas.Dataframe()')
         if not isinstance(dataset_name, str):
+            #TODO: check if valid filename
             raise TypeError(f'dataset_name must be of type string')
         if not isinstance(dataset_description, str):
             raise TypeError(f'dataset_description must be of type string')
@@ -146,13 +174,11 @@ class Datapackage:
 
     @staticmethod
     def _generate_id(metadata):
-        project = metadata.get("project", None)
-        publisher = metadata.get("publisher", None)
         author = metadata.get("author", None)
-        name = metadata.get("name", None)
+        title = metadata.get("title", None)
         bucket = metadata.get("bucket", None)
 
-        id_string = '-'.join(filter(None, (project, bucket, publisher, author, name)))
+        id_string = '-'.join(filter(None, (bucket, author, title)))
         if id_string:
             hash_object = hashlib.md5(id_string.encode())
             dp_id = hash_object.hexdigest()
@@ -165,16 +191,21 @@ class Datapackage:
         store = metadata['store']
         repo = metadata['repo']
         bucket = metadata['bucket']
-        name = metadata['name']
+        dp_id = metadata['id']
 
-        if BucketType(store) is BucketType.DATAVERK_S3:
-            path = f's3://{bucket}/{name}'
-            store_path = f's3://{bucket}/{name}'
+        if BucketType(store) is BucketType.NAIS:
+            try:
+                bucket_endpoint = environ["DATAVERK_BUCKET_ENDPOINT"]
+            except KeyError:
+                raise EnvironmentError(f'The environment variable DATAVERK_BUCKET_ENDPOINT must be set to'
+                                       f'the desired endpoint url for bucket storage')
+            path = f'{bucket_endpoint}/{bucket}/{dp_id}'
+            store_path = path
         elif BucketType(store) is BucketType.GCS:
-            path = f'https://storage.googleapis.com/{bucket}/{name}'
-            store_path = f'gs://{bucket}/{name}'
+            path = f'https://storage.googleapis.com/{bucket}/{dp_id}'
+            store_path = f'gs://{bucket}/{dp_id}'
         else: #default is local storage
-            path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{name}'
-            store_path = f'{bucket}/{name}'
+            path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{dp_id}'
+            store_path = f'{bucket}/{dp_id}'
 
         return path, store_path

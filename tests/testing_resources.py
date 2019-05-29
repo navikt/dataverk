@@ -14,7 +14,8 @@ MOCK_SETTINGS = {
 }
 
 MOCK_METADATA = {
-    "bucket_name": "my-bucket",
+    "bucket": "my-bucket",
     "id": "my-package-id",
-    "name": "packet-name"
+    "title": "packet-name",
+    "store": "local"
 }

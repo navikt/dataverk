@@ -11,22 +11,25 @@ class ElasticSearchUpdater:
         self._es_index = es_index
         self.datapackage_json = datapackage_metadata
 
-    def _datapackage_key_prefix(self, datapackage_name: str):
-        return datapackage_name + '/'
 
-    def _update_es_index(self):
+    def publish(self):
+        ''' - Iterates through all bucket storage connections in the settings.json file and publishes the datapackage
+            - Updates ES index with metadata for the datapackage
+
+        :return: None
+        '''
+
         try:
             id = self.datapackage_json["id"]
             js = {
                 'id': self.datapackage_json["id"],
-                'name': self.datapackage_json.get('name', ''),
-                'title': self.datapackage_json.get('title', ''),
+                'title': self.datapackage_json.get('title', 'missing title'),
                 'updated': datetime.now().isoformat(),
                 'keywords': self.datapackage_json.get('keywords', []),
                 'accessRights': self.datapackage_json.get('accessRights', ''),
                 'description': self.datapackage_json.get('description', ''),
                 'publisher': self.datapackage_json.get('publisher', ''),
-                'user': self.datapackage_json.get('user', ''),
+                'author': self.datapackage_json.get('author', ''),
                 'package': self.datapackage_json.get('package', ''),
                 'geo': self.datapackage_json.get('geo', []),
                 'provenance': self.datapackage_json.get('provenance', ''),
@@ -37,18 +40,7 @@ class ElasticSearchUpdater:
             print(f'write to elastic search failed, host_uri could not be resolved')
             raise urllib3.exceptions.LocationValueError(err)
 
-    def publish(self):
-        ''' - Iterates through all bucket storage connections in the settings.json file and publishes the datapackage
-            - Updates ES index with metadata for the datapackage
 
-        :return: None
-        '''
-        self._update_es_index()
-
-    def _package_id(self):
-        # TODO implement with file
-        # self._package_id = str(uuid4())
-        pass
 
 
 

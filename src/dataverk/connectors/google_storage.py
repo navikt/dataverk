@@ -124,13 +124,13 @@ class GoogleStorageConnector(BucketStorageConnector):
 
     def _gcp_project_name(self, settings):
         try:
-            return settings["bucket_storage_connections"]["google_cloud"]["client"]
+            return settings["bucket_storage_connections"]["gs"]["client"]
         except KeyError:
             return None
 
     def _gcp_credentials(self, settings):
         try:
-            info = settings["bucket_storage_connections"]["google_cloud"]["credentials"]
+            info = settings["bucket_storage_connections"]["gs"]["credentials"]
             scope = 'https://www.googleapis.com/auth/cloud-platform'
             credentials = service_account.Credentials.from_service_account_info(info, scopes=(scope,))
             return credentials

@@ -15,35 +15,34 @@ class PackagePublisher:
         self._env_store = env_store
         self._datapackage_metadata = datapackage_metadata
 
-    def publish(self, resources, csv_sep):
+    def publish(self, resources):
         """ - Iterates through all bucket storage connections in the settings.json file and publishes the datapackage
             - Updates ES index with metadata for the datapackage
 
         :return: None
         """
+        bucket_type = self._datapackage_metadata.get("store")
 
-        for bucket_type in self._settings_store["bucket_storage_connections"]:
-            if self._is_publish_set(bucket_type=bucket_type):
-                self.upload_to_storage_bucket(
-                    datapackage_metadata=self._datapackage_metadata,
-                    conn=get_storage_connector(
-                        bucket_type=BucketType(bucket_type),
-                        bucket_name=self._datapackage_metadata.get("bucket"),
-                        settings=self._settings_store,
-                        encrypted=False,
-                    ),
-                    datapackage_key_prefix=self._datapackage_key_prefix(
-                        self._datapackage_metadata.get("name")
-                    ),
-                    resources=resources,
-                    csv_sep=csv_sep
-                )
+        print(self._datapackage_metadata["store"])
+
+        self.upload_to_storage_bucket(
+            datapackage_metadata=self._datapackage_metadata,
+            conn=get_storage_connector(
+                bucket_type=BucketType(bucket_type),
+                bucket_name=self._datapackage_metadata.get("bucket"),
+                settings=self._settings_store,
+                encrypted=False,
+            ),
+            datapackage_key_prefix=self._datapackage_key_prefix(
+                self._datapackage_metadata.get("id")
+            ),
+            resources=resources
+        )
 
     @staticmethod
     def upload_to_storage_bucket(
         datapackage_metadata,
         resources,
-        csv_sep: str,
         conn: BucketStorageConnector,
         datapackage_key_prefix: str,
     ) -> None:
@@ -61,22 +60,16 @@ class PackagePublisher:
             conn.write(
                 json.dumps(datapackage_metadata),
                 datapackage_key_prefix + "datapackage",
-                "json",
+                "json", datapackage_metadata
             )
-            for filename, df in resources.items():
-                csv_string = df.to_csv(sep=csv_sep, encoding="utf-8")
+            for filename, item in resources.items():
+                df = item['df']
+                sep = item['dsv_separator']
+                csv_string = df.to_csv(sep=sep, encoding="utf-8")
                 conn.write(
-                    csv_string, f"{datapackage_key_prefix}resources/{filename}", "csv"
+                    csv_string, f"{datapackage_key_prefix}resources/{filename}", "csv", datapackage_metadata
                 )
 
-    def _is_publish_set(self, bucket_type: str):
-        return (
-            self._settings_store["bucket_storage_connections"][bucket_type][
-                "publish"
-            ].lower()
-            == "true"
-        )
-
     @staticmethod
-    def _datapackage_key_prefix(datapackage_name: str):
-        return datapackage_name + "/"
+    def _datapackage_key_prefix(base: str):
+        return base + "/"
