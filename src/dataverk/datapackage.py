@@ -4,10 +4,8 @@ import datetime
 import uuid
 import hashlib
 import re
-from dataverk.utils import (
-    validators,
-    metadata_utils
-)
+from os import environ
+from dataverk.utils import validators
 from collections.abc import Mapping, Sequence
 from dataverk.connectors.bucket_connector_factory import BucketType
 
@@ -28,14 +26,14 @@ class Datapackage:
         try:
             bucket = metadata['bucket']
         except KeyError:
-            raise AttributeError(f"<bucket> is required to be set in datapackage metadata")
+            raise AttributeError(f"bucket is required to be set in datapackage metadata")
         else:
             validators.validate_bucket_name(bucket)
 
         try:
             metadata['title']
         except KeyError:
-            raise AttributeError(f"<title> is required to be set in datapackage metadata")
+            raise AttributeError(f"title is required to be set in datapackage metadata")
 
         # set defaults for store and repo when not specified
         metadata['store'] = metadata.get('store', BucketType.LOCAL)
@@ -120,8 +118,6 @@ class Datapackage:
         :param separator: field separator
         :return: None
         """
-
-
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
         self.resources[dataset_name] = self._get_schema(df=df, path=self.path, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator)
         self.resources[dataset_name]['df'] = df
@@ -195,16 +191,21 @@ class Datapackage:
         store = metadata['store']
         repo = metadata['repo']
         bucket = metadata['bucket']
-        id = metadata['id']
+        dp_id = metadata['id']
 
         if BucketType(store) is BucketType.NAIS:
-            path = f's3://{bucket}/{id}'
-            store_path = f's3://{bucket}/{id}'
+            try:
+                bucket_endpoint = environ["DATAVERK_BUCKET_ENDPOINT"]
+            except KeyError:
+                raise EnvironmentError(f'The environment variable DATAVERK_BUCKET_ENDPOINT must be set to'
+                                       f'the desired endpoint url for bucket storage')
+            path = f'{bucket_endpoint}/{bucket}/{dp_id}'
+            store_path = f'{bucket_endpoint}/{bucket}/{dp_id}'
         elif BucketType(store) is BucketType.GCS:
-            path = f'https://storage.googleapis.com/{bucket}/{id}'
-            store_path = f'gs://{bucket}/{id}'
+            path = f'https://storage.googleapis.com/{bucket}/{dp_id}'
+            store_path = f'gs://{bucket}/{dp_id}'
         else: #default is local storage
-            path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{id}'
-            store_path = f'{bucket}/{id}'
+            path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{dp_id}'
+            store_path = f'{bucket}/{dp_id}'
 
         return path, store_path

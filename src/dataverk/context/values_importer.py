@@ -72,9 +72,9 @@ class NullValuesImporter(ValuesImporter):
 
 def get_secrets_importer(settings: Mapping, env_store: Mapping) -> ValuesImporter:
     # TODO add null object support
-    if env_store.get("SECRETS_FROM_FILES") is not None:
+    if env_store.get("DATAVERK_SECRETS_FROM_FILES") is not None:
         return FileValuesImporter(resource=settings["secret_path"])
-    elif env_store.get("SECRETS_FROM_API") is not None:
+    elif env_store.get("DATAVERK_SECRETS_FROM_API") is not None:
         parsed_url = _parse_url(settings["remote_secrets_url"])
         return APIValuesImporter(resource=f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}",
                                  mount_point=settings["secrets_auth_method"],
