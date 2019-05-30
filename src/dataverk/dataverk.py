@@ -1,3 +1,5 @@
+import math
+
 import pandas as pd
 from collections.abc import Sequence
 
@@ -46,7 +48,7 @@ class Dataverk:
 
         return consumer.get_message_fields()
 
-    def read_kafka(self, topics: Sequence, strategy=None, fields=None, fetch_mode: str = "from_beginning", max_mesgs: int=None) -> pd.DataFrame:
+    def read_kafka(self, topics: Sequence, strategy=None, fields=None, fetch_mode: str = "from_beginning", max_mesgs: int=math.inf) -> pd.DataFrame:
         """ Read kafka topics and return pandas dataframe
 
         :param strategy: function or lambda passed to the kafka consumer for aggregating data on the fly
@@ -60,7 +62,7 @@ class Dataverk:
 
         return consumer.get_pandas_df(strategy=strategy, fields=fields, max_mesgs=max_mesgs)
 
-    def read_kafka_accumulated(self, topics: Sequence, strategy, fields=None, fetch_mode: str = "from_beginning", max_mesgs: int=None) -> pd.DataFrame:
+    def read_kafka_accumulated(self, topics: Sequence, strategy, fields=None, fetch_mode: str = "from_beginning", max_mesgs: int=math.inf) -> pd.DataFrame:
         """ Read kafka topics and return pandas dataframe
 
         :param fields: requested fields in kafka message

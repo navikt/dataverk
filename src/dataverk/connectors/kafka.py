@@ -1,3 +1,5 @@
+import math
+
 import pandas as pd
 import json
 import struct
@@ -38,7 +40,7 @@ class KafkaConnector(BaseConnector):
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
         self._schema_registry_url = self._safe_get_nested(settings=settings, keys=("kafka", "schema_registry"), default="http://localhost:8081")
 
-    def get_pandas_df(self, strategy=None, fields=None, max_mesgs=None):
+    def get_pandas_df(self, strategy=None, fields=None, max_mesgs=math.inf):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
 
         :return: pd.Dataframe containing kafka messages read. NB! Commits offset
@@ -180,9 +182,8 @@ class KafkaConnector(BaseConnector):
     def _is_requested_messages_read(self, message, max_mesgs, mesgs_read):
         if message.timestamp >= self._read_until_timestamp:
             return True
-        elif max_mesgs is not None:
-            if mesgs_read >= max_mesgs:
-                return True
+        elif mesgs_read >= max_mesgs:
+            return True
         return False
 
     def _commit_offsets(self):
