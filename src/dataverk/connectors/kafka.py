@@ -12,7 +12,7 @@ from collections.abc import Mapping, Sequence
 from enum import Enum
 from datetime import datetime
 from dataverk.connectors import BaseConnector
-from streamz import Stream
+import streamz
 
 
 class KafkaFetchMode(Enum):
@@ -47,7 +47,10 @@ class KafkaConnector(BaseConnector):
             records = self._read_kafka_raw(max_mesgs, fields)
         else:
             records = self._read_kafka_accumulated(max_mesgs, strategy)
-        df = pd.DataFrame.from_records(records)
+        try:
+            df = pd.DataFrame.from_records(records)
+        except ValueError:
+            df = pd.DataFrame.from_records(records, index=[0])
         self._commit_offsets()
 
         return df
@@ -93,10 +96,10 @@ class KafkaConnector(BaseConnector):
         return data
 
     def _read_kafka_accumulated(self, max_mesgs, strategy):
-        data = dict()
-        stream = Stream()
-
-        stream.accumulate(strategy, start=data)
+        data = {}
+        mesg_count = 0
+        stream = streamz.Stream()
+        acc = stream.accumulate(strategy, start=data)
 
         for message in self._consumer:
             try:
@@ -106,9 +109,9 @@ class KafkaConnector(BaseConnector):
                 mesg = json.loads(message.value.decode('utf8'))
             else:
                 mesg = self._decode_avro_message(schema=schema, message=message)
-
+            mesg_count += 1
             stream.emit(mesg)
-            if self._is_requested_messages_read(message, max_mesgs, len(data)):
+            if self._is_requested_messages_read(message, max_mesgs, mesg_count):
                 break
         return data
 
