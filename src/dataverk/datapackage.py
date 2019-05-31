@@ -200,7 +200,7 @@ class Datapackage:
                 raise EnvironmentError(f'The environment variable DATAVERK_BUCKET_ENDPOINT must be set to'
                                        f'the desired endpoint url for bucket storage')
             path = f'{bucket_endpoint}/{bucket}/{dp_id}'
-            store_path = f'{bucket_endpoint}/{bucket}/{dp_id}'
+            store_path = path
         elif BucketType(store) is BucketType.GCS:
             path = f'https://storage.googleapis.com/{bucket}/{dp_id}'
             store_path = f'gs://{bucket}/{dp_id}'
