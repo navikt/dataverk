@@ -62,19 +62,6 @@ class Dataverk:
 
         return consumer.get_pandas_df(strategy=strategy, fields=fields, max_mesgs=max_mesgs)
 
-    def read_kafka_accumulated(self, topics: Sequence, strategy, fields=None, fetch_mode: str = "from_beginning", max_mesgs: int=math.inf) -> pd.DataFrame:
-        """ Read kafka topics and return pandas dataframe
-
-        :param fields: requested fields in kafka message
-        :param max_mesgs: max number of kafka messages to read
-        :param topics: Sequence of topics to subscribe to
-        :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset), default last_committed_offset
-        :return: pandas.Dataframe
-        """
-        consumer = KafkaConnector(settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
-
-        return consumer.get_pandas_df(strategy=strategy, fields=fields, max_mesgs=max_mesgs)
-
     def to_sql(self, df, table, sink=None, schema=None, connector='Oracle', if_exists: str = 'replace'):
         """ Write records in dataframe to a SQL database table
 
