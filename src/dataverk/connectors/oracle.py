@@ -77,7 +77,17 @@ class OracleConnector(DBBaseConnector):
             cur.arraysize = arraysize
             cur.execute(query)
             col_names = [x[0] for x in cur.description]
-            results = cur.fetchall()
+
+            results = list()
+
+            for row in cur.fetchall():
+                new_row = list()
+                for elem in row:
+                    if type(elem) == cx_Oracle.LOB:
+                        new_row.append(elem.read())
+                    else:
+                        new_row.append(elem)
+                results.append(new_row)
 
             end_time = time.time()
 
