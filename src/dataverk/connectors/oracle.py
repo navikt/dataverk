@@ -77,7 +77,8 @@ class OracleConnector(DBBaseConnector):
             cur.arraysize = arraysize
             cur.execute(query)
             col_names = [x[0] for x in cur.description]
-            results = cur.fetchall()
+
+            results = self._fetch_all(cur)
 
             end_time = time.time()
 
@@ -119,3 +120,18 @@ class OracleConnector(DBBaseConnector):
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return error
+
+    def _fetch_all(self, cursor):
+        return [self._read_table_row(row) for row in cursor.fetchall()]
+
+    def _read_table_row(self, row):
+        new_row = []
+        for elem in row:
+            if self._is_oracle_LOB(elem):
+                new_row.append(elem.read())
+            else:
+                new_row.append(elem)
+        return new_row
+
+    def _is_oracle_LOB(self, elem):
+        return type(elem) == cx_Oracle.LOB
