@@ -122,14 +122,20 @@ class OracleConnector(DBBaseConnector):
             return error
 
     def _fetch_all(self, cursor):
-        results = list()
-
+        results = []
         for row in cursor.fetchall():
-            new_row = list()
-            for elem in row:
-                if type(elem) == cx_Oracle.LOB:
-                    new_row.append(elem.read())
-                else:
-                    new_row.append(elem)
+            new_row = self._read_table_row(row)
             results.append(new_row)
         return results
+
+    def _read_table_row(self, row):
+        new_row = []
+        for elem in row:
+            if self._is_oracle_LOB(elem):
+                new_row.append(elem.read())
+            else:
+                new_row.append(elem)
+        return new_row
+
+    def _is_oracle_LOB(self, elem):
+        return type(elem) == cx_Oracle.LOB
