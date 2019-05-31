@@ -122,11 +122,7 @@ class OracleConnector(DBBaseConnector):
             return error
 
     def _fetch_all(self, cursor):
-        results = []
-        for row in cursor.fetchall():
-            new_row = self._read_table_row(row)
-            results.append(new_row)
-        return results
+        return [self._read_table_row(row) for row in cursor.fetchall()]
 
     def _read_table_row(self, row):
         new_row = []
