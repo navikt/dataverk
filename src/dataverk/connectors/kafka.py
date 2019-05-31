@@ -1,3 +1,5 @@
+import math
+
 import pandas as pd
 import json
 import struct
@@ -12,7 +14,7 @@ from collections.abc import Mapping, Sequence
 from enum import Enum
 from datetime import datetime
 from dataverk.connectors import BaseConnector
-from streamz import Stream
+import streamz
 
 
 class KafkaFetchMode(Enum):
@@ -38,7 +40,7 @@ class KafkaConnector(BaseConnector):
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
         self._schema_registry_url = self._safe_get_nested(settings=settings, keys=("kafka", "schema_registry"), default="http://localhost:8081")
 
-    def get_pandas_df(self, strategy=None, fields=None, max_mesgs=None):
+    def get_pandas_df(self, strategy=None, fields=None, max_mesgs=math.inf):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
 
         :return: pd.Dataframe containing kafka messages read. NB! Commits offset
@@ -47,7 +49,10 @@ class KafkaConnector(BaseConnector):
             records = self._read_kafka_raw(max_mesgs, fields)
         else:
             records = self._read_kafka_accumulated(max_mesgs, strategy)
-        df = pd.DataFrame.from_records(records)
+        try:
+            df = pd.DataFrame.from_records(records)
+        except ValueError:
+            df = pd.DataFrame.from_records(records, index=[0])
         self._commit_offsets()
 
         return df
@@ -76,14 +81,7 @@ class KafkaConnector(BaseConnector):
         data = list()
 
         for message in self._consumer:
-            try:
-                schema_res = self._get_schema_from_registry(message=message)
-                schema = schema_res.json()["schema"]
-            except (AttributeError, KeyError):
-                mesg = json.loads(message.value.decode('utf8'))
-            else:
-                mesg = self._decode_avro_message(schema=schema, message=message)
-
+            mesg = self._parse_kafka_message(message)
             data.append(self._extract_requested_fields(mesg, fields))
             if self._is_requested_messages_read(message, max_mesgs, len(data)):
                 break
@@ -93,24 +91,27 @@ class KafkaConnector(BaseConnector):
         return data
 
     def _read_kafka_accumulated(self, max_mesgs, strategy):
-        data = dict()
-        stream = Stream()
-
-        stream.accumulate(strategy, start=data)
+        data = {}
+        mesg_count = 0
+        stream = streamz.Stream()
+        acc = stream.accumulate(strategy, start=data)
 
         for message in self._consumer:
-            try:
-                schema_res = self._get_schema_from_registry(message=message)
-                schema = schema_res.json()["schema"]
-            except (AttributeError, KeyError):
-                mesg = json.loads(message.value.decode('utf8'))
-            else:
-                mesg = self._decode_avro_message(schema=schema, message=message)
-
+            mesg = self._parse_kafka_message(message)
+            mesg_count += 1
             stream.emit(mesg)
-            if self._is_requested_messages_read(message, max_mesgs, len(data)):
+            if self._is_requested_messages_read(message, max_mesgs, mesg_count):
                 break
         return data
+
+    def _parse_kafka_message(self, message):
+        try:
+            schema_res = self._get_schema_from_registry(message=message)
+            schema = schema_res.json()["schema"]
+        except (AttributeError, KeyError):
+            return json.loads(message.value.decode('utf8'))
+        else:
+            return self._decode_avro_message(schema=schema, message=message)
 
     def _get_schema_from_registry(self, message):
         schema_id = struct.unpack(">L", message.value[1:5])[0]
@@ -177,9 +178,8 @@ class KafkaConnector(BaseConnector):
     def _is_requested_messages_read(self, message, max_mesgs, mesgs_read):
         if message.timestamp >= self._read_until_timestamp:
             return True
-        elif max_mesgs is not None:
-            if mesgs_read >= max_mesgs:
-                return True
+        elif mesgs_read >= max_mesgs:
+            return True
         return False
 
     def _commit_offsets(self):
