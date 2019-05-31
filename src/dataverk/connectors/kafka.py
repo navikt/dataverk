@@ -81,14 +81,7 @@ class KafkaConnector(BaseConnector):
         data = list()
 
         for message in self._consumer:
-            try:
-                schema_res = self._get_schema_from_registry(message=message)
-                schema = schema_res.json()["schema"]
-            except (AttributeError, KeyError):
-                mesg = json.loads(message.value.decode('utf8'))
-            else:
-                mesg = self._decode_avro_message(schema=schema, message=message)
-
+            mesg = self._parse_kafka_message(message)
             data.append(self._extract_requested_fields(mesg, fields))
             if self._is_requested_messages_read(message, max_mesgs, len(data)):
                 break
@@ -104,18 +97,21 @@ class KafkaConnector(BaseConnector):
         acc = stream.accumulate(strategy, start=data)
 
         for message in self._consumer:
-            try:
-                schema_res = self._get_schema_from_registry(message=message)
-                schema = schema_res.json()["schema"]
-            except (AttributeError, KeyError):
-                mesg = json.loads(message.value.decode('utf8'))
-            else:
-                mesg = self._decode_avro_message(schema=schema, message=message)
+            mesg = self._parse_kafka_message(message)
             mesg_count += 1
             stream.emit(mesg)
             if self._is_requested_messages_read(message, max_mesgs, mesg_count):
                 break
         return data
+
+    def _parse_kafka_message(self, message):
+        try:
+            schema_res = self._get_schema_from_registry(message=message)
+            schema = schema_res.json()["schema"]
+        except (AttributeError, KeyError):
+            return json.loads(message.value.decode('utf8'))
+        else:
+            return self._decode_avro_message(schema=schema, message=message)
 
     def _get_schema_from_registry(self, message):
         schema_id = struct.unpack(">L", message.value[1:5])[0]
