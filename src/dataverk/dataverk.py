@@ -58,8 +58,7 @@ class Dataverk:
         :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset), default last_committed_offset
         :return: pandas.Dataframe
         """
-        consumer = kafka.get_kafka_consumer(settings=settings, topics=topics, fetch_mode=fetch_mode)
-
+        consumer = kafka.get_kafka_consumer(settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
         conn = KafkaConnector(consumer=consumer, settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
 
         return conn.get_pandas_df(strategy=strategy, fields=fields, max_mesgs=max_mesgs)
