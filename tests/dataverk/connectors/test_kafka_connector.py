@@ -52,6 +52,6 @@ class MethodsReturnValues(Base):
         res = self.conn._is_requested_messages_read(message=message, max_mesgs=10, mesgs_read=10)
         self.assertTrue(res)
 
-        self.conn._read_until_timestamp = self.conn._get_current_timestamp_in_ms()
+        self.conn._read_until_timestamp = self.conn._get_current_timestamp_in_ms() + 1
         res = self.conn._is_requested_messages_read(message=message, max_mesgs=math.inf, mesgs_read=1)
         self.assertFalse(res)
