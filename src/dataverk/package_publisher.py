@@ -5,6 +5,7 @@ from dataverk.connectors.bucket_connector_factory import (
     get_storage_connector,
     BucketType,
 )
+from dataverk.utils import file_functions
 
 
 class PackagePublisher:
@@ -63,6 +64,7 @@ class PackagePublisher:
                 "json", datapackage_metadata
             )
             for filename, item in resources.items():
+                filename = file_functions.remove_whitespace(filename)
                 df = item['df']
                 sep = item['dsv_separator']
                 csv_string = df.to_csv(sep=sep, encoding="utf-8")
