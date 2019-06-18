@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from dataverk.context import EnvStore
 
 from dataverk import DataverkContext
-from dataverk.connectors import KafkaConnector
+from dataverk.connectors import KafkaConnector, JSONStatConnector
 from dataverk.connectors import db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
@@ -61,6 +61,16 @@ class Dataverk:
         consumer = KafkaConnector(settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
 
         return consumer.get_pandas_df(strategy=strategy, fields=fields, max_mesgs=max_mesgs)
+
+    def read_json_stat(self, url, params=None):
+        """ Read kafka topics and return pandas dataframe
+
+        :param url: str: path to resource
+        :param params: optional request parameters
+        :return: pandas.Dataframe
+        """
+        conn = JSONStatConnector()
+        return conn.get_pandas_df(url, params=params)
 
     def to_sql(self, df, table, sink=None, schema=None, connector='Oracle', if_exists: str = 'replace'):
         """ Write records in dataframe to a SQL database table
