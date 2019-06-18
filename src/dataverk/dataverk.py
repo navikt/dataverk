@@ -63,7 +63,7 @@ class Dataverk:
         return consumer.get_pandas_df(strategy=strategy, fields=fields, max_mesgs=max_mesgs)
 
     def read_json_stat(self, url, params=None):
-        """ Read kafka topics and return pandas dataframe
+        """ Read json-stat return pandas dataframe
 
         :param url: str: path to resource
         :param params: optional request parameters
