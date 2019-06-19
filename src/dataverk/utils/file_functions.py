@@ -53,6 +53,10 @@ def json_to_dict(path: Path):
     return json.loads(file_string)
 
 
+def remove_whitespace(filename):
+    return filename.replace(' ', '_')
+
+
 def _json_validate_params(file_path: Path):
     if not isinstance(file_path, Path):
         raise TypeError(f"settings_file_path: {file_path} should be a Path object")
