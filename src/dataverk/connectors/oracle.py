@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from urllib import parse
 from collections.abc import Mapping
 from dataverk.connectors.abc.db_base import DBBaseConnector
+from intake_sql import SQLSourceManualPartition
 
 
 class OracleConnector(DBBaseConnector):
@@ -56,6 +57,12 @@ class OracleConnector(DBBaseConnector):
                 'service_name': res.path[1:]
                }
 
+    def get_dask_df(self, query, where_values, index_col):
+        conn = self._get_db_conn()
+        s = SQLSourceManualPartition(conn, sql_expr=query, where_values=where_values,
+                                     sql_kwargs=dict(index_col=index_col))
+        return s.to_dask()
+
     def get_pandas_df(self, query, arraysize=100000):
         start_time = time.time()
 
@@ -66,12 +73,7 @@ class OracleConnector(DBBaseConnector):
         self.log(f'Establishing connection to Oracle database: {self._source}')
 
         try: 
-            conn = cx_Oracle.connect(
-                user=self._db['user'],
-                password=self._db['password'],
-                dsn=self.dsn,
-                encoding='utf-8'
-            ) 
+            conn = self._get_db_conn()
 
             cur = conn.cursor()
             cur.arraysize = arraysize
@@ -95,6 +97,15 @@ class OracleConnector(DBBaseConnector):
 
         except cx_Oracle.DatabaseError as dberror:
             self.log(dberror)
+
+    def _get_db_conn(self):
+        return cx_Oracle.connect(
+                user=self._db['user'],
+                password=self._db['password'],
+                dsn=self.dsn,
+                encoding='utf-8'
+            )
+
 
     def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists='replace'):
 
