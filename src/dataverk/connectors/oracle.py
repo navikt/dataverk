@@ -121,10 +121,10 @@ class OracleConnector(DBBaseConnector):
                }
 
     @staticmethod
-    def _get_db_conn(db_conn, dsn):
+    def _get_db_conn(parsed_conn_string, dsn):
         return cx_Oracle.connect(
-                user=db_conn['user'],
-                password=db_conn['password'],
+                user=parsed_conn_string['user'],
+                password=parsed_conn_string['password'],
                 dsn=dsn,
                 encoding='utf-8'
             )
