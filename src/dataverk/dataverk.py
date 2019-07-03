@@ -1,5 +1,6 @@
 import math
 import pandas as pd
+import dask.dataframe as dd
 from collections.abc import Sequence
 from dataverk.context import EnvStore
 from dataverk import DataverkContext
@@ -34,7 +35,7 @@ class Dataverk:
 
         return conn.get_pandas_df(query=query)
 
-    def read_sql_dask(self, source, sql, where_values, connector='Oracle', index_col='index'):
+    def read_sql_dask(self, source, sql, where_values, connector='Oracle', index_col='index') -> dd.DataFrame:
         """ Read dask dataframe from SQL database
 
         :param source: str: database source
