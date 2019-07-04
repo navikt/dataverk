@@ -67,9 +67,9 @@ class PackagePublisher:
                 filename = file_functions.remove_whitespace(filename)
                 df = item['df']
                 sep = item['dsv_separator']
-                csv_string = df.to_csv(sep=sep, encoding="utf-8")
+                csv_string = df.to_csv(sep=sep, encoding="utf-8", compression='gzip')
                 conn.write(
-                    csv_string, f"{datapackage_key_prefix}resources/{filename}", "csv", datapackage_metadata
+                    csv_string, f"{datapackage_key_prefix}resources/{filename}", "csv.gz", datapackage_metadata
                 )
 
     @staticmethod
