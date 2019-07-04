@@ -1,6 +1,8 @@
 import time
 import cx_Oracle
 import pandas as pd
+import dask
+import dask.dataframe as dd
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from urllib import parse
@@ -29,49 +31,25 @@ class OracleConnector(DBBaseConnector):
 
         self._settings = settings_store
         self._source = source
-        self._df = None
-        self._dsn = None
     
-        if source not in settings_store["db_connection_strings"]:
+        if self._source not in settings_store["db_connection_strings"]:
             raise ValueError(f'Database connection string not found in settings file. '
-                             f'Unable to establish connection to database: {source}')
+                             f'Unable to establish connection to database: {self._source}')
 
-        self._db = self._parse_connection_string(settings_store["db_connection_strings"][source])
-
-        if 'service_name' in self._db:
-            self.dsn = cx_Oracle.makedsn(host=self._db['host'], port=self._db['port'], service_name=self._db['service_name'])
-        elif 'sid' in self._db:
-            self.dsn = cx_Oracle.makedsn(host=self._db['host'], port=self._db['port'], sid=self._db['sid'])
-        else:
-            raise ValueError(f'Invalid connection description. Neither "service name" nor "sid" specified for {self._source}')
-
-    def _parse_connection_string(self, connection_string):
-        res = parse.urlparse(connection_string)
-
-        return {
-                'user': res.username,
-                'password': res.password,
-                'host': res.hostname,
-                'port': res.port,
-                'service_name': res.path[1:]
-               }
+    def get_dask_df(self, query, where_values) -> dd.DataFrame:
+        parsed_conn_string = self._parse_connection_string(self._settings["db_connection_strings"][self._source])
+        return self._read_sql_query_dask(parsed_conn_string, query, where_values)
 
     def get_pandas_df(self, query, arraysize=100000):
         start_time = time.time()
 
-        if self._df:
-            self.log(f'{len(self._df)} records returned from cached dataframe. Query: {query}')
-            return self._df
-
         self.log(f'Establishing connection to Oracle database: {self._source}')
 
+        parsed_conn_string = self._parse_connection_string(self._settings["db_connection_strings"][self._source])
+        dsn = cx_Oracle.makedsn(host=parsed_conn_string['host'], port=parsed_conn_string['port'], service_name=parsed_conn_string['service_name'])
+
         try: 
-            conn = cx_Oracle.connect(
-                user=self._db['user'],
-                password=self._db['password'],
-                dsn=self.dsn,
-                encoding='utf-8'
-            ) 
+            conn = self._get_db_conn(parsed_conn_string, dsn)
 
             cur = conn.cursor()
             cur.arraysize = arraysize
@@ -89,23 +67,20 @@ class OracleConnector(DBBaseConnector):
 
             self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {query}')
 
-            self._df = df
-
             return df
 
         except cx_Oracle.DatabaseError as dberror:
             self.log(dberror)
 
     def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists='replace'):
+        parsed_conn_string = self._parse_connection_string(self._settings["db_connection_strings"][self._source])
 
-        if 'service_name' in self._db:
-            engine = create_engine(f"oracle+cx_oracle://{self._db['user']}:{self._db['password']}@"
-                                   f"{self._db['host']}:{self._db['port']}/?service_name={self._db['service_name']}")
-        elif 'sid' in self._db:
-            engine = create_engine(f"oracle+cx_oracle://{self._db['user']}:{self._db['password']}@"
-                                   f"{self._db['host']}:{self._db['port']}/{self._db['sid']}")
+        if 'service_name' in parsed_conn_string:
+            engine = create_engine(f"oracle+cx_oracle://{parsed_conn_string['user']}:{parsed_conn_string['password']}@"
+                                   f"{parsed_conn_string['host']}:{parsed_conn_string['port']}/"
+                                   f"?service_name={parsed_conn_string['service_name']}")
         else:
-            raise ValueError(f'Neither "service_name" nor "sid" found in database connection string')
+            raise ValueError(f'"service_name" not found database connection string')
 
         if schema is None:
             schema = "dataverk"
@@ -120,6 +95,39 @@ class OracleConnector(DBBaseConnector):
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return error
+
+    def _read_sql_query_dask(self, parsed_conn_string, sql, where_values):
+        dload = dask.delayed(self._load_df_part)
+        parts = [dload(sql, parsed_conn_string, where) for where in where_values]
+        return dd.from_delayed(parts)
+
+    def _load_df_part(self, sql, parsed_conn_string, where):
+        dsn = cx_Oracle.makedsn(host=parsed_conn_string['host'], port=parsed_conn_string['port'],
+                                service_name=parsed_conn_string['service_name'])
+        db_conn = self._get_db_conn(parsed_conn_string, dsn)
+        partial_sql = f"{sql} {where}"
+        return pd.read_sql(partial_sql, db_conn)
+
+    @staticmethod
+    def _parse_connection_string(connection_string):
+        res = parse.urlparse(connection_string)
+
+        return {
+                'user': res.username,
+                'password': res.password,
+                'host': res.hostname,
+                'port': res.port,
+                'service_name': res.path[1:]
+               }
+
+    @staticmethod
+    def _get_db_conn(parsed_conn_string, dsn):
+        return cx_Oracle.connect(
+                user=parsed_conn_string['user'],
+                password=parsed_conn_string['password'],
+                dsn=dsn,
+                encoding='utf-8'
+            )
 
     def _fetch_all(self, cursor):
         return [self._read_table_row(row) for row in cursor.fetchall()]
