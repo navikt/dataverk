@@ -35,7 +35,7 @@ class Dataverk:
 
         return conn.get_pandas_df(query=query)
 
-    def read_sql_dask(self, source, sql, where_values, connector='Oracle', index_col='index') -> dd.DataFrame:
+    def read_sql_dask(self, source, sql, where_values, connector='Oracle') -> dd.DataFrame:
         """ Read dask dataframe from SQL database
 
         :param source: str: database source
@@ -46,7 +46,7 @@ class Dataverk:
         """
         conn = db_connector_factory.get_db_connector(settings_store=self.context.settings, connector=connector, source=source)
 
-        return conn.get_dask_df(query=sql, where_values=where_values, index_col=index_col)
+        return conn.get_dask_df(query=sql, where_values=where_values)
 
     def read_kafka_message_fields(self, topics: Sequence, fetch_mode: str = "from_beginning") -> pd.DataFrame:
         """ Read single kafka message from topic and return list of message fields

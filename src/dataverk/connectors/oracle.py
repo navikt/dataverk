@@ -36,7 +36,7 @@ class OracleConnector(DBBaseConnector):
             raise ValueError(f'Database connection string not found in settings file. '
                              f'Unable to establish connection to database: {self._source}')
 
-    def get_dask_df(self, query, where_values, index_col) -> dd.DataFrame:
+    def get_dask_df(self, query, where_values) -> dd.DataFrame:
         parsed_conn_string = self._parse_connection_string(self._settings["db_connection_strings"][self._source])
         return self._read_sql_query_dask(parsed_conn_string, query, where_values)
 
