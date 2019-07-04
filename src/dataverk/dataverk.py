@@ -11,7 +11,7 @@ from dataverk.connectors import db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from dataverk.package_publisher import PackagePublisher
-from dataverk.utils import anonymize
+from dataverk.utils import anonymization
 
 
 class Dataverk:
@@ -62,16 +62,6 @@ class Dataverk:
         consumer = KafkaConnector(settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
 
         return consumer.get_pandas_df(strategy=strategy, fields=fields, max_mesgs=max_mesgs)
-
-    def anonymize_replace(self, df, columns, lower_limit):
-        """ Replace values in columns with NaN when the value is less than lower_limit
-
-        :param df: pandas Dataframe
-        :param columns: list of columns to apply value replacement
-        :param lower_limit: lower limit for value replacement in dataset column
-        :return: anonymized pandas Dataframe
-        """
-        return anonymize.replace(df, columns, lower_limit)
 
     def to_sql(self, df, table, sink=None, schema=None, connector='Oracle', if_exists: str = 'replace'):
         """ Write records in dataframe to a SQL database table
