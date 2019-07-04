@@ -11,7 +11,6 @@ from dataverk.connectors import db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from dataverk.package_publisher import PackagePublisher
-from dataverk.utils import anonymization
 
 
 class Dataverk:
