@@ -7,7 +7,7 @@ class BucketStorageConnector(BaseConnector, ABC):
     def __init__(self, encrypted=True):
         super().__init__()
 
-    def write(self, source_string: str, destination_blob_name: str, fmt: str, metadata: dict={}):
+    def write(self, data, destination_blob_name: str, fmt: str, metadata: dict={}):
         raise NotImplementedError(f'Abstract method. Needs to be implemented in subclass')
 
     def read(self, blob_name: str):

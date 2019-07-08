@@ -1,4 +1,6 @@
+import io
 import json
+import gzip
 from collections import Mapping
 from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
 from dataverk.connectors.bucket_connector_factory import (
@@ -67,10 +69,12 @@ class PackagePublisher:
                 filename = file_functions.remove_whitespace(filename)
                 df = item['df']
                 sep = item['dsv_separator']
-                csv_string = df.to_csv(sep=sep, encoding="utf-8", compression='gzip')
-                conn.write(
-                    csv_string, f"{datapackage_key_prefix}resources/{filename}", "csv.gz", datapackage_metadata
-                )
+                buff = io.BytesIO()
+                with gzip.GzipFile(fileobj=buff, mode='w') as zipped_f:
+                    df.to_csv(io.TextIOWrapper(zipped_f, encoding="utf-8"), sep=sep)
+                conn.write(data=buff.getvalue(),
+                           destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
+                           fmt="csv.gz")
 
     @staticmethod
     def _datapackage_key_prefix(base: str):
