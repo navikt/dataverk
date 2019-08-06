@@ -51,9 +51,8 @@ class PackagePublisher:
     ) -> None:
         """ Publish data to bucket storage.
 
-        :param csv_sep: csv separator
         :param resources: datapackage data to be published
-        :param datapackage_metadata: metadata assosciated with the datapackage
+        :param datapackage_metadata: metadata associated with the datapackage
         :param conn: BucketStorageConnector object: the connection object for chosen bucket storage.
                      If no bucket storage connector is configured (conn=None) no resources shall be published to bucket storage
         :param datapackage_key_prefix: str: prefix for datapackage key

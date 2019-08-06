@@ -20,15 +20,14 @@ class GoogleStorageConnector(BucketStorageConnector):
         gcp_credentials = self._gcp_credentials(settings)
   
         try:
-            storage_client = storage.Client(credentials = gcp_credentials)
+            storage_client = storage.Client(credentials=gcp_credentials)
             self.bucket = self._get_bucket(storage_client, bucket_name)
             # Reload fetches the current ACL from Cloud Storage.
             self.bucket.acl.reload()
         except Exception as ex:
             print(ex)
 
-        
-    def write(self, source_string: str, destination_blob_name: str, fmt: str, metadata: dict = {}):
+    def write(self, data: str, destination_blob_name: str, fmt: str, metadata: dict = {}):
         """Write string to a bucket."""
         try:
 
@@ -40,8 +39,8 @@ class GoogleStorageConnector(BucketStorageConnector):
             blob.cache_control = 'no-cache'
             #blob.content_type = 'text/plain'
             blob.metadata = metadata
-            blob.upload_from_string(source_string)
-            if metadata.get('accessRights','').lower() == 'open':
+            blob.upload_from_string(data)
+            if metadata.get('accessRights', '').lower() == 'open':
                 blob.make_public()
 
             self.log(f'{self.__class__}: String (format: {fmt}) written to {blob.public_url}')

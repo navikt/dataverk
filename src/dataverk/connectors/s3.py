@@ -9,7 +9,7 @@ class S3Connector(BaseConnector):
         self.s3_api_url = s3_endpoint
         self.bucket_name = bucket_name
 
-    def write(self, data, destination_blob_name: str, fmt: str="csv.gz", metadata: dict={}):
+    def write(self, data, destination_blob_name: str, fmt: str="csv", metadata: dict={}):
         res = requests.put(url=f'{self.s3_api_url}/{self.bucket_name}/{destination_blob_name}.{fmt}',
                            data=data)
 
