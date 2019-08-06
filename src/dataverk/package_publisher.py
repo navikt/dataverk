@@ -68,6 +68,7 @@ class PackagePublisher:
                 filename = file_functions.remove_whitespace(filename)
                 df = item['df']
                 sep = item['dsv_separator']
+
                 buff = io.BytesIO()
                 with gzip.GzipFile(fileobj=buff, mode='w') as zipped_f:
                     df.to_csv(io.TextIOWrapper(zipped_f, encoding="utf-8"), sep=sep)

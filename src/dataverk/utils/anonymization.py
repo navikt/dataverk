@@ -1,4 +1,7 @@
+import json
+from os import environ
 import pandas as pd
+import requests
 
 
 def anonymize_replace(df, columns, lower_limit) -> pd.DataFrame:
@@ -25,3 +28,22 @@ def _replace_value(value, limit):
         return None
     else:
         return value
+
+
+def name_replace(df, columns) -> pd.DataFrame:
+    """ Replaces names in columns
+
+    :param df: pandas DataFrame
+    :param columns: list of columns to apply name replacement
+    :return: pandas DataFrame
+    """
+    try:
+        url = environ["DATAVERK_NAME_REPLACE_API"]
+    except KeyError:
+        raise EnvironmentError("DATAVERK_NAME_REPLACE_API env is not set")
+
+    for column in columns:
+        res = requests.post(url, data={'values': json.dumps(df[column].tolist())})
+        filtered_list = json.loads(res.text)['result']
+        df[column] = pd.Series(filtered_list)
+    return df
