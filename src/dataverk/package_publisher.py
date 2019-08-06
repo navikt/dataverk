@@ -69,10 +69,13 @@ class PackagePublisher:
                 df = item['df']
                 sep = item['dsv_separator']
 
-                buff = io.BytesIO()
-                with gzip.GzipFile(fileobj=buff, mode='w') as zipped_f:
-                    df.to_csv(io.TextIOWrapper(zipped_f, encoding="utf-8"), sep=sep)
-                conn.write(data=buff.getvalue(),
+                data_buff = io.StringIO()
+                df.to_csv(data_buff, sep=sep)
+
+                gz_buff = io.BytesIO()
+                with gzip.GzipFile(fileobj=gz_buff, mode='w') as zipped_f:
+                    zipped_f.write(bytes(data_buff.getvalue(), encoding="utf-8"))
+                conn.write(data=gz_buff.getvalue(),
                            destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
                            fmt="csv.gz")
 
