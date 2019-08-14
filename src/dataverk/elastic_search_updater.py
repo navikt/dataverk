@@ -21,21 +21,6 @@ class ElasticSearchUpdater:
 
         try:
             id = self.datapackage_json["id"]
-           """  js = {
-                'id': self.datapackage_json["id"],
-                'title': self.datapackage_json.get('title', 'missing title'),
-                'updated': datetime.now().isoformat(),
-                'keywords': self.datapackage_json.get('keywords', []),
-                'accessRights': self.datapackage_json.get('accessRights', ''),
-                'description': self.datapackage_json.get('description', ''),
-                'publisher': self.datapackage_json.get('publisher', ''),
-                'author': self.datapackage_json.get('author', ''),
-                'package': self.datapackage_json.get('package', ''),
-                'geo': self.datapackage_json.get('geo', []),
-                'provenance': self.datapackage_json.get('provenance', ''),
-                'uri': f'{self.datapackage_json.get("path", "")}/datapackage.json'
-            } """
-
             title = self.datapackage_json.get('title', 'title missing')
             desc = self.datapackage_json.get('description', 'description missing')
             js = {
