@@ -21,7 +21,7 @@ class ElasticSearchUpdater:
 
         try:
             id = self.datapackage_json["id"]
-            js = {
+           """  js = {
                 'id': self.datapackage_json["id"],
                 'title': self.datapackage_json.get('title', 'missing title'),
                 'updated': datetime.now().isoformat(),
@@ -34,7 +34,42 @@ class ElasticSearchUpdater:
                 'geo': self.datapackage_json.get('geo', []),
                 'provenance': self.datapackage_json.get('provenance', ''),
                 'uri': f'{self.datapackage_json.get("path", "")}/datapackage.json'
+            } """
+
+            title = self.datapackage_json.get('title', 'title missing')
+            desc = self.datapackage_json.get('description', 'description missing')
+            js = {
+                "id": id,
+                "type": self.datapackage_json.get("type", ""),
+                "suggest": title + ' ' + desc,
+                "description": desc,
+                "title": title,
+                "format": self.datapackage_json.get("format", ""),
+                "category": self.datapackage_json.get("category", ""),
+                "provenance": self.datapackage_json.get("provenance", ""),
+                "master": self.datapackage_json.get("master", ""),
+                "purpose": self.datapackage_json.get("purpose", ""),
+                "legalbasis": self.datapackage_json.get("legalbasis", ""),
+                "pii": self.datapackage_json.get("pii", ""),
+                "issued": self.datapackage_json.get("issued", datetime.now().isoformat()),
+                "modified": datetime.now().isoformat(),
+                "modified_by": self.datapackage_json.get("modified_by", ""),
+                "created": self.datapackage_json.get("created", datetime.now().isoformat()),
+                "created_by": self.datapackage_json.get("created_by", ""),
+                "policy": self.datapackage_json.get("policy", [{"legal_basis": "", "purpose": ""}]),
+                "distribution": self.datapackage_json.get("distribution", [{"id": "", "format": "", "url": ""}]),
+                "keywords": self.datapackage_json.get("keywords", []),
+                "theme": self.datapackage_json.get("theme", [""]),
+                "accessRights": self.datapackage_json.get("accessRights", [""]),
+                "publisher": self.datapackage_json.get("publisher", [""]),
+                "spatial": self.datapackage_json.get("spatial", [""]),
+                "geo": self.datapackage_json.get("geo", []),
+                "url": self.datapackage_json.get("url", ""),
+                "repo": self.datapackage_json.get("repo", ""),
+                "ispartof": self.datapackage_json.get("ispartof", []),
+                "haspart": self.datapackage_json.get("haspart", []),
             }
+
             self._es_index.write(id, js)
         except urllib3.exceptions.LocationValueError as err:
             print(f'write to elastic search failed, host_uri could not be resolved')
