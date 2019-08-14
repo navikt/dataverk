@@ -17,8 +17,8 @@ class TestPackagePublisher(TestCase):
 
     def test_publish(self):
         pp = PackagePublisher(settings_store=MOCK_SETTINGS, datapackage_metadata=MOCK_METADATA, env_store=MOCK_ENVSTORE)
-        pp.publish(["resource1, resource2"], csv_sep=";")
+        pp.publish(["resource1, resource2"])
 
     def test_upload_to_storage_bucket(self):
         pp = PackagePublisher(settings_store=MOCK_SETTINGS, datapackage_metadata=MOCK_METADATA, env_store=MOCK_ENVSTORE)
-        pp.upload_to_storage_bucket(MOCK_METADATA, [], csv_sep=";", conn=None, datapackage_key_prefix="prefix")
+        pp.upload_to_storage_bucket(MOCK_METADATA, [], conn=None, datapackage_key_prefix="prefix")

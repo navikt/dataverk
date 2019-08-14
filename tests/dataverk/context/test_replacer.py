@@ -59,7 +59,7 @@ class MethodsReturnValues(Base):
     """
 
     def test_get_filled_mapping(self):
-        env_store = {"SECRETS_FROM_FILES": "True"}
+        env_store = {"DATAVERK_SECRETS_FROM_FILES": "True"}
         secrets_importer = get_secrets_importer(self.settings, env_store)
 
         replacer = Replacer(secrets_importer.import_values())

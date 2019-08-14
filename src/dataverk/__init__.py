@@ -2,11 +2,12 @@ from dataverk import utils
 from dataverk.dataverk_context import DataverkContext
 from dataverk.dataverk import Dataverk
 from dataverk.dataverk import Dataverk as Client
-from pathlib import Path
+from dataverk.utils import anonymization
 from dataverk.datapackage import Datapackage
 
 
-__all__ = ['connectors',
+__all__ = ['anonymization',
+           'connectors',
            'utils',
            'Datapackage',
            'Client',
