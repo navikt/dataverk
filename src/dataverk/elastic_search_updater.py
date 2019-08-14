@@ -49,7 +49,7 @@ class ElasticSearchUpdater:
                 "publisher": self.datapackage_json.get("publisher", []),
                 "spatial": self.datapackage_json.get("spatial", []),
                 "geo": self.datapackage_json.get("geo", []),
-                "url": self.datapackage_json.get("url", ""),
+                "url": self.datapackage_json.get("path", ""),
                 "repo": self.datapackage_json.get("repo", ""),
                 "ispartof": self.datapackage_json.get("ispartof", []),
                 "haspart": self.datapackage_json.get("haspart", []),
