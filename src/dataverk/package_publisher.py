@@ -7,7 +7,6 @@ from dataverk.connectors.bucket_connector_factory import (
     get_storage_connector,
     BucketType,
 )
-from dataverk.utils import file_functions
 
 
 class PackagePublisher:
