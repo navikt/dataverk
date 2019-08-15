@@ -5,7 +5,7 @@ import uuid
 import hashlib
 import re
 from os import environ
-from dataverk.utils import validators
+from dataverk.utils import validators, file_functions
 from collections.abc import Mapping, Sequence
 from dataverk.connectors.bucket_connector_factory import BucketType
 
@@ -119,6 +119,7 @@ class Datapackage:
         :return: None
         """
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
+        dataset_name = file_functions.remove_whitespace(dataset_name)
         self.resources[dataset_name] = self._get_schema(df=df, path=self.path, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator)
         self.resources[dataset_name]['df'] = df
         self._datapackage_metadata["datasets"][dataset_name] = dataset_description
