@@ -1,4 +1,6 @@
+import io
 import json
+import gzip
 from collections import Mapping
 from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
 from dataverk.connectors.bucket_connector_factory import (
@@ -49,9 +51,8 @@ class PackagePublisher:
     ) -> None:
         """ Publish data to bucket storage.
 
-        :param csv_sep: csv separator
         :param resources: datapackage data to be published
-        :param datapackage_metadata: metadata assosciated with the datapackage
+        :param datapackage_metadata: metadata associated with the datapackage
         :param conn: BucketStorageConnector object: the connection object for chosen bucket storage.
                      If no bucket storage connector is configured (conn=None) no resources shall be published to bucket storage
         :param datapackage_key_prefix: str: prefix for datapackage key
@@ -67,10 +68,16 @@ class PackagePublisher:
                 filename = file_functions.remove_whitespace(filename)
                 df = item['df']
                 sep = item['dsv_separator']
-                csv_string = df.to_csv(sep=sep, encoding="utf-8")
-                conn.write(
-                    csv_string, f"{datapackage_key_prefix}resources/{filename}", "csv", datapackage_metadata
-                )
+
+                data_buff = io.StringIO()
+                df.to_csv(data_buff, sep=sep)
+
+                gz_buff = io.BytesIO()
+                with gzip.GzipFile(fileobj=gz_buff, mode='w') as zipped_f:
+                    zipped_f.write(bytes(data_buff.getvalue(), encoding="utf-8"))
+                conn.write(data=gz_buff.getvalue(),
+                           destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
+                           fmt="csv.gz")
 
     @staticmethod
     def _datapackage_key_prefix(base: str):

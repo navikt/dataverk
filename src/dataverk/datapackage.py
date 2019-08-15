@@ -108,7 +108,7 @@ class Datapackage:
             'schema': {'fields': fields}
         }
 
-    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="", format="csv", dsv_separator=","):
+    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="", format="csv.gz", dsv_separator=","):
         """
         Adds a provided DataFrame as a resource in the Datapackage object with provided name and description.
 
