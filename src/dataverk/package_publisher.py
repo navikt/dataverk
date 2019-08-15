@@ -65,7 +65,6 @@ class PackagePublisher:
                 "json", datapackage_metadata
             )
             for filename, item in resources.items():
-                filename = file_functions.remove_whitespace(filename)
                 df = item['df']
                 sep = item['dsv_separator']
 
