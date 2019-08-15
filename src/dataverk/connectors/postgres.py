@@ -35,7 +35,7 @@ class PostgresConnector(DBBaseConnector):
 
         try: 
             #adapter = PostgresAdapter(self.db, query = sql, self.pg_kwargs)
-            df = pd.read_sql_query(query, self.engine)
+            df = pd.read_sql_query(query, engine)
             end_time = time.time()
         
             self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {query}')

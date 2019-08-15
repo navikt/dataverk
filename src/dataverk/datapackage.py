@@ -77,8 +77,8 @@ class Datapackage:
         return self._datapackage_metadata.get("path")
 
     @property
-    def uri(self):
-        return self._datapackage_metadata.get("uri")
+    def url(self):
+        return self._datapackage_metadata.get("url")
 
     def _get_schema(self, df, path, dataset_name, format, dsv_separator):
         fields = []
