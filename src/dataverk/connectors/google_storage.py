@@ -40,7 +40,7 @@ class GoogleStorageConnector(BucketStorageConnector):
             #blob.content_type = 'text/plain'
             blob.metadata = metadata
             blob.upload_from_string(data)
-            if metadata.get('accessRights', '').lower() == 'open':
+            if metadata.get('accessRights', '').lower() in ['open','public'] :
                 blob.make_public()
 
             self.log(f'{self.__class__}: String (format: {fmt}) written to {blob.public_url}')

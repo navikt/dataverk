@@ -25,8 +25,6 @@ class PackagePublisher:
         """
         bucket_type = self._datapackage_metadata.get("store")
 
-        print(self._datapackage_metadata["store"])
-
         self.upload_to_storage_bucket(
             datapackage_metadata=self._datapackage_metadata,
             conn=get_storage_connector(
@@ -65,17 +63,37 @@ class PackagePublisher:
             )
             for filename, item in resources.items():
                 df = item['df']
-                sep = item['dsv_separator']
 
-                data_buff = io.StringIO()
-                df.to_csv(data_buff, sep=sep)
+                if item['format'] == "csv.gz":
+                    sep = item['dsv_separator']
 
-                gz_buff = io.BytesIO()
-                with gzip.GzipFile(fileobj=gz_buff, mode='w') as zipped_f:
-                    zipped_f.write(bytes(data_buff.getvalue(), encoding="utf-8"))
-                conn.write(data=gz_buff.getvalue(),
-                           destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
-                           fmt="csv.gz")
+                    data_buff = io.StringIO()
+                    df.to_csv(data_buff, sep=sep, index=False)
+
+                    gz_buff = io.BytesIO()
+                    with gzip.GzipFile(fileobj=gz_buff, mode='w') as zipped_f:
+                        zipped_f.write(bytes(data_buff.getvalue(), encoding="utf-8"))
+                    conn.write(data=gz_buff.getvalue(),
+                            destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
+                            metadata= datapackage_metadata,
+                            fmt="csv.gz")
+
+                if item['format'] == "csv":
+                    sep = item['dsv_separator']
+                    data_buff = io.StringIO()
+                    df.to_csv(data_buff, sep=sep, index=False)
+                    conn.write(data=data_buff.getvalue(),
+                            destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
+                            metadata= datapackage_metadata,
+                            fmt="csv")
+
+                if item['format'] == 'json':
+                    data_buff = io.StringIO()
+                    df.to_json(data_buff, orient='records')
+                    conn.write(data=json.dumps(data_buff.getvalue()),
+                            destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
+                            metadata= datapackage_metadata,
+                            fmt="json")
 
     @staticmethod
     def _datapackage_key_prefix(base: str):

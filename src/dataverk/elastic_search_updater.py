@@ -20,7 +20,7 @@ class ElasticSearchUpdater:
         '''
 
         try:
-            id = self.datapackage_json["id"]
+            id = self.datapackage_json.get("id","unknown")
             title = self.datapackage_json.get('title', 'title missing')
             desc = self.datapackage_json.get('description', 'description missing')
             js = {
@@ -40,6 +40,7 @@ class ElasticSearchUpdater:
                 "modified": datetime.now().isoformat(),
                 "modified_by": self.datapackage_json.get("modified_by", ""),
                 "created": self.datapackage_json.get("created", datetime.now().isoformat()),
+                "updated": self.datapackage_json.get("updated", datetime.now().isoformat()),
                 "created_by": self.datapackage_json.get("created_by", ""),
                 "policy": self.datapackage_json.get("policy", [{"legal_basis": "", "purpose": ""}]),
                 "distribution": self.datapackage_json.get("distribution", [{"id": "", "format": "", "url": ""}]),
