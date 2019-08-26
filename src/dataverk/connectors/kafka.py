@@ -189,4 +189,4 @@ def get_kafka_consumer(settings: Mapping, topics: Sequence, fetch_mode: str) -> 
                          ssl_cafile=mapping_util.safe_get_nested(settings, keys=("kafka", "ssl_cafile"), default=None),
                          auto_offset_reset='earliest',
                          enable_auto_commit=False,
-                         consumer_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "consumer_timeout"), default=1000))
+                         consumer_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "consumer_timeout_ms"), default=1000))
