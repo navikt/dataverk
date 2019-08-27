@@ -78,7 +78,7 @@ class KafkaConnector(BaseConnector):
     def _read_kafka_raw(self, max_mesgs, fields):
         start_time = time.time()
 
-        self.log(f"Reading kafka stream {self._topics}. Fetch mode {self._fetch_mode}")
+        self.log(f"Reading kafka topic {self._topics}. Fetch mode {self._fetch_mode}")
 
         data = list()
 
@@ -189,4 +189,4 @@ def get_kafka_consumer(settings: Mapping, topics: Sequence, fetch_mode: str) -> 
                          ssl_cafile=mapping_util.safe_get_nested(settings, keys=("kafka", "ssl_cafile"), default=None),
                          auto_offset_reset='earliest',
                          enable_auto_commit=False,
-                         consumer_timeout_ms=15000)
+                         consumer_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "consumer_timeout_ms"), default=1000))
