@@ -28,20 +28,6 @@ def _replace(df: pd.DataFrame, eval_column, additional_columns: [], lower_limit)
     return df
 
 
-    # for column in columns:
-    #     current_col = df[column].tolist()
-    #     current_col = [_replace_value(value, lower_limit) for value in current_col]
-    #     df[column] = current_col
-    # return df
-
-
-def _replace_value(value, limit):
-    if value < limit:
-        return "*"
-    else:
-        return value
-
-
 def name_replace(df, columns) -> pd.DataFrame:
     """ Replaces names in columns
 
