@@ -121,3 +121,4 @@ class Dataverk:
     @staticmethod
     def _is_sql_file(source):
         return '.sql' in source
+
