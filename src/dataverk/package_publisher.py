@@ -68,7 +68,7 @@ class PackagePublisher:
                 sep = item['dsv_separator']
 
                 data_buff = io.StringIO()
-                df.to_csv(data_buff, sep=sep)
+                df.to_csv(data_buff, sep=sep, index=False)
 
                 gz_buff = io.BytesIO()
                 with gzip.GzipFile(fileobj=gz_buff, mode='w') as zipped_f:
