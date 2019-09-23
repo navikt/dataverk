@@ -4,28 +4,40 @@ import pandas as pd
 import requests
 
 
-def anonymize_replace(df, columns, lower_limit) -> pd.DataFrame:
+def anonymize_replace(df, eval_column, additional_columns, lower_limit) -> pd.DataFrame:
     """ Replace values in columns with NaN when the value is less than lower_limit
 
+    :param eval_column: column to evaluate for anonymization
+    :param additional_columns: list of columns to anonymize if value in eval_column is below lower_limit
     :param df: pandas Dataframe
-    :param columns: list of columns to apply value replacement
     :param lower_limit: lower limit for value replacement in dataset column
     :return: anonymized pandas Dataframe
     """
-    return _replace(df, columns, lower_limit)
+    return _replace(df, eval_column, additional_columns, lower_limit)
 
 
-def _replace(df: pd.DataFrame, columns: [], lower_limit):
-    for column in columns:
-        current_col = df[column].tolist()
-        current_col = [_replace_value(value, lower_limit) for value in current_col]
-        df[column] = current_col
+def _replace(df: pd.DataFrame, eval_column, additional_columns: [], lower_limit):
+    columns = additional_columns
+    if eval_column not in additional_columns:
+        columns += [eval_column]
+
+    for index, row in df.iterrows():
+        if row[eval_column] < lower_limit:
+            for column in columns:
+                df.loc[index, column] = "*"
     return df
+
+
+    # for column in columns:
+    #     current_col = df[column].tolist()
+    #     current_col = [_replace_value(value, lower_limit) for value in current_col]
+    #     df[column] = current_col
+    # return df
 
 
 def _replace_value(value, limit):
     if value < limit:
-        return None
+        return "*"
     else:
         return value
 
