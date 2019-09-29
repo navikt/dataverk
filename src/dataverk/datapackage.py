@@ -80,7 +80,7 @@ class Datapackage:
     def url(self):
         return self._datapackage_metadata.get("url")
 
-    def _get_schema(self, df, path, dataset_name, format, dsv_separator):
+    def _get_schema(self, df, path, dataset_name, dataset_description, format, dsv_separator, spec):
         fields = []
 
         for name, dtype in zip(df.columns, df.dtypes):
@@ -90,7 +90,15 @@ class Datapackage:
             else:
                 dtype = 'number'
 
-            fields.append({'name': name, 'description': '', 'type': dtype})
+            description = ''
+            if (spec and spec.get('fields')):
+                spec_fields = spec['fields']
+                for field in spec_fields:
+                    if (field['name']==name):
+                        description = field['description']
+
+            fields.append({'name': name, 'description': description, 'type': dtype})
+
 
         if format == 'csv':
             mediatype = 'text/csv'
@@ -101,14 +109,16 @@ class Datapackage:
 
         return {
             'name': dataset_name,
+            'description': dataset_description,
             'path': f'{path}/resources/{dataset_name}.{format}',
             'format': format,
             'dsv_separator': dsv_separator,
             'mediatype': mediatype,
-            'schema': {'fields': fields}
+            'schema': {'fields': fields},
+            'spec': spec
         }
 
-    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="", format="csv.gz", dsv_separator=";"):
+    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="", format="csv.gz", dsv_separator=";", spec: Mapping=None):
         """
         Adds a provided DataFrame as a resource in the Datapackage object with provided name and description.
 
@@ -120,10 +130,10 @@ class Datapackage:
         """
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
         dataset_name = file_functions.remove_whitespace(dataset_name)
-        self.resources[dataset_name] = self._get_schema(df=df, path=self.path, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator)
+        self.resources[dataset_name] = self._get_schema(df=df, path=self.path, dataset_name=dataset_name, dataset_description=dataset_description, format=format, dsv_separator=dsv_separator, spec=spec)
         self.resources[dataset_name]['df'] = df
         self._datapackage_metadata["datasets"][dataset_name] = dataset_description
-        self._datapackage_metadata['resources'].append(self._get_schema(df=df, path=self.path, dataset_name=dataset_name, format=format, dsv_separator=dsv_separator))
+        self._datapackage_metadata['resources'].append(self._get_schema(df=df, path=self.path, dataset_name=dataset_name, dataset_description=dataset_description, format=format, dsv_separator=dsv_separator, spec=spec))
 
     def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
@@ -158,7 +168,7 @@ class Datapackage:
                     "group": group,
                     "series": series}
 
-        view = {'name': name,
+        view = {'name': file_functions.remove_whitespace(name),
                 'title': title,
                 'description': description,
                 'attribution': attribution,
