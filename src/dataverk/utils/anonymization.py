@@ -27,15 +27,15 @@ def _replace(df: pd.DataFrame, eval_column, additional_columns, lower_limit):
     elif not isinstance(additional_columns, list):
         raise TypeError("additional_columns should either be string or list containing column name(s)")
 
-    to_anonymize = df.copy()
-
     columns = additional_columns
     if eval_column not in additional_columns:
         columns += [eval_column]
 
     for column in columns:
-        if column not in to_anonymize.columns:
+        if column not in df.columns:
             raise ValueError(f"{column} is not a column in DataFrame to anonymize")
+
+    to_anonymize = df.copy()
 
     return _replace_value(to_anonymize, eval_column, columns, lower_limit)
 
