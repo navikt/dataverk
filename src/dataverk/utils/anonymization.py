@@ -20,15 +20,9 @@ def _replace(df: pd.DataFrame, eval_column, additional_columns, lower_limit):
 
     _check_value_types(df, eval_column, lower_limit)
 
-    columns = _check_additional_columns_type(additional_columns)
-
-    if eval_column not in additional_columns:
-        columns += [eval_column]
-
-    _check_column_names(columns)
+    columns = _set_columns_to_anonymize(df, eval_column, additional_columns)
 
     to_anonymize = df.copy()
-
     return _replace_value(to_anonymize, eval_column, columns, lower_limit)
 
 
@@ -38,6 +32,16 @@ def _check_value_types(df, eval_column, lower_limit):
 
     if not isinstance(lower_limit, (int, float)):
         raise TypeError("lower_limit should be of type int or float")
+
+
+def _set_columns_to_anonymize(df, eval_column, additional_columns):
+    columns = _check_additional_columns_type(additional_columns)
+
+    if eval_column not in columns:
+        columns += [eval_column]
+
+    _check_column_names(df, columns)
+    return columns
 
 
 def _check_additional_columns_type(additional_columns):
@@ -50,7 +54,7 @@ def _check_additional_columns_type(additional_columns):
     return additional_columns
 
 
-def _check_column_names(columns):
+def _check_column_names(df, columns):
     for column in columns:
         if column not in df.columns:
             raise ValueError(f"{column} is not a column in DataFrame to anonymize")
