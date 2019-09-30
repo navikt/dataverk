@@ -17,3 +17,13 @@ class MethodsReturnValues(TestCase):
         df = pd.DataFrame(data={'name_column1': ["John Doe"], 'name_column2': ["Jane Doe"]})
         with self.assertRaises(EnvironmentError):
             anonymization.name_replace(df, ['name_column1', 'name_column2'])
+
+
+class MethodsEvaluateInputTypes(TestCase):
+
+    def test_eval_column_type(self):
+        df = pd.DataFrame(data={'values': ['one', 'two', 'three', 'four', 'five'],
+                                'ints': [1, 2, 3, 4, 5],
+                                'floats': [1.0, 2.0, 3.0, 4.0, 5.0]})
+        with self.assertRaises(TypeError):
+            anonymization.anonymize_replace(df, eval_column='values', additional_columns=['ints'], lower_limit=4)
