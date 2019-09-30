@@ -80,7 +80,7 @@ class Datapackage:
     def url(self):
         return self._datapackage_metadata.get("url")
 
-    def _get_schema(self, df, path, dataset_name, dataset_description, format, dsv_separator, spec):
+    def _get_schema(self, df, path, dataset_name, dataset_description, format, dsv_separator, decimal_separator, spec):
         fields = []
 
         for name, dtype in zip(df.columns, df.dtypes):
@@ -113,12 +113,14 @@ class Datapackage:
             'path': f'{path}/resources/{dataset_name}.{format}',
             'format': format,
             'dsv_separator': dsv_separator,
+            'decimal_separator': decimal_separator,
             'mediatype': mediatype,
             'schema': {'fields': fields},
             'spec': spec
         }
 
-    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="", format="csv.gz", dsv_separator=";", spec: Mapping=None):
+    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="",
+                     format="csv.gz", dsv_separator=";", decimal_separator=",", spec: Mapping=None):
         """
         Adds a provided DataFrame as a resource in the Datapackage object with provided name and description.
 
@@ -130,7 +132,10 @@ class Datapackage:
         """
         self._verify_add_resource_input_types(df, dataset_name, dataset_description)
         dataset_name = file_functions.remove_whitespace(dataset_name)
-        self.resources[dataset_name] = self._get_schema(df=df, path=self.path, dataset_name=dataset_name, dataset_description=dataset_description, format=format, dsv_separator=dsv_separator, spec=spec)
+        self.resources[dataset_name] = self._get_schema(df=df, path=self.path,
+                                                        dataset_name=dataset_name, dataset_description=dataset_description,
+                                                        format=format, dsv_separator=dsv_separator,
+                                                        decimal_separator=decimal_separator, spec=spec)
         self.resources[dataset_name]['df'] = df
         self._datapackage_metadata["datasets"][dataset_name] = dataset_description
         self._datapackage_metadata['resources'].append(self._get_schema(df=df, path=self.path, dataset_name=dataset_name, dataset_description=dataset_description, format=format, dsv_separator=dsv_separator, spec=spec))
