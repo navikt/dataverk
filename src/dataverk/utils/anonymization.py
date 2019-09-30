@@ -18,11 +18,7 @@ def anonymize_replace(df, eval_column, additional_columns, lower_limit) -> pd.Da
 
 def _replace(df: pd.DataFrame, eval_column, additional_columns, lower_limit):
 
-    if df[eval_column].dtype not in ["int64", "float"]:
-        raise TypeError("Values that are evaluated for anonymization should be of type int or float")
-
-    if not isinstance(lower_limit, (int, float)):
-        raise TypeError("lower_limit should be of type int or float")
+    _check_value_types(df, eval_column, lower_limit)
 
     columns = _check_additional_columns_type(additional_columns)
 
@@ -36,6 +32,14 @@ def _replace(df: pd.DataFrame, eval_column, additional_columns, lower_limit):
     to_anonymize = df.copy()
 
     return _replace_value(to_anonymize, eval_column, columns, lower_limit)
+
+
+def _check_value_types(df, eval_column, lower_limit):
+    if df[eval_column].dtype not in ["int64", "float"]:
+        raise TypeError("Values that are evaluated for anonymization should be of type int or float")
+
+    if not isinstance(lower_limit, (int, float)):
+        raise TypeError("lower_limit should be of type int or float")
 
 
 def _check_additional_columns_type(additional_columns):
