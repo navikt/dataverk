@@ -13,19 +13,20 @@ def anonymize_replace(df, eval_column, additional_columns, lower_limit) -> pd.Da
     :param lower_limit: lower limit for value replacement in data set column
     :return: anonymized pandas DataFrame
     """
-    return _replace(df.copy(), eval_column, additional_columns, lower_limit)
+    return _replace(df, eval_column, additional_columns, lower_limit)
 
 
 def _replace(df: pd.DataFrame, eval_column, additional_columns: [], lower_limit):
+    to_anonymize = df.copy()
     columns = additional_columns
     if eval_column not in additional_columns:
         columns += [eval_column]
 
-    for index, row in df.iterrows():
+    for index, row in to_anonymize.iterrows():
         if row[eval_column] < lower_limit:
             for column in columns:
-                df.loc[index, column] = "*"
-    return df
+                to_anonymize.loc[index, column] = "*"
+    return to_anonymize
 
 
 def name_replace(df, columns) -> pd.DataFrame:
