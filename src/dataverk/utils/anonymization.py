@@ -5,13 +5,13 @@ import requests
 
 
 def anonymize_replace(df, eval_column, additional_columns, lower_limit) -> pd.DataFrame:
-    """ Replace values in columns with NaN when the value is less than lower_limit
+    """ Replace values in columns with "*" when the value is less than lower_limit
 
+    :param df: pandas DataFrame
     :param eval_column: column to evaluate for anonymization
     :param additional_columns: list of columns to anonymize if value in eval_column is below lower_limit
-    :param df: pandas Dataframe
-    :param lower_limit: lower limit for value replacement in dataset column
-    :return: anonymized pandas Dataframe
+    :param lower_limit: lower limit for value replacement in data set column
+    :return: anonymized pandas DataFrame
     """
     return _replace(df.copy(), eval_column, additional_columns, lower_limit)
 
