@@ -17,6 +17,15 @@ class MethodsReturnValues(TestCase):
 
         self.assertTrue(df_out.equals(expected_df_out))
 
+        def test_additional_columns_types_string(self):
+            df_out_both = pd.DataFrame(data={'values': ['one', 'two', 'three', 'four', 'five'],
+                                             'ints': ["*", "*", "*", 4, 5],
+                                             'floats': ["*", "*", "*", 4.0, 5.0]})
+
+            df_both = anonymization.anonymize_replace(df_vals, eval_column='ints', additional_columns='floats')
+            self.assertTrue(df_both.equals(df_out_both))
+
+
     def test_name_replace_env_not_set(self):
         df = pd.DataFrame(data={'name_column1': ["John Doe"], 'name_column2': ["Jane Doe"]})
         with self.assertRaises(EnvironmentError):
@@ -28,14 +37,6 @@ class MethodsEvaluateInputTypes(TestCase):
     def test_eval_column_type(self):
         with self.assertRaises(TypeError):
             anonymization.anonymize_replace(df_vals, eval_column='values')
-
-    def test_additional_columns_types_string(self):
-        df_out_both = pd.DataFrame(data={'values': ['one', 'two', 'three', 'four', 'five'],
-                                         'ints': ["*", "*", "*", 4, 5],
-                                         'floats': ["*", "*", "*", 4.0, 5.0]})
-
-        df_both = anonymization.anonymize_replace(df_vals, eval_column='ints', additional_columns='floats')
-        self.assertTrue(df_both.equals(df_out_both))
 
     def test_additional_columns_types_not_list(self):
         non_valid_additional_list_types = [pd.DataFrame(), {'one': 1}, 2, 2.5]
