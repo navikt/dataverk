@@ -21,6 +21,9 @@ def _replace(df: pd.DataFrame, eval_column, additional_columns, lower_limit):
     if df[eval_column].dtype not in ["int64", "float"]:
         raise TypeError("Values that are evaluated for anonymization should be of type int or float")
 
+    if not isinstance(lower_limit, (int, float)):
+        raise TypeError("lower_limit should be of type int or float")
+
     columns = _check_additional_columns_type(additional_columns)
 
     if eval_column not in additional_columns:
