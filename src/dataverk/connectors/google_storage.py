@@ -33,11 +33,9 @@ class GoogleStorageConnector(BucketStorageConnector):
 
             name = f'{destination_blob_name}.{fmt}'
             blob = self.bucket.blob(name)
-            #blob.content_type = f'application/{fmt}'
-            # blob.content_language = 'en-US'
-            # blob.content_encoding='utf-8'
+            if fmt.lower().endswith('csv.gz'):
+                blob.content_encoding = f'gzip'
             blob.cache_control = 'no-cache'
-            #blob.content_type = 'text/plain'
             blob.metadata = metadata
             blob.upload_from_string(data)
             if metadata.get('accessRights', '').lower() == 'open':

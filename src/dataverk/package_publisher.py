@@ -75,6 +75,7 @@ class PackagePublisher:
                     zipped_f.write(bytes(data_buff.getvalue(), encoding="utf-8"))
                 conn.write(data=gz_buff.getvalue(),
                            destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
+                           metadata=datapackage_metadata,
                            fmt="csv.gz")
 
     @staticmethod
