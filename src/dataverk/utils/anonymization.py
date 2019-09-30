@@ -37,8 +37,12 @@ def _replace(df: pd.DataFrame, eval_column, additional_columns, lower_limit):
         if column not in to_anonymize.columns:
             raise ValueError(f"{column} is not a column in DataFrame to anonymize")
 
-    to_anonymize.loc[to_anonymize[to_anonymize[eval_column] < lower_limit].index, columns] = '*'
-    return to_anonymize
+    return _replace_value(to_anonymize, eval_column, columns, lower_limit)
+
+
+def _replace_value(df, eval_column, columns, lower_limit):
+    df.loc[df[df[eval_column] < lower_limit].index, columns] = "*"
+    return df
 
 
 def name_replace(df, columns) -> pd.DataFrame:
