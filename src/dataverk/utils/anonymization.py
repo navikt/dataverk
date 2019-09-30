@@ -21,13 +21,8 @@ def _replace(df: pd.DataFrame, eval_column, additional_columns, lower_limit):
     if df[eval_column].dtype not in ["int64", "float"]:
         raise TypeError("Values that are evaluated for anonymization should be of type int or float")
 
-    if isinstance(additional_columns, str):
-        additional_columns = [additional_columns]
+    columns = _check_additional_columns_type(additional_columns)
 
-    elif not isinstance(additional_columns, list):
-        raise TypeError("additional_columns should either be string or list containing column name(s)")
-
-    columns = additional_columns
     if eval_column not in additional_columns:
         columns += [eval_column]
 
@@ -38,6 +33,16 @@ def _replace(df: pd.DataFrame, eval_column, additional_columns, lower_limit):
     to_anonymize = df.copy()
 
     return _replace_value(to_anonymize, eval_column, columns, lower_limit)
+
+
+def _check_additional_columns_type(additional_columns):
+    if isinstance(additional_columns, str):
+        additional_columns = [additional_columns]
+
+    elif not isinstance(additional_columns, list):
+        raise TypeError("additional_columns should either be string or list containing column name(s)")
+
+    return additional_columns
 
 
 def _replace_value(df, eval_column, columns, lower_limit):
