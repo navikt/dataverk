@@ -25,9 +25,7 @@ def _replace(df: pd.DataFrame, eval_column, additional_columns, lower_limit):
     if eval_column not in additional_columns:
         columns += [eval_column]
 
-    for column in columns:
-        if column not in df.columns:
-            raise ValueError(f"{column} is not a column in DataFrame to anonymize")
+    _check_column_names(columns)
 
     to_anonymize = df.copy()
 
@@ -50,6 +48,12 @@ def _check_additional_columns_type(additional_columns):
         raise TypeError("additional_columns should either be string or list containing column name(s)")
 
     return additional_columns
+
+
+def _check_column_names(columns):
+    for column in columns:
+        if column not in df.columns:
+            raise ValueError(f"{column} is not a column in DataFrame to anonymize")
 
 
 def _replace_value(df, eval_column, columns, lower_limit):
