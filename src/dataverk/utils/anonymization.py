@@ -35,13 +35,14 @@ def name_replace(df, columns) -> pd.DataFrame:
     :param columns: list of columns to apply name replacement
     :return: pandas DataFrame
     """
+    to_anonymize = df.copy()
     try:
         url = environ["DATAVERK_NAME_REPLACE_API"]
     except KeyError:
         raise EnvironmentError("DATAVERK_NAME_REPLACE_API env is not set")
 
     for column in columns:
-        res = requests.post(url, data={'values': json.dumps(df[column].tolist())})
+        res = requests.post(url, data={'values': json.dumps(to_anonymize[column].tolist())})
         filtered_list = json.loads(res.text)['result']
-        df[column] = pd.Series(filtered_list)
-    return df
+        to_anonymize[column] = pd.Series(filtered_list)
+    return to_anonymize
