@@ -16,8 +16,12 @@ def anonymize_replace(df, eval_column, additional_columns, lower_limit) -> pd.Da
     return _replace(df, eval_column, additional_columns, lower_limit)
 
 
-def _replace(df: pd.DataFrame, eval_column, additional_columns: [], lower_limit):
+def _replace(df: pd.DataFrame, eval_column, additional_columns, lower_limit):
     to_anonymize = df.copy()
+
+    if isinstance(additional_columns, str):
+        additional_columns = [additional_columns]
+
     columns = additional_columns
     if eval_column not in additional_columns:
         columns += [eval_column]
