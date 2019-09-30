@@ -13,7 +13,7 @@ def anonymize_replace(df, eval_column, additional_columns, lower_limit) -> pd.Da
     :param lower_limit: lower limit for value replacement in dataset column
     :return: anonymized pandas Dataframe
     """
-    return _replace(df, eval_column, additional_columns, lower_limit)
+    return _replace(df.copy(), eval_column, additional_columns, lower_limit)
 
 
 def _replace(df: pd.DataFrame, eval_column, additional_columns: [], lower_limit):
