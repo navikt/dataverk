@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 
 
-def anonymize_replace(df, eval_column, additional_columns, lower_limit) -> pd.DataFrame:
+def anonymize_replace(df, eval_column: str, additional_columns, lower_limit) -> pd.DataFrame:
     """ Replace values in columns with "*" when the value is less than lower_limit
 
     :param df: pandas DataFrame
