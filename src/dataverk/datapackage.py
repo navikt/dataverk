@@ -80,66 +80,86 @@ class Datapackage:
     def url(self):
         return self._datapackage_metadata.get("url")
 
-    def _get_schema(self, df, path, dataset_name, dataset_description, format, dsv_separator, spec):
+    def _get_schema(self, df, path, resource_name, resource_description, format, compress, dsv_separator, spec):
         fields = []
 
         for name, dtype in zip(df.columns, df.dtypes):
-            # TODO : Bool and others
             if str(dtype) == 'object':
                 dtype = 'string'
             else:
                 dtype = 'number'
 
             description = ''
-            if (spec and spec.get('fields')):
+            if spec and spec.get('fields'):
                 spec_fields = spec['fields']
                 for field in spec_fields:
-                    if (field['name']==name):
+                    if field['name'] == name:
                         description = field['description']
 
             fields.append({'name': name, 'description': description, 'type': dtype})
 
-
-        if format == 'csv':
-            mediatype = 'text/csv'
-        elif format == 'json':
-            mediatype = 'application/json'
-        else:
-            mediatype = 'text/csv'
+        mediatype = self._media_type(format)
 
         return {
-            'name': dataset_name,
-            'description': dataset_description,
-            'path': f'{path}/resources/{dataset_name}.{format}',
+            'name': resource_name,
+            'description': resource_description,
+            'path': self._resource_path(path, resource_name, format, compress),
             'format': format,
             'dsv_separator': dsv_separator,
+            'compressed': compress,
             'mediatype': mediatype,
             'schema': {'fields': fields},
             'spec': spec
         }
 
-    def add_resource(self, df: pd.DataFrame, dataset_name: str, dataset_description: str="", format="csv.gz", dsv_separator=";", spec: Mapping=None):
+    @staticmethod
+    def _media_type(fmt):
+        if fmt == 'csv':
+            return 'text/csv'
+        elif fmt == 'json':
+            return 'application/json'
+        else:
+            return 'text/csv'
+
+    @staticmethod
+    def _resource_path(path, resource_name, fmt, compress):
+        if compress:
+            return f'{path}/resources/{resource_name}.{fmt}.gz'
+        else:
+            return f'{path}/resources/{resource_name}.{fmt}'
+
+    def add_resource(self, df: pd.DataFrame, resource_name: str, resource_description: str="",
+                     format="csv", compress: bool=True, dsv_separator=";", spec: Mapping=None):
         """
         Adds a provided DataFrame as a resource in the Datapackage object with provided name and description.
 
         :param df: DataFrame to add as resource
-        :param dataset_name: Name of the dataset
-        :param dataset_description: Description of the dataset
-        :param separator: field separator
+        :param resource_name: Name of the resource
+        :param resource_description: Description of the resource
+        :param format: file format of resource
+        :param compress: boolean value indicating whether to compress resource before storage
+        :param dsv_separator: field separator
+        :param spec: resource specification
         :return: None
         """
-        self._verify_add_resource_input_types(df, dataset_name, dataset_description)
-        dataset_name = file_functions.remove_whitespace(dataset_name)
-        self.resources[dataset_name] = self._get_schema(df=df, path=self.path, dataset_name=dataset_name, dataset_description=dataset_description, format=format, dsv_separator=dsv_separator, spec=spec)
-        self.resources[dataset_name]['df'] = df
-        self._datapackage_metadata["datasets"][dataset_name] = dataset_description
-        self._datapackage_metadata['resources'].append(self._get_schema(df=df, path=self.path, dataset_name=dataset_name, dataset_description=dataset_description, format=format, dsv_separator=dsv_separator, spec=spec))
+        self._verify_add_resource_input_types(df, resource_name, resource_description)
+        resource_name = file_functions.remove_whitespace(resource_name)
+        self.resources[resource_name] = self._get_schema(df=df, path=self.path, resource_name=resource_name,
+                                                         resource_description=resource_description, format=format,
+                                                         compress=compress, dsv_separator=dsv_separator, spec=spec)
+        self.resources[resource_name]['df'] = df
+        self._datapackage_metadata["datasets"][resource_name] = resource_description
+        self._datapackage_metadata['resources'].append(self._get_schema(df=df, path=self.path,
+                                                                        resource_name=resource_name,
+                                                                        resource_description=resource_description,
+                                                                        format=format, compress=compress,
+                                                                        dsv_separator=dsv_separator, spec=spec))
 
-    def _verify_add_resource_input_types(self, df, dataset_name, dataset_description):
+    @staticmethod
+    def _verify_add_resource_input_types(df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
             raise TypeError(f'df must be of type pandas.Dataframe()')
         if not isinstance(dataset_name, str):
-            #TODO: check if valid filename
             raise TypeError(f'dataset_name must be of type string')
         if not isinstance(dataset_description, str):
             raise TypeError(f'dataset_description must be of type string')

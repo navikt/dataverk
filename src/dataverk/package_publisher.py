@@ -66,17 +66,39 @@ class PackagePublisher:
             for filename, item in resources.items():
                 df = item['df']
                 sep = item['dsv_separator']
+                fmt = item["format"]
+                compressed = item["compressed"]
 
                 data_buff = io.StringIO()
                 df.to_csv(data_buff, sep=sep, index=False)
 
-                gz_buff = io.BytesIO()
-                with gzip.GzipFile(fileobj=gz_buff, mode='w') as zipped_f:
-                    zipped_f.write(bytes(data_buff.getvalue(), encoding="utf-8"))
-                conn.write(data=gz_buff.getvalue(),
-                           destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
-                           metadata=datapackage_metadata,
-                           fmt="csv.gz")
+                if compressed:
+                    compressed_data = PackagePublisher._compress_content(data_buff)
+                    PackagePublisher._upload(conn=conn,
+                                             data=compressed_data,
+                                             destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
+                                             metadata=datapackage_metadata,
+                                             fmt=f"{fmt}.gz")
+                else:
+                    PackagePublisher._upload(conn=conn,
+                                             data=data_buff.getvalue(),
+                                             destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
+                                             metadata=datapackage_metadata,
+                                             fmt=fmt)
+
+    @staticmethod
+    def _compress_content(data_buff):
+        gz_buff = io.BytesIO()
+        with gzip.GzipFile(fileobj=gz_buff, mode='w') as zipped_f:
+            zipped_f.write(bytes(data_buff.getvalue(), encoding="utf-8"))
+        return gz_buff.getvalue()
+
+    @staticmethod
+    def _upload(conn, data, destination_blob_name, metadata, fmt):
+        conn.write(data=data,
+                   destination_blob_name=destination_blob_name,
+                   metadata=metadata,
+                   fmt=fmt)
 
     @staticmethod
     def _datapackage_key_prefix(base: str):
