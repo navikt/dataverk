@@ -4,6 +4,7 @@ import datetime
 import uuid
 import hashlib
 import re
+from urllib3.util import url
 from os import environ
 from dataverk.utils import validators, file_functions
 from collections.abc import Mapping, Sequence
@@ -154,6 +155,22 @@ class Datapackage:
                                                                         resource_description=resource_description,
                                                                         format=format, compress=compress,
                                                                         dsv_separator=dsv_separator, spec=spec))
+
+    def add_remote_resource(self, resource_url: str, resource_description):
+        resource_name, resource_fmt = self._resource_name_and_type_from_url(resource_url)
+        self._datapackage_metadata['datasets'][resource_name] = resource_description
+        self._datapackage_metadata['resources'].append({
+            'name': resource_name,
+            'description': resource_description,
+            'path': url,
+            'format': resource_fmt
+        })
+
+    @staticmethod
+    def _resource_name_and_type_from_url(resource_url):
+        parsed_url = url.parse_url(resource_url)
+        resource = parsed_url.path.split('/')[-1]
+        return resource.split('.', 1)[0], resource.split('.', 1)
 
     @staticmethod
     def _verify_add_resource_input_types(df, dataset_name, dataset_description):
