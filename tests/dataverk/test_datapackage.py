@@ -98,7 +98,7 @@ class TestMethodReturnValues(unittest.TestCase):
     def test__resource_name_and_type_from_url(self):
         resource_name_in = "resource"
         resource_fmt_in = "csv"
-        resource_url = f"https://remote.storage.location.com/bucket/" \
+        resource_url = f"http://remote.storage.location.com/bucket/" \
                        f"datapackage/resources/{resource_name_in}.{resource_fmt_in}"
         resource_name, resource_fmt = Datapackage._resource_name_and_type_from_url(resource_url)
         self.assertEqual(resource_name_in, resource_name)

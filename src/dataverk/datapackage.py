@@ -170,7 +170,7 @@ class Datapackage:
     def _resource_name_and_type_from_url(resource_url):
         parsed_url = url.parse_url(resource_url)
 
-        if not parsed_url.scheme == "https" or parsed_url.scheme == "http":
+        if not parsed_url.scheme == "https" and not parsed_url.scheme == "http":
             raise ValueError(f"Remote resource needs to be a web address, scheme is {parsed_url.scheme}")
 
         resource = parsed_url.path.split('/')[-1]
