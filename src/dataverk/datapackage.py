@@ -156,7 +156,7 @@ class Datapackage:
                                                                         format=format, compress=compress,
                                                                         dsv_separator=dsv_separator, spec=spec))
 
-    def add_remote_resource(self, resource_url: str, resource_description):
+    def add_remote_resource(self, resource_url: str, resource_description: str=""):
         resource_name, resource_fmt = self._resource_name_and_type_from_url(resource_url)
         self._datapackage_metadata['datasets'][resource_name] = resource_description
         self._datapackage_metadata['resources'].append({
