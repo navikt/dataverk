@@ -17,6 +17,12 @@ class MethodsReturnValues(TestCase):
 
         self.assertTrue(df_out.equals(expected_df_out))
 
+    def test_df_in_not_changed_df_out_copy(self):
+        df_in_ = pd.DataFrame(data={'col1': [1, 2, 3, 4, 5, 6], 'col2': [33, 44, 55, 67, 765, 1111]})
+        df_out = anonymization.anonymize_replace(df_in, eval_column='col1', lower_limit=4)
+        self.assertTrue(df_in.equals(df_in_))
+        self.assertFalse(df_out.equals(df_in))
+
     def test_additional_columns_types_string(self):
         df_out_both = pd.DataFrame(data={'values': ['one', 'two', 'three', 'four', 'five'],
                                          'ints': ["*", "*", "*", 4, 5],
