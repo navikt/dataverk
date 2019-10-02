@@ -162,15 +162,20 @@ class Datapackage:
         self._datapackage_metadata['resources'].append({
             'name': resource_name,
             'description': resource_description,
-            'path': url,
+            'path': resource_url,
             'format': resource_fmt
         })
 
     @staticmethod
     def _resource_name_and_type_from_url(resource_url):
         parsed_url = url.parse_url(resource_url)
+
+        if not parsed_url.scheme == "https" or parsed_url.scheme == "http":
+            raise ValueError(f"Remote resource needs to be a web address, scheme is {parsed_url.scheme}")
+
         resource = parsed_url.path.split('/')[-1]
-        return resource.split('.', 1)[0], resource.split('.', 1)
+        resource_name_and_format = resource.split('.', 1)
+        return resource_name_and_format[0], resource_name_and_format[1].split('.')[0]
 
     @staticmethod
     def _verify_add_resource_input_types(df, dataset_name, dataset_description):

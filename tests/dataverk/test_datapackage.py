@@ -85,3 +85,26 @@ class TestMethodReturnValues(unittest.TestCase):
                                      resource_name=resource_name, resource_description=resource_description,
                                      format=fmt, compress=True, dsv_separator=";", spec=None)
         self.assertEqual(expected_schema, schema)
+
+    def test__resource_name_and_type_from_url_zipped(self):
+        resource_name_in = "resource"
+        resource_fmt_in = "csv"
+        resource_url = f"https://remote.storage.location.com/bucket/" \
+                       f"datapackage/resources/{resource_name_in}.{resource_fmt_in}.gz"
+        resource_name, resource_fmt = Datapackage._resource_name_and_type_from_url(resource_url)
+        self.assertEqual(resource_name_in, resource_name)
+        self.assertEqual(resource_fmt_in, resource_fmt)
+
+    def test__resource_name_and_type_from_url(self):
+        resource_name_in = "resource"
+        resource_fmt_in = "csv"
+        resource_url = f"https://remote.storage.location.com/bucket/" \
+                       f"datapackage/resources/{resource_name_in}.{resource_fmt_in}"
+        resource_name, resource_fmt = Datapackage._resource_name_and_type_from_url(resource_url)
+        self.assertEqual(resource_name_in, resource_name)
+        self.assertEqual(resource_fmt_in, resource_fmt)
+
+    def test__resource_name_and_type_from_url_invalid(self):
+        resource_url = "/not/a/web/url/bucket/datapackage/resources/resource.csv.gz"
+        with self.assertRaises(ValueError):
+            Datapackage._resource_name_and_type_from_url(resource_url)
