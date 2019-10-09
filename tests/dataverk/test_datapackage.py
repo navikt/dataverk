@@ -88,9 +88,9 @@ class TestMethodReturnValues(unittest.TestCase):
 
     def test__resource_name_and_type_from_url_zipped(self):
         resource_name_in = "resource"
-        resource_fmt_in = "csv"
+        resource_fmt_in = "csv.gz"
         resource_url = f"https://remote.storage.location.com/bucket/" \
-                       f"datapackage/resources/{resource_name_in}.{resource_fmt_in}.gz"
+                       f"datapackage/resources/{resource_name_in}.{resource_fmt_in}"
         resource_name, resource_fmt = Datapackage._resource_name_and_type_from_url(resource_url)
         self.assertEqual(resource_name_in, resource_name)
         self.assertEqual(resource_fmt_in, resource_fmt)

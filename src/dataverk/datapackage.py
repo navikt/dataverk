@@ -175,7 +175,7 @@ class Datapackage:
 
         resource = parsed_url.path.split('/')[-1]
         resource_name_and_format = resource.split('.', 1)
-        return resource_name_and_format[0], resource_name_and_format[1].split('.')[0]
+        return resource_name_and_format[0], resource_name_and_format[1]
 
     @staticmethod
     def _verify_add_resource_input_types(df, dataset_name, dataset_description):
