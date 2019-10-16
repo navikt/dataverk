@@ -70,13 +70,13 @@ class ElasticSearchUpdater:
             resource_names = []
             resource_descriptions = []
             for resource in resources:
-                if len(resource.get('name','')) > 0:
+                if resource.get('name'):
                     resource_names.append(resource['name'])
-                if len(resource.get('description','')) > 0:
+                if resource.get('description'):
                     resource_descriptions.append(resource['description'])
 
-            js['resource_names'] =   resource_names
-            js['resource_descriptions'] =   resource_descriptions
+            js['resource_names'] = resource_names
+            js['resource_descriptions'] = resource_descriptions
 
             js_flat = self._flatten_json(js)
 

@@ -129,17 +129,14 @@ class GoogleStorageConnector(BucketStorageConnector):
     def _gcp_credentials(self, settings):
         try:
             info = settings["bucket_storage_connections"]["gs"]["credentials"]
-            if (isinstance(info, str)):
+            if isinstance(info, str):
                 with open(info) as f:
-                    #print(os.path.abspath(info))
                     info = json.load(f)
-                    #print(info)
             scope = 'https://www.googleapis.com/auth/cloud-platform'
             credentials = service_account.Credentials.from_service_account_info(info, scopes=(scope,))
             return credentials
         except KeyError:
             return None
-
 
     def _make_blob_public(self, blob_name):
         """Makes a blob publicly accessible."""
