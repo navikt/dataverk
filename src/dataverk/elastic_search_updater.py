@@ -1,8 +1,10 @@
 from collections import Mapping
 
 import urllib3
+import json
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from datetime import datetime
+from pandas.io.json import json_normalize
 
 
 class ElasticSearchUpdater:
@@ -10,6 +12,19 @@ class ElasticSearchUpdater:
     def __init__(self, es_index: ElasticsearchConnector, datapackage_metadata: Mapping):
         self._es_index = es_index
         self.datapackage_json = datapackage_metadata
+
+    def _flatten_json(self,y):
+        out = {}
+
+        def flatten(x, name=''):
+            if type(x) is dict:
+                for a in x:
+                    flatten(x[a], name + a + '_')
+            else:
+                out[name[:-1]] = x
+
+        flatten(y)
+        return out
 
 
     def publish(self):
@@ -29,33 +44,46 @@ class ElasticSearchUpdater:
                 "suggest": title + ' ' + desc,
                 "description": desc,
                 "title": title,
-                "format": self.datapackage_json.get("format", ""),
+                "license": self.datapackage_json.get("license", {'name': 'CC BY 4.0', 'url': 'http://creativecommons.org/licenses/by/4.0/deed.no'}),
+                "language": self.datapackage_json.get("language", "Norsk"),
+                "periodicity": self.datapackage_json.get("periodicity", "NA"),
+                "temporal": self.datapackage_json.get("temporal", ""),
                 "category": self.datapackage_json.get("category", ""),
                 "provenance": self.datapackage_json.get("provenance", ""),
-                "master": self.datapackage_json.get("master", ""),
-                "purpose": self.datapackage_json.get("purpose", ""),
-                "legalbasis": self.datapackage_json.get("legalbasis", ""),
-                "pii": self.datapackage_json.get("pii", ""),
                 "issued": self.datapackage_json.get("issued", datetime.now().isoformat()),
-                "modified": datetime.now().isoformat(),
-                "modified_by": self.datapackage_json.get("modified_by", ""),
-                "created": self.datapackage_json.get("created", datetime.now().isoformat()),
-                "created_by": self.datapackage_json.get("created_by", ""),
-                "policy": self.datapackage_json.get("policy", [{"legal_basis": "", "purpose": ""}]),
+                "modified": self.datapackage_json.get("modified", datetime.now().isoformat()),
                 "distribution": self.datapackage_json.get("distribution", [{"id": "", "format": "", "url": ""}]),
                 "keywords": self.datapackage_json.get("keywords", []),
                 "theme": self.datapackage_json.get("theme", [""]),
-                "accessRights": self.datapackage_json.get("accessRights", []),
-                "publisher": self.datapackage_json.get("publisher", []),
+                "accessRights": self.datapackage_json.get("accessRights", ['Internal']),
+                "publisher": self.datapackage_json.get("publisher", {'name': 'Arbeids- og velferdsetaten (NAV)', 'publisher_url': 'https://www.nav.no'}),
+                "contactpoint": self.datapackage_json.get("contactpoint", []),
                 "spatial": self.datapackage_json.get("spatial", []),
-                "geo": self.datapackage_json.get("geo", []),
                 "url": f"{self.datapackage_json.get('path', '')}/datapackage.json",
+                "source": self.datapackage_json.get("source", ""),
                 "repo": self.datapackage_json.get("repo", ""),
                 "ispartof": self.datapackage_json.get("ispartof", []),
                 "haspart": self.datapackage_json.get("haspart", []),
             }
 
-            self._es_index.write(id, js)
+            resources = self.datapackage_json.get('resources', [])
+
+            resource_names = []
+            resource_descriptions = []
+            for resource in resources:
+                if len(resource.get('name','')) > 0:
+                    resource_names.append(resource['name'])
+                if len(resource.get('description','')) > 0:
+                    resource_descriptions.append(resource['description'])
+
+            js['resource_names'] =   resource_names
+            js['resource_descriptions'] =   resource_descriptions
+
+            js_flat = self._flatten_json(js)
+
+            res = self._es_index.write(id, js_flat)
+            print(res)
+            print(json.dumps(js))
         except urllib3.exceptions.LocationValueError as err:
             print(f'write to elastic search failed, host_uri could not be resolved')
             raise urllib3.exceptions.LocationValueError(err)
