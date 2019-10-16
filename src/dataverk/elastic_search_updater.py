@@ -1,10 +1,9 @@
 from collections import Mapping
-
 import urllib3
 import json
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from datetime import datetime
-from pandas.io.json import json_normalize
+
 
 
 class ElasticSearchUpdater:
@@ -83,7 +82,6 @@ class ElasticSearchUpdater:
 
             res = self._es_index.write(id, js_flat)
             print(res)
-            print(json.dumps(js))
         except urllib3.exceptions.LocationValueError as err:
             print(f'write to elastic search failed, host_uri could not be resolved')
             raise urllib3.exceptions.LocationValueError(err)
