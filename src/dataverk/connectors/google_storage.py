@@ -4,6 +4,7 @@ import google.cloud.storage as storage
 from io import BytesIO
 from datetime import timedelta
 import google.auth
+import json
 from google.cloud import exceptions
 from google.oauth2 import service_account
 from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
@@ -128,12 +129,14 @@ class GoogleStorageConnector(BucketStorageConnector):
     def _gcp_credentials(self, settings):
         try:
             info = settings["bucket_storage_connections"]["gs"]["credentials"]
+            if isinstance(info, str):
+                with open(info) as f:
+                    info = json.load(f)
             scope = 'https://www.googleapis.com/auth/cloud-platform'
             credentials = service_account.Credentials.from_service_account_info(info, scopes=(scope,))
             return credentials
         except KeyError:
             return None
-
 
     def _make_blob_public(self, blob_name):
         """Makes a blob publicly accessible."""
