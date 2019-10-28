@@ -9,15 +9,34 @@ def anonymize_replace(df, eval_column, additional_columns=None, lower_limit=4, r
 
     :param df: pandas DataFrame
     :param eval_column: str, column to evaluate for anonymization
-    :param additional_columns: str or list of columns to anonymize if value in eval_column is below lower_limit, default=None
+    :param additional_columns: optional, str or list of column(s) to anonymize if value in eval_column is below
+    lower_limit, default=None
     :param lower_limit: int, lower limit for value replacement in data set column, default=4
     :param replace_by: str, list or dict, value to replace by. List or dict passed must have same length as number of
-                       columns to anonymize. Values in list must also be given in same order as [additional_columns]+[eval_column]
-
+    columns to anonymize. Values in list must be given in same order as [additional_columns]+[eval_column]
 
     :return: anonymized pandas DataFrame
     """
     return _replace(df, eval_column, additional_columns, lower_limit, replace_by)
+
+
+def anonymize_replace_by_label(df, eval_column, label=None, additional_columns=None, replace_by="*", anonymize_eval=True) -> pd.DataFrame:
+    """ Replace values in columns when value in eval_column given label or in label list
+
+    :param df: pandas DataFrame
+    :param eval_column: str, column to evaluate for anonymization
+    :param label: single int, float, str or NoneType or list of ints, floats, strings and/or NoneType, label(s) for
+    value replacement in data set column, default=None. NoneTypeValues in df columns will be replaced if default is
+    given.
+    :param additional_columns: optional, str or list of column(s) to anonymize if value in eval_column is given in
+    'label', default=None
+    :param replace_by: str, list or dict, value to replace by. List or dict passed must have same length as number of
+    columns to anonymize. Values in list must be given in same order as [additional_columns]+[eval_column]
+    :param anonymize_eval: bool, whether eval_column should be anonymized, default=True
+
+    :return: anonymized pandas DataFrame
+    """
+    return _replace_by_label(df, eval_column, additional_columns, label, replace_by, anonymize_eval)
 
 
 def _replace(df: pd.DataFrame, eval_column: str, additional_columns, lower_limit, replace_by):
@@ -31,10 +50,28 @@ def _replace(df: pd.DataFrame, eval_column: str, additional_columns, lower_limit
     return _replace_value(to_anonymize, eval_column, columns, lower_limit, replace_by)
 
 
-def _set_columns_to_anonymize(df, eval_column, additional_columns):
+def _replace_by_label(df: pd.DataFrame, eval_column: str, additional_columns, label, replace_by, anonymize_eval):
+
+    _check_valid_anonymization_by_label(additional_columns, anonymize_eval)
+
+    columns = _set_columns_to_anonymize(df, eval_column, additional_columns, anonymize_eval)
+
+    labels = _set_labels(df, eval_column, label)
+    columns, replace_by = _check_replace_by(columns, replace_by)
+
+    to_anonymize = df.copy()
+    return _replace_label(to_anonymize, eval_column, columns, labels, replace_by)
+
+
+def _check_valid_anonymization_by_label(additional_columns, anonymize_eval):
+    if additional_columns is None and not anonymize_eval:
+        raise Exception("df will not be anonymized. No additional columns are given and anonymize_eval is set to False")
+
+
+def _set_columns_to_anonymize(df, eval_column, additional_columns, anonymize_eval=True):
     columns = _check_additional_columns_type(additional_columns)
 
-    if eval_column not in columns:
+    if anonymize_eval and eval_column not in columns:
         columns += [eval_column]
 
     _check_column_names(df, columns)
@@ -58,6 +95,7 @@ def _check_column_names(df, columns):
     for column in columns:
         if not isinstance(column, str):
             raise TypeError(f"{column}: column names should be of type str")
+
         if column not in df.columns:
             raise ValueError(f"'{column}' is not a column in df")
 
@@ -70,6 +108,24 @@ def _check_value_types(df, eval_column, lower_limit):
         raise TypeError("lower_limit should be of type int or float")
 
 
+def _set_labels(df, eval_column, label):
+    if df[eval_column].dtype not in ["int64", "float", "O"]:
+        raise TypeError("Labels that are evaluated for anonymization should be of type int, float or str")
+
+    if isinstance(label, (int, float, str, type(None))):
+        label = [label]
+
+    elif isinstance(label, list):
+        for l in label:
+            if not isinstance(l, (int, float, str, type(None))):
+                raise TypeError(f"{l}: labels in label list should be of type int, float or NoneType")
+
+    else:
+        raise TypeError("input 'label' should be of type int, float, str or list")
+
+    return label
+
+
 def _check_replace_by(columns, replace_by):
     column_order, replace_by_order = columns, replace_by
 
@@ -78,10 +134,11 @@ def _check_replace_by(columns, replace_by):
 
     if isinstance(replace_by, list):
         if len(replace_by) != len(columns):
-            raise Exception("number of replacement values in list of values to replace_by is different from number of columns to anonymize")
+            raise Exception("number of replacement values in 'replace_by' is different from the number of columns to anonymize")
+
         for replace_value in replace_by:
             if not isinstance(replace_value, (int, float, type(None), str)):
-                raise TypeError("values in list of values to replace by should be given as types int, float, None or str")
+                raise TypeError("values in 'replace_by' should be given as types int, float, None or str")
 
     if isinstance(replace_by, dict):
         replace_in_columns = list(replace_by.keys())
@@ -107,6 +164,11 @@ def _check_replace_by(columns, replace_by):
 
 def _replace_value(df, eval_column, columns, lower_limit, replace_by):
     df.loc[df[df[eval_column] < lower_limit].index, columns] = replace_by
+    return df
+
+
+def _replace_label(df, eval_column, columns, labels, replace_by):
+    df.loc[df[eval_column].isin(labels), columns] = replace_by
     return df
 
 
