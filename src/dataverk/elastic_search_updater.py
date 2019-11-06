@@ -12,20 +12,6 @@ class ElasticSearchUpdater:
         self._es_index = es_index
         self.datapackage_json = datapackage_metadata
 
-    def _flatten_json(self,y):
-        out = {}
-
-        def flatten(x, name=''):
-            if type(x) is dict:
-                for a in x:
-                    flatten(x[a], name + a + '_')
-            else:
-                out[name[:-1]] = x
-
-        flatten(y)
-        return out
-
-
     def publish(self):
         ''' - Iterates through all bucket storage connections in the settings.json file and publishes the datapackage
             - Updates ES index with metadata for the datapackage
@@ -34,38 +20,49 @@ class ElasticSearchUpdater:
         '''
 
         try:
-            id = self.datapackage_json["id"]
-            title = self.datapackage_json.get('title', 'title missing')
-            desc = self.datapackage_json.get('description', 'description missing')
+            dp = self.datapackage_json
+            id = dp["id"]
+            title = dp.get('title', 'title missing')
+            desc = dp.get('description', 'description missing')
             js = {
                 "id": id,
-                "type": self.datapackage_json.get("type", ""),
+                "versionInfo": dp.get("versionInfo", "0.0.1"),
+                "versionNotes": dp.get("versionNotes", []),
+                "type": dp.get("type", ""),
+                "format": dp.get("format", ""),
                 "suggest": title + ' ' + desc,
                 "description": desc,
                 "title": title,
-                "license": self.datapackage_json.get("license", {'name': 'CC BY 4.0', 'url': 'http://creativecommons.org/licenses/by/4.0/deed.no'}),
-                "language": self.datapackage_json.get("language", "Norsk"),
-                "periodicity": self.datapackage_json.get("periodicity", "NA"),
-                "temporal": self.datapackage_json.get("temporal", ""),
-                "category": self.datapackage_json.get("category", ""),
-                "provenance": self.datapackage_json.get("provenance", ""),
-                "issued": self.datapackage_json.get("issued", datetime.now().isoformat()),
-                "modified": self.datapackage_json.get("modified", datetime.now().isoformat()),
-                "distribution": self.datapackage_json.get("distribution", [{"id": "", "format": "", "url": ""}]),
-                "keywords": self.datapackage_json.get("keywords", []),
-                "theme": self.datapackage_json.get("theme", [""]),
-                "accessRights": self.datapackage_json.get("accessRights", ['Internal']),
-                "publisher": self.datapackage_json.get("publisher", {'name': 'Arbeids- og velferdsetaten (NAV)', 'publisher_url': 'https://www.nav.no'}),
-                "contactpoint": self.datapackage_json.get("contactpoint", []),
-                "spatial": self.datapackage_json.get("spatial", []),
-                "url": f"{self.datapackage_json.get('path', '')}/datapackage.json",
-                "source": self.datapackage_json.get("source", ""),
-                "repo": self.datapackage_json.get("repo", ""),
-                "ispartof": self.datapackage_json.get("ispartof", []),
-                "haspart": self.datapackage_json.get("haspart", []),
+                "license": dp.get("license", {'name': 'CC BY 4.0', 'url': 'http://creativecommons.org/licenses/by/4.0/deed.no'}),
+                "language": dp.get("language", "Norsk"),
+                "accrualPeriodicity": dp.get("accrualPeriodicity", ""),
+                "temporal": dp.get("temporal", ""),
+                "category": dp.get("category", ""),
+                "status": dp.get("status", ""),
+                "rights": dp.get("rights", []),
+                "byteSize": dp.get("byteSize", []),
+                "provenance": dp.get("provenance", ""),
+                "issued": dp.get("issued", datetime.now().isoformat()),
+                "modified": dp.get("modified", datetime.now().isoformat()),
+                "distribution": dp.get("distribution", []),
+                "keyword": dp.get("keywords", []),
+                "term": dp.get("term", []),
+                "theme": dp.get("theme", []),
+                "accessRights": dp.get("accessRights", ['non-public']),
+                "accessRightsComment": dp.get("accessRightsComment", ""),
+                "publisher": dp.get("publisher", {'name': 'Arbeids- og velferdsetaten (NAV)', 'publisher_url': 'https://www.nav.no'}),
+                "creator": dp.get("creator", {'name': 'NAV kunnskapsavdelingen', 'email': 'statistikk@nav.no'}),
+                "contactPoint": dp.get("contactPoint", []),
+                "spatial": dp.get("spatial", []),
+                "url": f"{dp.get('path', '')}/datapackage.json",
+                "source": dp.get("source", []),
+                "sample": dp.get("sample", []),
+                "repo": dp.get("repo", ""),
+                "notebook": dp.get("notebook", ""),
+                "code": dp.get("code", ""),
             }
 
-            resources = self.datapackage_json.get('resources', [])
+            resources = dp.get('resources', [])
 
             resource_names = []
             resource_descriptions = []
@@ -78,10 +75,8 @@ class ElasticSearchUpdater:
             js['resource_names'] = resource_names
             js['resource_descriptions'] = resource_descriptions
 
-            js_flat = self._flatten_json(js)
-
-            res = self._es_index.write(id, js_flat)
-            print(res)
+            res = self._es_index.write(id, js)
+            print(res.text)
         except urllib3.exceptions.LocationValueError as err:
             print(f'write to elastic search failed, host_uri could not be resolved')
             raise urllib3.exceptions.LocationValueError(err)
