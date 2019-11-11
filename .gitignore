@@ -28,10 +28,14 @@ dist
 # Environment variables
 .env
 
+venv
+pyvenv.cfg 
+
 **ca-bundle.crt
 **.idea
 
 settings.json
+secrets.json
 test.py
 
 **/*.egg-info
