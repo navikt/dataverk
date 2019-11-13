@@ -1,15 +1,18 @@
 import json
+from collections import Sequence, Mapping
 from os import environ
+from typing import Callable
+
 import pandas as pd
 import requests
 
 
-def anonymize_replace(df, eval_column, additional_columns=None, lower_limit=4, replace_by="*") -> pd.DataFrame:
+def anonymize_replace(df, eval_column, anonymize_columns, evaluator=lambda x: x<4, replace_by="*") -> pd.DataFrame:
     """ Replace values in columns when value in eval_column is less than lower_limit
 
     :param df: pandas DataFrame
     :param eval_column: name of column to evaluate for anonymization
-    :param additional_columns: optional, column name or list of column(s) to anonymize if value in eval_column is below
+    :param anonymize_columns: optional, column name or list of column(s) to anonymize if value in eval_column is below
     lower_limit, default=None
     :param lower_limit: int or float, lower limit for value replacement in data set column, default=4
     :param replace_by: value, list or dict of values to replace by. List or dict passed must have same length as number
@@ -17,7 +20,7 @@ def anonymize_replace(df, eval_column, additional_columns=None, lower_limit=4, r
 
     :return: anonymized pandas DataFrame
     """
-    return _replace(df, eval_column, additional_columns, lower_limit, replace_by)
+    return _replace(df, eval_column, anonymize_columns, evaluator, replace_by)
 
 
 def anonymize_replace_by_label(df, eval_column, labels, additional_columns=None, replace_by="*",
@@ -38,14 +41,13 @@ def anonymize_replace_by_label(df, eval_column, labels, additional_columns=None,
     return _replace_by_label(df, eval_column, additional_columns, labels, replace_by, anonymize_eval)
 
 
-def _replace(df: pd.DataFrame, eval_column, additional_columns, lower_limit, replace_by):
+def _replace(df: pd.DataFrame, eval_column, additional_columns, evaluator, replace_by):
     columns = _set_columns_to_anonymize(df, eval_column, additional_columns)
 
-    _check_value_types(df, eval_column, lower_limit)
     columns, replace_by = _set_replace_by(df, columns, replace_by)
 
     to_anonymize = df.copy()
-    return _replace_value(to_anonymize, eval_column, columns, lower_limit, replace_by)
+    return _replace_value(to_anonymize, eval_column, columns, evaluator, replace_by)
 
 
 def _replace_by_label(df: pd.DataFrame, eval_column, additional_columns, labels, replace_by, anonymize_eval):
@@ -78,11 +80,8 @@ def _check_additional_columns_input_type(additional_columns):
     if additional_columns is None:
         additional_columns = []
 
-    elif isinstance(additional_columns, (int, float, str)):
+    elif not isinstance(additional_columns, Sequence):
         additional_columns = [additional_columns]
-
-    elif not isinstance(additional_columns, list):
-        raise TypeError("additional_columns should either be a column name or a list containing column name(s)")
 
     return additional_columns
 
@@ -90,15 +89,7 @@ def _check_additional_columns_input_type(additional_columns):
 def _check_column_names(df, columns):
     for column in columns:
         if column not in df.columns:
-            raise ValueError(f"'{column}' is not a column in df")
-
-
-def _check_value_types(df, eval_column, lower_limit):
-    if df[eval_column].dtype not in ["int64", "float64"]:
-        raise TypeError("Values that are evaluated for anonymization should be of type int or float")
-
-    if not isinstance(lower_limit, (int, float)):
-        raise TypeError("lower_limit should be of type int or float")
+            raise AttributeError(f"'{column}' is not a column in df")
 
 
 def _set_labels(df, eval_column, labels):
@@ -122,7 +113,7 @@ def _set_labels(df, eval_column, labels):
 def _set_replace_by(df, columns, replace_by):
     column_order, replace_by_order = columns, replace_by
 
-    if isinstance(replace_by, dict):
+    if isinstance(replace_by, Mapping):
         replace_in_columns = list(replace_by.keys())
         replace_by_values = list(replace_by.values())
 
@@ -132,8 +123,8 @@ def _set_replace_by(df, columns, replace_by):
     return column_order, replace_by_order
 
 
-def _replace_value(df, eval_column, columns, lower_limit, replace_by):
-    df.loc[df[df[eval_column] < lower_limit].index, columns] = replace_by
+def _replace_value(df, eval_column, columns, evaluator, replace_by):
+    df.loc[df[df[eval_column].apply(evaluator)].index, columns] = replace_by
     return df
 
 
