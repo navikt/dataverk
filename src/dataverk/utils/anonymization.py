@@ -12,12 +12,20 @@ def anonymize_replace(df, eval_column, anonymize_columns=None, evaluator=lambda 
 
     :param df: pandas DataFrame
     :param eval_column: name of column to evaluate for anonymization
-    :param anonymize_columns: optional, column name or list of column(s) to anonymize if value in eval_column is below
-    lower_limit, default=None
-    :param evaluator: condition for anonymization in eval_column
-    :param replace_by: value or dict of values to replace by. Dict passed must have same length as number of columns to
-    anonymize.
-    :param anonymize_eval, whether to anonymize eval_column, default=True
+    :param anonymize_columns: optional, column name or list of column(s) to anonymize if value in eval_column satisfies the
+    condition given in evaluator, default=None
+    :param evaluator: lambda function, condition for anonymization based on values in eval_column, default=lambda x: x < 4
+    :param replace_by: value or list or dict of values to replace by. List or dict passed must have same length as the number
+    of columns to anonymize. Elements in list passed should in addition have the same order as columns in
+
+    a) anonymize_columns + eval_columns if anonymize_eval=True and eval_column is _not_ given in anonymize_columns
+    b) anonymize_columns                if anonymize_eval=True and eval_column is given in anonymize_columns
+                                        or anonymize_eval=False
+    c) eval_column                      if anonymize_eval=True and anonymize_columns=False or anonymize_columns=[]
+
+    The order of values to replace by in dictionary does not matter.
+
+    :param anonymize_eval, bool, whether to anonymize eval_column, default=True
 
     :return: anonymized pandas DataFrame
     """
