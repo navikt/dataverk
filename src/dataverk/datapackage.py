@@ -6,6 +6,8 @@ import hashlib
 import re
 from urllib3.util import url
 from os import environ
+
+from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 from dataverk.utils import validators, file_functions
 from collections.abc import Mapping, Sequence
 from dataverk.connectors.bucket_connector_factory import BucketType
@@ -247,18 +249,30 @@ class Datapackage:
         dp_id = metadata['id']
 
         if BucketType(store) is BucketType.NAIS:
-            try:
-                bucket_endpoint = environ["DATAVERK_BUCKET_ENDPOINT"]
-            except KeyError:
-                raise EnvironmentError(f'The environment variable DATAVERK_BUCKET_ENDPOINT must be set to'
-                                       f'the desired endpoint url for bucket storage')
-            path = f'{bucket_endpoint}/{bucket}/{dp_id}'
-            store_path = path
+            path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
         elif BucketType(store) is BucketType.GCS:
             path = f'https://storage.googleapis.com/{bucket}/{dp_id}'
             store_path = f'gs://{bucket}/{dp_id}'
         else: #default is local storage
             path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{dp_id}'
             store_path = f'{bucket}/{dp_id}'
+
+        return path, store_path
+
+    @staticmethod
+    def _nais_specific_paths(bucket, dp_id):
+        try:
+            api_endpoint = environ["DATAVERK_API_ENDPOINT"]
+        except KeyError as missing_env:
+            raise EnvironmentVariableNotSet(missing_env)
+        else:
+            path = f'{api_endpoint}/{bucket}/{dp_id}'
+
+        try:
+            bucket_endpoint = environ["DATAVERK_BUCKET_ENDPOINT"]
+        except KeyError as missing_env:
+            raise EnvironmentVariableNotSet(missing_env)
+        else:
+            store_path = f'{bucket_endpoint}/{bucket}/{dp_id}'
 
         return path, store_path

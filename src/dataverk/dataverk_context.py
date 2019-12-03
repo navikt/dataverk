@@ -1,5 +1,4 @@
 import json
-from collections.abc import Mapping
 from dataverk.context import EnvStore
 from dataverk.context import values_importer
 from dataverk.context.replacer import Replacer
@@ -23,7 +22,7 @@ class DataverkContext:
         return json.loads(file_functions.get_package_resource("settings.json", self._resource_path, self._http_headers))
 
     def _load_and_apply_secrets(self):
-        self._settings_store = self._try_apply_secrets(self._settings_store, self._env_store)
+        self._settings_store = self._apply_secrets(self._env_store, self._settings_store)
 
     def get_sql_query(self, sql: str):
         return file_functions.get_package_resource(sql, self._resource_path, self._http_headers)
@@ -34,9 +33,6 @@ class DataverkContext:
             return {"Authorization": f"token {auth_token}"}
         else:
             return None
-
-    def _try_apply_secrets(self, settings: Mapping, env_store: Mapping):
-        return self._apply_secrets(env_store, settings)
 
     @staticmethod
     def _apply_secrets(env_store, settings):
