@@ -5,6 +5,8 @@ from os import environ
 import pandas as pd
 import requests
 
+from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
+
 
 def anonymize_replace(df, eval_column, anonymize_columns=None, evaluator=lambda x: x < 4, replace_by="*",
                       anonymize_eval=True) -> pd.DataFrame:
@@ -104,7 +106,7 @@ def name_replace(df, columns) -> pd.DataFrame:
     try:
         url = environ["DATAVERK_NAME_REPLACE_API"]
     except KeyError:
-        raise EnvironmentError("DATAVERK_NAME_REPLACE_API env is not set")
+        raise EnvironmentVariableNotSet("DATAVERK_NAME_REPLACE_API env is not set")
 
     to_anonymize = df.copy()
     for column in columns:

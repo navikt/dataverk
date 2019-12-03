@@ -1,10 +1,11 @@
 from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
 from dataverk.connectors.google_storage import GoogleStorageConnector
-from dataverk.connectors.azure_blob_storage import AzureStorageConnector
 from collections.abc import Mapping
 from enum import Enum
 from dataverk.connectors.s3 import S3Connector
 from os import environ
+
+from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 
 
 class BucketType(str, Enum):
@@ -17,8 +18,8 @@ def get_storage_connector(bucket_type: BucketType, bucket_name: str, settings: M
     if bucket_type == BucketType.NAIS:
         try:
             environ["DATAVERK_BUCKET_ENDPOINT"]
-        except KeyError:
-            raise EnvironmentError("DATAVERK_BUCKET_ENDPOINT environment variable must be set")
+        except KeyError as missing_env:
+            raise EnvironmentVariableNotSet(missing_env)
         return S3Connector(bucket_name=bucket_name, s3_endpoint=environ["DATAVERK_BUCKET_ENDPOINT"])
     elif bucket_type == BucketType.GCS:
         return GoogleStorageConnector(bucket_name=bucket_name, settings=settings)

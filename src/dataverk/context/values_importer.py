@@ -3,14 +3,10 @@ from collections.abc import Mapping
 from abc import ABC, abstractmethod
 from urllib import parse
 from urllib.parse import ParseResult
-import json
-import hvac
+import dataverk_vault.api as vault_api
 
 
 class ValuesImporter(ABC):
-
-    def __init__(self, resource):
-        self._resource = resource
 
     @abstractmethod
     def import_values(self) -> Mapping:
@@ -20,7 +16,7 @@ class ValuesImporter(ABC):
 class FileValuesImporter(ValuesImporter):
 
     def __init__(self, resource):
-        super().__init__(resource)
+        super().__init__()
         self._resource_path = Path(resource)
 
     def import_values(self) -> Mapping:
@@ -44,24 +40,11 @@ class FileValuesImporter(ValuesImporter):
 
 class APIValuesImporter(ValuesImporter):
 
-    def __init__(self, resource, mount_point, secrets_path, env_store):
-        super().__init__(resource)
-        self._mount_point = mount_point
-        self._env_store = env_store
-        self._secrets_path = secrets_path
+    def __init__(self):
+        super().__init__()
 
     def import_values(self) -> Mapping:
-        client = hvac.Client(url=self._resource)
-        client.auth.ldap.login(username=self._env_store["USER_IDENT"],
-                               password=self._env_store["PASSWORD"],
-                               mount_point=self._mount_point)
-
-        values = client.read(path=self._secrets_path)["data"]
-        return self._clean_json_string(json.dumps(values))
-
-    def _clean_json_string(self, values_string: str):
-        values_string = values_string.replace(r"\n", "").replace(r"ẗ", "").replace(r"\r", "")
-        return json.loads(values_string)
+        return vault_api.read_secrets()
 
 
 class NullValuesImporter(ValuesImporter):
@@ -71,16 +54,12 @@ class NullValuesImporter(ValuesImporter):
 
 
 def get_secrets_importer(settings: Mapping, env_store: Mapping) -> ValuesImporter:
-    # TODO add null object support
     if env_store.get("DATAVERK_SECRETS_FROM_FILES") is not None:
         return FileValuesImporter(resource=settings["secret_path"])
     elif env_store.get("DATAVERK_SECRETS_FROM_API") is not None:
-        parsed_url = _parse_url(settings["remote_secrets_url"])
-        return APIValuesImporter(resource=f"{parsed_url.scheme}://{parsed_url.hostname}:{parsed_url.port}",
-                                 mount_point=settings["secrets_auth_method"],
-                                 secrets_path=parsed_url.path[1:], env_store=env_store)
+        return APIValuesImporter()
     else:
-        return NullValuesImporter(resource=None)
+        return NullValuesImporter()
 
 
 def _parse_url(url: str) -> ParseResult:
