@@ -105,8 +105,8 @@ def name_replace(df, columns) -> pd.DataFrame:
     """
     try:
         url = environ["DATAVERK_NAME_REPLACE_API"]
-    except KeyError:
-        raise EnvironmentVariableNotSet("DATAVERK_NAME_REPLACE_API env is not set")
+    except KeyError as missing_env:
+        raise EnvironmentVariableNotSet(missing_env)
 
     to_anonymize = df.copy()
     for column in columns:

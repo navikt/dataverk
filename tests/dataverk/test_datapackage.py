@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 from dataverk.datapackage import Datapackage
-
+from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 
 valid_metadata = {
     'title': 'title',
@@ -34,7 +34,7 @@ class TestClassInstanciation(unittest.TestCase):
     def test_instanciation_invalid_bucket_env_not_set(self):
         invalid_metadata = valid_metadata.copy()
         invalid_metadata['store'] = 'nais'
-        with self.assertRaises(EnvironmentError):
+        with self.assertRaises(EnvironmentVariableNotSet):
             dp = Datapackage(invalid_metadata)
 
     def test_instanciation_invalid_bucket_not_set(self):
