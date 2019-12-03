@@ -1,3 +1,4 @@
+import os
 import unittest
 import pandas as pd
 from dataverk.datapackage import Datapackage
@@ -108,3 +109,34 @@ class TestMethodReturnValues(unittest.TestCase):
         resource_url = "/not/a/web/url/bucket/datapackage/resources/resource.csv.gz"
         with self.assertRaises(ValueError):
             Datapackage._resource_name_and_type_from_url(resource_url)
+
+    def test__nais_specific_paths_valid(self):
+        api_endpoint = "https://dataverk.no"
+        bucket_endpoint = "https://dataverk.no"
+        bucket = "bucket"
+        dp_id = "id123"
+        os.environ["DATAVERK_API_ENDPOINT"] = api_endpoint
+        os.environ["DATAVERK_BUCKET_ENDPOINT"] = bucket_endpoint
+        path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
+        del os.environ["DATAVERK_API_ENDPOINT"]
+        del os.environ["DATAVERK_BUCKET_ENDPOINT"]
+        self.assertEqual(path, f"{api_endpoint}/{bucket}/{dp_id}")
+        self.assertEqual(store_path, f"{bucket_endpoint}/{bucket}/{dp_id}")
+
+    def test__nais_specific_paths_invalid_api_not_set(self):
+        bucket_endpoint = "https://dataverk.no"
+        bucket = "bucket"
+        dp_id = "id123"
+        os.environ["DATAVERK_BUCKET_ENDPOINT"] = bucket_endpoint
+        with self.assertRaises(EnvironmentVariableNotSet):
+            path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
+        del os.environ["DATAVERK_BUCKET_ENDPOINT"]
+
+    def test__nais_specific_paths_invalid_bucket_not_set(self):
+        api_endpoint = "https://dataverk.no"
+        bucket = "bucket"
+        dp_id = "id123"
+        os.environ["DATAVERK_API_ENDPOINT"] = api_endpoint
+        with self.assertRaises(EnvironmentVariableNotSet):
+            path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
+        del os.environ["DATAVERK_API_ENDPOINT"]
