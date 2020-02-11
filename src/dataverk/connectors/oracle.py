@@ -65,10 +65,9 @@ class OracleConnector(DBBaseConnector):
             cur.close()
             conn.close()
 
+            self.log(f'{len(df)} records returned in {end_time - start_time} seconds.')
             if verbose_output:
-                self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {query}')
-            else:
-                self.log(f'{len(df)} records returned in {end_time - start_time} seconds.')
+                self.log(f'Query: {query}')
 
             return df
 
