@@ -40,7 +40,7 @@ class OracleConnector(DBBaseConnector):
         parsed_conn_string = self._parse_connection_string(self._settings["db_connection_strings"][self._source])
         return self._read_sql_query_dask(parsed_conn_string, query, where_values)
 
-    def get_pandas_df(self, query, arraysize=100000):
+    def get_pandas_df(self, query, arraysize=100000, verbose_output=False):
         start_time = time.time()
 
         self.log(f'Establishing connection to Oracle database: {self._source}')
@@ -65,7 +65,10 @@ class OracleConnector(DBBaseConnector):
             cur.close()
             conn.close()
 
-            self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {query}')
+            if verbose_output:
+                self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {query}')
+            else:
+                self.log(f'{len(df)} records returned in {end_time - start_time} seconds.')
 
             return df
 
