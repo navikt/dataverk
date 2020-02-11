@@ -31,10 +31,14 @@ class AuthMixin:
         
         """
 
-        if platform == "linux" or platform == "linux2":
-            user = pwd.getpwuid(os.getuid()).pw_name
-        else:
-            user = os.getlogin()
+        try:
+            user = os.environ["KF_TEAM_NAME"]
+        except KeyError:
+            if platform == "linux" or platform == "linux2":
+                user = pwd.getpwuid(os.getuid()).pw_name
+            else:
+                user = os.getlogin()
+
         return user
 
 
