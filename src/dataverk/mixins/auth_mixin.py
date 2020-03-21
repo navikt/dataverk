@@ -32,7 +32,7 @@ class AuthMixin:
         """
 
         try:
-            user = os.environ["KF_TEAM_NAME"]
+            user = os.environ["DATAVERK_USER"]
         except KeyError:
             if platform == "linux" or platform == "linux2":
                 user = pwd.getpwuid(os.getuid()).pw_name
