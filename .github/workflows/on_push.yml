@@ -1,6 +1,9 @@
 name: Run unittests
 
-on: push
+on:
+  push:
+    paths-ignore:
+      - setup.py
 
 jobs:
   test:
