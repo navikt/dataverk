@@ -35,7 +35,6 @@ class AuthMixin:
             user = pwd.getpwuid(os.getuid()).pw_name
         else:
             user = os.getlogin()
-
         return user
 
 
