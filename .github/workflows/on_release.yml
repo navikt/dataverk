@@ -21,6 +21,8 @@ jobs:
     name: Set dataverk version in setup.py to release tag
     needs: test
     runs-on: ubuntu-latest
+    container:
+      image: python:3.7
     steps:
       - name: Checkout
         uses: actions/checkout@master
