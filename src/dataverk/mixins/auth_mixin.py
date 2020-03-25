@@ -31,13 +31,10 @@ class AuthMixin:
         
         """
 
-        try:
-            user = os.environ["DATAVERK_USER"]
-        except KeyError:
-            if platform == "linux" or platform == "linux2":
-                user = pwd.getpwuid(os.getuid()).pw_name
-            else:
-                user = os.getlogin()
+        if platform == "linux" or platform == "linux2":
+            user = pwd.getpwuid(os.getuid()).pw_name
+        else:
+            user = os.getlogin()
 
         return user
 
