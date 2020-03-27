@@ -2,8 +2,8 @@ name: Run unittests
 
 on:
   push:
-    paths-ignore:
-      - setup.py
+    tags-ignore:
+      - '*.*.*'
 
 jobs:
   test:
