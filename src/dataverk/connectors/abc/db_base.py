@@ -8,7 +8,7 @@ class DBBaseConnector(BaseConnector):
         super().__init__()
 
     @abstractmethod
-    def get_pandas_df(self, query):
+    def get_pandas_df(self, query, verbose_output):
         """Get Pandas dataframe
 
         """
