@@ -30,7 +30,7 @@ class PostgresConnector(DBBaseConnector):
             raise KeyError(f"db_vault_path for {self._source} not found in settings file."
                            f"Unable to establish connection to PostgreSQL database: {self._source}")
 
-    def get_pandas_df(self, query, arraysize=100000):
+    def get_pandas_df(self, query, arraysize=100000, verbose_output=False):
         start_time = time.time()
         self.log(f'Establishing connection to PostgreSQL database: {self._source}')
 
@@ -45,10 +45,13 @@ class PostgresConnector(DBBaseConnector):
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return error
-        else:
-            end_time = time.time()
-            self.log(f'{len(df)} records returned in {end_time - start_time} seconds. Query: {query}')
-            return df
+
+        end_time = time.time()
+        self.log(f'{len(df)} records returned in {end_time - start_time} seconds.')
+        if verbose_output:
+            self.log(f'Query: {query}')
+
+        return df
 
     def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists="replace"):
         self.log(f'Persisting {len(df)} records to table: {table} in PostgreSQL database: {self._source}')

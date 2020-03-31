@@ -13,8 +13,11 @@ class SQLiteConnector(DBBaseConnector):
         self.cnx = sqlite3.connect(self.source)
         self.cur = self.cnx.cursor
 
-    def get_pandas_df(self, query):
+    def get_pandas_df(self, query, verbose_output=False):
         """Get Pandas dataframe"""
+
+        if verbose_output:
+            self.log(f'Query: {query}')
 
         return pd.read_sql_query(query, self.cnx)
     
