@@ -22,18 +22,19 @@ class Dataverk:
     def context(self):
         return self._context
 
-    def read_sql(self, source, sql, connector='Oracle') -> pd.DataFrame:
+    def read_sql(self, source, sql, connector='Oracle', verbose_output=False) -> pd.DataFrame:
         """ Read pandas dataframe from SQL database
 
         :param source: str: database source
         :param sql: str: sql query or file with sql query
         :param connector: str: Database connector (default oracle)
+        :param verbose_output: bool: flag for verbose output option
         :return: pd.Dataframe: Dataframe with result
         """
         conn = db_connector_factory.get_db_connector(settings_store=self.context.settings, connector=connector, source=source)
         query = self._get_sql_query(sql=sql)
 
-        return conn.get_pandas_df(query=query)
+        return conn.get_pandas_df(query=query, verbose_output=verbose_output)
 
     def read_sql_dask(self, source, sql, where_values, connector='Oracle') -> dd.DataFrame:
         """ Read dask dataframe from SQL database
