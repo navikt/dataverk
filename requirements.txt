@@ -1,4 +1,4 @@
-dask[complete]==2.13.0
+dask[complete]==2.14.0
 dataverk-vault==0.1.4
 google-api-core==1.16.0
 google-auth==1.13.1
