@@ -18,7 +18,7 @@ pandas==1.0.3
 cx_Oracle==7.3.0
 protobuf==3.11.3
 sphinx-rtd-theme==0.4.3
-Sphinx==3.0.0
+Sphinx==3.0.1
 nbsphinx==0.6.0
 kafka-python==2.0.1
 elasticsearch==7.6.0
