@@ -56,6 +56,7 @@ class KafkaConnector(BaseConnector):
         except ValueError:
             df = pd.DataFrame.from_records(records, index=[0])
         self._commit_offsets()
+        self._consumer.close()
 
         return df
 
