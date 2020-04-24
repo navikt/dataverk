@@ -191,4 +191,4 @@ def get_kafka_consumer(settings: Mapping, topics: Sequence, fetch_mode: str) -> 
                          enable_auto_commit=False,
                          consumer_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "consumer_timeout_ms"), default=1000),
                          heartbeat_interval_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "heartbeat_interval_ms"), default=3000),
-                         session_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "heartbeat_interval_ms"), default=3000))
+                         session_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "session_timeout_ms"), default=10000))
