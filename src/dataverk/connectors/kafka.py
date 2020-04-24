@@ -88,7 +88,7 @@ class KafkaConnector(BaseConnector):
             if self._is_requested_messages_read(message, max_mesgs, len(data)):
                 break
 
-        self.log(f"({len(data)} messages read from kafka stream {self._topics} in {time.time() - start_time} sec. Fetch mode {self._fetch_mode}")
+        self.log(f"({len(data)} messages read from kafka topic(s) {self._topics} in {time.time() - start_time} sec. Fetch mode {self._fetch_mode}")
 
         return data
 
@@ -189,4 +189,6 @@ def get_kafka_consumer(settings: Mapping, topics: Sequence, fetch_mode: str) -> 
                          ssl_cafile=mapping_util.safe_get_nested(settings, keys=("kafka", "ssl_cafile"), default=None),
                          auto_offset_reset='earliest',
                          enable_auto_commit=False,
-                         consumer_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "consumer_timeout_ms"), default=1000))
+                         consumer_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "consumer_timeout_ms"), default=1000),
+                         heartbeat_interval_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "heartbeat_interval_ms"), default=3000),
+                         session_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "heartbeat_interval_ms"), default=3000))
