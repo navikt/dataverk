@@ -187,8 +187,9 @@ def get_kafka_consumer(settings: Mapping, topics: Sequence, fetch_mode: str) -> 
                          sasl_plain_username=mapping_util.safe_get_nested(settings, keys=("kafka", "sasl_plain_username"), default=None),
                          sasl_plain_password=mapping_util.safe_get_nested(settings, keys=("kafka", "sasl_plain_password"), default=None),
                          ssl_cafile=mapping_util.safe_get_nested(settings, keys=("kafka", "ssl_cafile"), default=None),
-                         auto_offset_reset='earliest',
+                         auto_offset_reset=mapping_util.safe_get_nested(settings, keys=("kafka", "auto_offset_reset"), default='earliest'),
                          enable_auto_commit=False,
                          consumer_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "consumer_timeout_ms"), default=1000),
                          heartbeat_interval_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "heartbeat_interval_ms"), default=3000),
-                         session_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "session_timeout_ms"), default=10000))
+                         session_timeout_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "session_timeout_ms"), default=10000),
+                         max_poll_interval_ms=mapping_util.safe_get_nested(settings, keys=("kafka", "max_poll_interval_ms"), default=300000))
