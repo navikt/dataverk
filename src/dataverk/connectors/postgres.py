@@ -70,6 +70,7 @@ class PostgresConnector(DBBaseConnector):
         else:
             end_time = time.time()
             self.log(f"Persisted {len(df)} records to table {table} in {end_time - start_time} seconds")
+            engine.dispose()
             return len(df)
 
     def _create_engine(self):
