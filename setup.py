@@ -6,15 +6,12 @@ from pathlib import Path
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with Path("VERSION").open("r") as fh:
-    __version__ = fh.read()
-
 with open('requirements.txt') as f:
     install_requires = f.read().strip().split('\n')
 
 setup(
     name='dataverk',
-    version=__version__,
+    version='0.2.12',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     python_requires='>=3.6',

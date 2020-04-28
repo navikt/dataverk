@@ -1,0 +1,38 @@
+name: Release dataverk
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.7
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Install dependencies
+      run: pip3 install .
+    - name: Run unittests
+      run: python3 -m unittest discover
+
+  release-pypi:
+    name: Set dataverk version in setup.py to release tag
+    needs: test
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.7
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Update version
+        run: |
+          export VERSION=$(echo ${{ github.ref }} | sed "s~refs/tags/~~")
+          sed -i "s~version=.*~version='$VERSION',~g" setup.py
+      - name: Install twine
+        run: pip3 install twine --user
+      - name: Build release
+        run: python3 setup.py sdist bdist_wheel
+      - name: publish pypi
+        run: python -m twine upload -u ${{ secrets.PYPI_USER }} -p ${{ secrets.PYPI_PASSWORD }} dist/*
