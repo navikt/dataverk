@@ -36,6 +36,13 @@ class OracleConnector(DBBaseConnector):
             raise ValueError(f'Database connection string not found in settings file. '
                              f'Unable to establish connection to database: {self._source}')
 
+    def __enter__(self):
+        self._conn = self._create_connection()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._conn.close()
+
     def get_dask_df(self, query, where_values) -> dd.DataFrame:
         parsed_conn_string = self._parse_connection_string(self._settings["db_connection_strings"][self._source])
         return self._read_sql_query_dask(parsed_conn_string, query, where_values)
@@ -43,15 +50,10 @@ class OracleConnector(DBBaseConnector):
     def get_pandas_df(self, query, arraysize=100000, verbose_output=False):
         start_time = time.time()
 
-        self.log(f'Establishing connection to Oracle database: {self._source}')
+        self.log(f'Reading from Oracle database: {self._source}')
 
-        parsed_conn_string = self._parse_connection_string(self._settings["db_connection_strings"][self._source])
-        dsn = cx_Oracle.makedsn(host=parsed_conn_string['host'], port=parsed_conn_string['port'], service_name=parsed_conn_string['service_name'])
-
-        try: 
-            conn = self._get_db_conn(parsed_conn_string, dsn)
-
-            cur = conn.cursor()
+        try:
+            cur = self._conn.cursor()
             cur.arraysize = arraysize
             cur.execute(query)
             col_names = [x[0] for x in cur.description]
@@ -63,7 +65,6 @@ class OracleConnector(DBBaseConnector):
             df = pd.DataFrame(results, columns=col_names)
 
             cur.close()
-            conn.close()
 
             self.log(f'{len(df)} records returned in {end_time - start_time} seconds.')
             if verbose_output:
@@ -97,6 +98,12 @@ class OracleConnector(DBBaseConnector):
         except SQLAlchemyError as e:
             error = str(e.__dict__['orig'])
             return error
+
+    def _create_connection(self):
+        parsed_conn_string = self._parse_connection_string(self._settings["db_connection_strings"][self._source])
+        dsn = cx_Oracle.makedsn(host=parsed_conn_string['host'], port=parsed_conn_string['port'],
+                                service_name=parsed_conn_string['service_name'])
+        return self._get_db_conn(parsed_conn_string, dsn)
 
     def _read_sql_query_dask(self, parsed_conn_string, sql, where_values):
         dload = dask.delayed(self._load_df_part)

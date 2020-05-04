@@ -14,7 +14,6 @@ from dataverk.package_publisher import PackagePublisher
 class Dataverk:
 
     def __init__(self, resource_path: str=".", env_file: str='.env', auth_token: str=None):
-        # TODO make context builder
         env_store = EnvStore.safe_create(env_file)
         self._context = DataverkContext(env_store, resource_path, auth_token)
 
@@ -25,7 +24,7 @@ class Dataverk:
     def read_sql(self, source, sql, connector='Oracle', verbose_output=False) -> pd.DataFrame:
         """ Read pandas dataframe from SQL database
 
-        :param source: str: database source
+        :param source: str: database source reference
         :param sql: str: sql query or file with sql query
         :param connector: str: Database connector (default oracle)
         :param verbose_output: bool: flag for verbose output option
@@ -34,7 +33,8 @@ class Dataverk:
         conn = db_connector_factory.get_db_connector(settings_store=self.context.settings, connector=connector, source=source)
         query = self._get_sql_query(sql=sql)
 
-        return conn.get_pandas_df(query=query, verbose_output=verbose_output)
+        with conn:
+            return conn.get_pandas_df(query=query, verbose_output=verbose_output)
 
     def read_sql_dask(self, source, sql, where_values, connector='Oracle') -> dd.DataFrame:
         """ Read dask dataframe from SQL database
@@ -86,19 +86,20 @@ class Dataverk:
         conn = JSONStatConnector()
         return conn.get_pandas_df(url, params=params)
 
-    def to_sql(self, df, table, sink=None, schema=None, connector='Oracle', if_exists: str = 'replace'):
+    def to_sql(self, df, table, sink=None, schema=None, connector='Oracle', if_exists: str = 'append'):
         """ Write records in dataframe to a SQL database table
 
         :param df: pd.Dataframe: Dataframe to write
         :param table: str: Table in db to write to
-        :param sink:
-        :param schema:
+        :param sink: str: target database name reference
+        :param schema: str: databse schema
         :param connector: str: Connector type (default: Oracle)
         :param if_exists: str: Action if table already exists in database (default: replace)
         """
         conn = db_connector_factory.get_db_connector(settings_store=self._context.settings, connector=connector, source=sink)
 
-        return conn.persist_pandas_df(table, schema=schema, df=df, if_exists=if_exists)
+        with conn:
+            return conn.persist_pandas_df(table, schema=schema, df=df, if_exists=if_exists)
 
     def publish(self, datapackage):
         resources = datapackage.resources
