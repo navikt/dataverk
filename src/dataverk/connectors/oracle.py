@@ -36,6 +36,7 @@ class OracleConnector(DBBaseConnector):
             raise ValueError(f'Database connection string not found in settings file. '
                              f'Unable to establish connection to database: {self._source}')
 
+    def __enter__(self):
         self._conn = self._create_connection()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
