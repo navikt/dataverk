@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from dataverk.connectors import BaseConnector
+from dataverk.connectors.abc.base import BaseConnector
 
 
 class DBBaseConnector(BaseConnector):
@@ -21,7 +21,7 @@ class DBBaseConnector(BaseConnector):
         raise NotImplementedError()
 
     @abstractmethod
-    def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists='replace'):
+    def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists='append'):
         """ Write Pandas dataframe
 
         """
