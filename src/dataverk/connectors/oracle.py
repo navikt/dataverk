@@ -38,6 +38,7 @@ class OracleConnector(DBBaseConnector):
 
     def __enter__(self):
         self._conn = self._create_connection()
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._conn.close()
