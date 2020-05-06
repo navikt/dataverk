@@ -1,5 +1,5 @@
 import requests
-from dataverk.connectors import BaseConnector
+from dataverk.connectors.abc.base import BaseConnector
 
 
 class S3Connector(BaseConnector):
@@ -9,19 +9,15 @@ class S3Connector(BaseConnector):
         self.s3_api_url = s3_endpoint
         self.bucket_name = bucket_name
 
-    def write(self, data, destination_blob_name: str, fmt: str="csv", metadata: dict={}):
-        res = requests.put(url=f'{self.s3_api_url}/{self.bucket_name}/{destination_blob_name}.{fmt}',
+    def write(self, data, destination_blob_name: str, fmt: str="csv"):
+        res = requests.put(url=f"{self.s3_api_url}/{self.bucket_name}/{destination_blob_name}.{fmt}",
                            data=data)
-
-        if res.status_code != 200:
-            res.raise_for_status()
-        self.log(f'{self.__class__}: Object {destination_blob_name} written to bucket {self.bucket_name}')
+        res.raise_for_status()
+        self.log.info(f"Object {destination_blob_name} written to bucket {self.bucket_name}")
 
     def read(self, blob_name: str):
-        res = requests.get(url=f'{self.s3_api_url}/{self.bucket_name}/{blob_name}')
+        res = requests.get(url=f"{self.s3_api_url}/{self.bucket_name}/{blob_name}")
 
-        if res.status_code != 200:
-            res.raise_for_status()
-
-        self.log(f'{self.__class__}: Object {blob_name} read to string')
+        res.raise_for_status()
+        self.log.info(f"Object {blob_name} read to string")
         return res.text

@@ -8,9 +8,9 @@ from dataverk.context.settings_classes import SettingsStore
 class FileStorageConnector(BaseConnector):
     """File Storage connector"""
     
-    def __init__(self, settings: SettingsStore, encrypted=True, bucket=None):
+    def __init__(self, settings: SettingsStore, bucket=None):
 
-        super(self.__class__, self).__init__(encrypted=encrypted)
+        super().__init__()
 
         self.bucket = bucket
         self.settings = settings

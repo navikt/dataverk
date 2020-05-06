@@ -13,7 +13,7 @@ def get_db_connector(settings_store: Mapping, connector: str, source: str):
     if connector.lower() == 'oracle':
         return OracleConnector(settings_store=settings_store, source=source)
     elif connector.lower() == 'sqllite':
-        return SQLiteConnector(source=source)
+        return SQLiteConnector(settings_store=settings_store, source=source)
     elif connector.lower() == 'postgres':
         return PostgresConnector(settings_store=settings_store, source=source)
     else:

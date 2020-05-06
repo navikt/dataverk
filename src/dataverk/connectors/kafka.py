@@ -38,9 +38,11 @@ class KafkaConnector(BaseConnector):
         self._fetch_mode = fetch_mode
         self._schema_cache = {}
         self._consumer = consumer
-        self.log(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
+        self.log.info(f"KafkaConsumer created with fetch mode set to '{fetch_mode}'")
         self._read_until_timestamp = self._get_current_timestamp_in_ms()
-        self._schema_registry_url = mapping_util.safe_get_nested(settings, keys=("kafka", "schema_registry"), default="http://localhost:8081")
+        self._schema_registry_url = mapping_util.safe_get_nested(settings,
+                                                                 keys=("kafka", "schema_registry"),
+                                                                 default="http://localhost:8081")
 
     def get_pandas_df(self, strategy=None, fields=None, max_mesgs=math.inf):
         """ Read kafka topics, commits offset and returns result as pandas dataframe
@@ -79,7 +81,7 @@ class KafkaConnector(BaseConnector):
     def _read_kafka_raw(self, max_mesgs, fields):
         start_time = time.time()
 
-        self.log(f"Reading kafka topic {self._topics}. Fetch mode {self._fetch_mode}")
+        self.log.info(f"Reading kafka topic {self._topics}. Fetch mode {self._fetch_mode}")
 
         data = list()
 
@@ -89,7 +91,7 @@ class KafkaConnector(BaseConnector):
             if self._is_requested_messages_read(message, max_mesgs, len(data)):
                 break
 
-        self.log(f"({len(data)} messages read from kafka topic(s) {self._topics} in {time.time() - start_time} sec. Fetch mode {self._fetch_mode}")
+        self.log.info(f"({len(data)} messages read from kafka topic(s) {self._topics} in {time.time() - start_time} sec. Fetch mode {self._fetch_mode}")
 
         return data
 

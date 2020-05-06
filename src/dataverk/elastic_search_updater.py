@@ -5,7 +5,6 @@ from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from datetime import datetime
 
 
-
 class ElasticSearchUpdater:
 
     def __init__(self, es_index: ElasticsearchConnector, datapackage_metadata: Mapping):

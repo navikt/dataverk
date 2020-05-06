@@ -1,6 +1,6 @@
 import os
 from abc import ABC
-from dataverk.utils import log
+from dataverk.utils.logger import Logger
 
 
 class BaseConnector(ABC):
@@ -8,12 +8,12 @@ class BaseConnector(ABC):
     
     """
     def __init__(self):
-        self._logger = log.get_logger(user=self._get_user(),
-                                      connector_name=self._get_class_name())
+        self._logger = Logger(user=self._get_user(),
+                              connector_name=self._get_class_name())
 
     @property
     def log(self):
-        return self._logger
+        return self._logger.log
 
     @staticmethod
     def _get_user():

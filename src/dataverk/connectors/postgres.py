@@ -12,10 +12,7 @@ from dataverk_vault import api as vault_api
 class PostgresConnector(DBBaseConnector):
 
     def __init__(self, settings_store: Mapping, source=None):
-        super().__init__()
-
-        self._settings = settings_store
-        self._source = source
+        super().__init__(settings_store, source)
 
     def __enter__(self):
         self._engine = self._create_engine()
@@ -24,28 +21,28 @@ class PostgresConnector(DBBaseConnector):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._engine.dispose()
 
-    def get_pandas_df(self, query, arraysize=100000, verbose_output=False) -> pd.DataFrame:
+    def get_pandas_df(self, query, verbose_output=False) -> pd.DataFrame:
         start_time = time.time()
-        self.log.info(f'Reading from PostgreSQL database: {self._source}')
+        self.log.info(f"Reading from PostgreSQL database: {self._source}")
 
         try:
             df = pd.read_sql_query(query, self._engine)
         except OperationalError:
             self._reset_db_connection()
             df = pd.read_sql_query(query, self._engine)
-        except SQLAlchemyError as e:
-            self.log.error(str(e.__dict__['orig']))
+        except SQLAlchemyError as error:
+            self.log.error(str(error.__dict__["orig"]))
             return pd.DataFrame()
 
         end_time = time.time()
-        self.log.info(f'{len(df)} records returned in {end_time - start_time} seconds.')
+        self.log.info(f"{len(df)} records returned in {end_time - start_time} seconds.")
         if verbose_output:
-            self.log(f'Query: {query}')
+            self.log(f"Query: {query}")
 
         return df
 
     def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists="replace") -> None:
-        self.log.info(f'Persisting {len(df)} records to table: {table} in PostgreSQL database: {self._source}')
+        self.log.info(f"Persisting {len(df)} records to table: {table} in PostgreSQL database: {self._source}")
         start_time = time.time()
 
         try:
@@ -55,19 +52,12 @@ class PostgresConnector(DBBaseConnector):
             self._reset_db_connection()
             self._set_role()
             df.to_sql(table, self._engine, if_exists=if_exists, chunksize=chunksize)
-        except SQLAlchemyError as e:
-            self.log.error(str(e.__dict__['orig']))
+        except SQLAlchemyError as error:
+            self.log.error(str(error.__dict__["orig"]))
             return
 
         end_time = time.time()
         self.log.info(f"Persisted {len(df)} records to table {table} in {end_time - start_time} seconds")
-
-    def _connection_string(self) -> str:
-        try:
-            return self._settings["db_connection_strings"][self._source]
-        except KeyError:
-            raise KeyError(f"Database connection string not found in settings file."
-                           f"Unable to establish connection to PostgreSQL database: {self._source}")
 
     def _vault_path(self) -> str:
         try:
@@ -88,8 +78,7 @@ class PostgresConnector(DBBaseConnector):
         try:
             query = f"SET ROLE '{self._get_role_name()}'; COMMIT;"
         except KeyError as err:
-            self.log.error(f"""Unable to set role:
-                        {err}""")
+            self.log.error(f"Unable to set role: {err}")
         else:
             self._engine.execute(query)
 
@@ -99,8 +88,7 @@ class PostgresConnector(DBBaseConnector):
         try:
             vault_path = self._vault_path()
         except KeyError as err:
-            self.log.error(f"""Unable to update postgres credentials:
-                      {err}""")
+            self.log.error(f"Unable to update postgres credentials: {err}")
         else:
             self._update_credentials(vault_path)
             self._engine = self._create_engine()
