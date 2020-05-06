@@ -5,7 +5,7 @@ from typing import Mapping
 from dataverk.connectors.abc.base import DataverkBase
 
 
-class DBBaseConnector(BaseConnector):
+class DBBaseConnector(DataverkBase):
 
     def __init__(self, settings_store: Mapping, source: str):
         super().__init__()
