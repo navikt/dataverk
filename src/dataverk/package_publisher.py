@@ -28,7 +28,7 @@ class PackagePublisher(DataverkBase):
         """
         bucket_type = self._datapackage_metadata.get("store")
 
-        self.log.info(f"Publishing datapackage {self._datapackage_metadata.get('store')} "
+        self.log.info(f"Publishing datapackage {self._datapackage_metadata.get('title')} "
                       f"to bucket {self._datapackage_metadata.get('bucket')}")
 
         self.upload_to_storage_bucket(
