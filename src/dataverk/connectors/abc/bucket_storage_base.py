@@ -4,7 +4,7 @@ from dataverk.connectors.abc.base import BaseConnector
 
 class BucketStorageConnector(BaseConnector, ABC):
 
-    def __init__(self, encrypted=True):
+    def __init__(self):
         super().__init__()
 
     def write(self, data, destination_blob_name: str, fmt: str, metadata: dict={}):

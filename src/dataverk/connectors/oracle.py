@@ -8,8 +8,6 @@ from dataverk.connectors.abc.db_base import DBBaseConnector
 
 
 class OracleConnector(DBBaseConnector):
-    """
-    """
 
     def __init__(self, settings_store: Mapping, source=None):
         super().__init__(settings_store, source)

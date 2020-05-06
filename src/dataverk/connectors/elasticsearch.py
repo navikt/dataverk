@@ -1,37 +1,41 @@
 import requests
-from elasticsearch import Elasticsearch
+
 from dataverk.connectors.abc.base import BaseConnector
 from collections.abc import Mapping
-from ssl import create_default_context
 
 
 class ElasticsearchConnector(BaseConnector):
-    """Elasticsearch connection"""
+    """Elasticsearch connector"""
 
     def __init__(self, settings: Mapping, host="elastic_host"):
         super().__init__()
 
-        ssl_context = create_default_context()
-        self.host_uri = settings["index_connections"][host]
-
-        if self.host_uri is None:
-            raise ValueError(f'Connection settings are not available for the host: {host}')
-
-        self.es = Elasticsearch([self.host_uri], ssl_context=ssl_context)
+        self._es_address = self._es_address(settings, host)
         self.index = settings["index_connections"]["index"]
 
-    def write(self, dp_id, doc):
-        """Add or update document"""
+    def write(self, dp_id: str, doc: Mapping):
+        """ Add or update document in es index
+
+        :param dp_id: str: document id
+        :param doc: dict: document
+        :return:
+        """
         try:
-            res = requests.post(self.host_uri, json=doc,
-                                headers={"Content-Type": "application/json"})
+            res = requests.post(self._es_address, json=doc, headers={"Content-Type": "application/json"})
             res.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            raise requests.exceptions.HTTPError(f"""Unable to update ES index:
-                                                    {str(err)}""")
+            self.log.error(f"Unable to update ES index: {str(err)}""")
         except requests.exceptions.RequestException as err:
-            raise requests.exceptions.RequestException(f"ES index connection error:\n"
-                                                       f"{str(err)}")
+            self.log.error(f"ES index connection error: {str(err)}")
+        else:
+            self.log.info(f"Document {dp_id} successfully written to elastic index: {self.index}.")
+            return res
 
-        self.log.info(f'{self.__class__}: Document {dp_id} of type {self.index} indexed to elastic index: {self.index}.')
-        return res
+    def _es_address(self, settings: Mapping, host):
+        try:
+            address = settings["index_connections"][host]
+        except KeyError as err:
+            self.log.error(f"No ES index specified: {err}")
+            raise ValueError(f'Connection settings are not available for the host: {host}')
+        else:
+            return address
