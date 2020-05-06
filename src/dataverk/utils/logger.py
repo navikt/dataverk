@@ -14,8 +14,10 @@ class Logger:
     def _configure_logger(self, user) -> None:
         self._logger.propagate = False
         self._logger.setLevel(logging.INFO)
-        handler = self._create_handler(user)
-        self._logger.addHandler(handler)
+
+        if not len(self._logger.handlers):
+            handler = self._create_handler(user)
+            self._logger.addHandler(handler)
 
     def _create_handler(self, user) -> logging.Handler:
         handler = logging.StreamHandler()

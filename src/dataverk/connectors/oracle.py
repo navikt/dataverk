@@ -1,5 +1,4 @@
 import time
-#import cx_Oracle
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.engine.base import Engine
@@ -22,7 +21,7 @@ class OracleConnector(DBBaseConnector):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._engine.dispose()
 
-    def get_pandas_df(self, query, verbose_output=False) -> pd.DataFrame:
+    def get_pandas_df(self, query: str, verbose_output: bool=False) -> pd.DataFrame:
         start_time = time.time()
         self.log.info(f"Reading from Oracle database: {self._source}")
 
@@ -39,12 +38,12 @@ class OracleConnector(DBBaseConnector):
 
         return df
 
-    def persist_pandas_df(self, table, schema="dataverk", df=None, chunksize=10000, if_exists='append') -> None:
+    def persist_pandas_df(self, table: str, df: pd.DataFrame, chunksize: int=10000, if_exists: str='append') -> None:
         start_time = time.time()
         self.log.info(f"Persisting {len(df)} records to table: {table} in Oracle database: {self._source}")
 
         try:
-            df.to_sql(table, self._engine, schema=schema, if_exists=if_exists, chunksize=chunksize)
+            df.to_sql(table, self._engine, if_exists=if_exists, chunksize=chunksize)
         except SQLAlchemyError as error:
             self.log.error(str(error.__dict__["orig"]))
             return

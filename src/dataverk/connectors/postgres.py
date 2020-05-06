@@ -21,7 +21,7 @@ class PostgresConnector(DBBaseConnector):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._engine.dispose()
 
-    def get_pandas_df(self, query, verbose_output=False) -> pd.DataFrame:
+    def get_pandas_df(self, query: str, verbose_output: int=False) -> pd.DataFrame:
         start_time = time.time()
         self.log.info(f"Reading from PostgreSQL database: {self._source}")
 
@@ -41,7 +41,7 @@ class PostgresConnector(DBBaseConnector):
 
         return df
 
-    def persist_pandas_df(self, table, schema=None, df=None, chunksize=10000, if_exists="replace") -> None:
+    def persist_pandas_df(self, table: str, df: pd.DataFrame, chunksize: int=10000, if_exists: str="append") -> None:
         self.log.info(f"Persisting {len(df)} records to table: {table} in PostgreSQL database: {self._source}")
         start_time = time.time()
 
