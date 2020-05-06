@@ -2,6 +2,8 @@ import io
 import json
 import gzip
 from collections import Mapping
+
+from dataverk.connectors import BaseConnector
 from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
 from dataverk.connectors.bucket_connector_factory import (
     get_storage_connector,
@@ -9,10 +11,11 @@ from dataverk.connectors.bucket_connector_factory import (
 )
 
 
-class PackagePublisher:
+class PackagePublisher(BaseConnector):
     def __init__(
         self, settings_store: Mapping, env_store: Mapping, datapackage_metadata: Mapping
     ):
+        super().__init__()
         self._settings_store = settings_store
         self._env_store = env_store
         self._datapackage_metadata = datapackage_metadata
@@ -25,7 +28,8 @@ class PackagePublisher:
         """
         bucket_type = self._datapackage_metadata.get("store")
 
-        print(self._datapackage_metadata["store"])
+        self.log.info(f"Publishing datapackage {self._datapackage_metadata.get('store')} "
+                      f"to bucket {self._datapackage_metadata.get('bucket')}")
 
         self.upload_to_storage_bucket(
             datapackage_metadata=self._datapackage_metadata,

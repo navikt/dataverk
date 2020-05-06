@@ -22,5 +22,4 @@ class Base(TestCase):
 class MethodsReturnValues(Base):
 
     def test_write_invalid(self):
-        with self.assertRaises(requests.exceptions.RequestException):
-            self.es.write("id", {})
+        self.assertEqual(self.es.write("id", {}), None)

@@ -4,8 +4,8 @@ from dataverk.utils.logger import Logger
 
 
 class BaseConnector(ABC):
-    """Base class for all dataverk connectors
-    
+    """
+    Base class for all dataverk connectors
     """
     def __init__(self):
         self._logger = Logger(user=self._get_user(),
