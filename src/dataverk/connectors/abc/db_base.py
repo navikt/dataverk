@@ -2,7 +2,7 @@ import pandas as pd
 
 from abc import abstractmethod
 from typing import Mapping
-from dataverk.connectors.abc.base import BaseConnector
+from dataverk.connectors.abc.base import DataverkBase
 
 
 class DBBaseConnector(BaseConnector):

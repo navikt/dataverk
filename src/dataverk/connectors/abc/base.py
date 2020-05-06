@@ -3,9 +3,9 @@ from abc import ABC
 from dataverk.utils.logger import Logger
 
 
-class BaseConnector(ABC):
+class DataverkBase(ABC):
     """
-    Base class for all dataverk connectors
+    Base class for all dataverk classes
     """
     def __init__(self):
         self._logger = Logger(user=self._get_user(),

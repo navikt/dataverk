@@ -1,10 +1,10 @@
 import requests
 
 from typing import Mapping
-from dataverk.connectors.abc.base import BaseConnector
+from dataverk.connectors.abc.base import DataverkBase
 
 
-class S3Connector(BaseConnector):
+class S3Connector(DataverkBase):
     """
     Connector for NAIS S3 API
     """

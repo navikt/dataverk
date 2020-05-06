@@ -15,7 +15,7 @@ from kafka import KafkaConsumer
 from collections.abc import Mapping, Sequence
 from enum import Enum
 from datetime import datetime
-from dataverk.connectors import BaseConnector
+from dataverk.connectors import DataverkBase
 import streamz
 
 
@@ -24,7 +24,7 @@ class KafkaFetchMode(Enum):
     LAST_COMMITED_OFFSET = "last_commited_offset"
 
 
-class KafkaConnector(BaseConnector):
+class KafkaConnector(DataverkBase):
 
     def __init__(self, consumer: KafkaConsumer, settings: Mapping, topics: Sequence, fetch_mode: str):
         """ Dataverk Kafka consumer class

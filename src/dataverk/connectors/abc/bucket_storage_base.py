@@ -1,8 +1,8 @@
 from abc import ABC
-from dataverk.connectors.abc.base import BaseConnector
+from dataverk.connectors.abc.base import DataverkBase
 
 
-class BucketStorageConnector(BaseConnector, ABC):
+class BucketStorageConnector(DataverkBase, ABC):
 
     def __init__(self):
         super().__init__()

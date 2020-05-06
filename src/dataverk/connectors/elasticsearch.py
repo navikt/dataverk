@@ -1,10 +1,10 @@
 import requests
 
-from dataverk.connectors.abc.base import BaseConnector
+from dataverk.connectors.abc.base import DataverkBase
 from collections.abc import Mapping
 
 
-class ElasticsearchConnector(BaseConnector):
+class ElasticsearchConnector(DataverkBase):
     """Elasticsearch connector"""
 
     def __init__(self, settings: Mapping, host="elastic_host"):
@@ -28,7 +28,7 @@ class ElasticsearchConnector(BaseConnector):
         except requests.exceptions.RequestException as err:
             self.log.error(f"ES index connection error: {str(err)}")
         else:
-            self.log.info(f"Document {dp_id} successfully written to elastic index: {self.index}.")
+            self.log.info(f"Document {dp_id} successfully written to elastic index {self.index}.")
             return res
 
     def _es_address(self, settings: Mapping, host):

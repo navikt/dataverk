@@ -3,7 +3,7 @@ import json
 import gzip
 from collections import Mapping
 
-from dataverk.connectors import BaseConnector
+from dataverk.connectors import DataverkBase
 from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
 from dataverk.connectors.bucket_connector_factory import (
     get_storage_connector,
@@ -11,7 +11,7 @@ from dataverk.connectors.bucket_connector_factory import (
 )
 
 
-class PackagePublisher(BaseConnector):
+class PackagePublisher(DataverkBase):
     def __init__(
         self, settings_store: Mapping, env_store: Mapping, datapackage_metadata: Mapping
     ):
