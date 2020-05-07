@@ -1,9 +1,8 @@
 import math
 import pandas as pd
-import dask.dataframe as dd
 from collections.abc import Sequence
 from dataverk.context import EnvStore
-from dataverk import DataverkContext
+from dataverk.dataverk_context import DataverkContext
 from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector
 from dataverk.connectors import db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
@@ -21,7 +20,7 @@ class Dataverk:
     def context(self):
         return self._context
 
-    def read_sql(self, source, sql, connector='Oracle', verbose_output=False) -> pd.DataFrame:
+    def read_sql(self, source: str, sql: str, connector: str='Oracle', verbose_output: bool=False) -> pd.DataFrame:
         """ Read pandas dataframe from SQL database
 
         :param source: str: database source reference
@@ -35,19 +34,6 @@ class Dataverk:
 
         with conn:
             return conn.get_pandas_df(query=query, verbose_output=verbose_output)
-
-    def read_sql_dask(self, source, sql, where_values, connector='Oracle') -> dd.DataFrame:
-        """ Read dask dataframe from SQL database
-
-        :param source: str: database source
-        :param sql: str: sql query
-        :param where_values: where values for specifying dask partitions
-        :param connector: Database connector
-        :return: dask dataframe with result
-        """
-        conn = db_connector_factory.get_db_connector(settings_store=self.context.settings, connector=connector, source=source)
-
-        return conn.get_dask_df(query=sql, where_values=where_values)
 
     def read_kafka_message_fields(self, topics: Sequence, fetch_mode: str = "from_beginning") -> pd.DataFrame:
         """ Read single kafka message from topic and return list of message fields
@@ -86,20 +72,19 @@ class Dataverk:
         conn = JSONStatConnector()
         return conn.get_pandas_df(url, params=params)
 
-    def to_sql(self, df, table, sink=None, schema=None, connector='Oracle', if_exists: str = 'append'):
+    def to_sql(self, df: pd.DataFrame, table: str, sink: str, connector: str='Oracle', if_exists: str='append'):
         """ Write records in dataframe to a SQL database table
 
         :param df: pd.Dataframe: Dataframe to write
         :param table: str: Table in db to write to
         :param sink: str: target database name reference
-        :param schema: str: databse schema
         :param connector: str: Connector type (default: Oracle)
         :param if_exists: str: Action if table already exists in database (default: replace)
         """
         conn = db_connector_factory.get_db_connector(settings_store=self._context.settings, connector=connector, source=sink)
 
         with conn:
-            return conn.persist_pandas_df(table, schema=schema, df=df, if_exists=if_exists)
+            return conn.persist_pandas_df(table, df=df, if_exists=if_exists)
 
     def publish(self, datapackage):
         resources = datapackage.resources

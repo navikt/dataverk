@@ -1,23 +1,23 @@
-from collections import Mapping
 import urllib3
-import json
+
+from collections import Mapping
+from dataverk.connectors.abc.base import DataverkBase
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from datetime import datetime
 
 
-
-class ElasticSearchUpdater:
+class ElasticSearchUpdater(DataverkBase):
 
     def __init__(self, es_index: ElasticsearchConnector, datapackage_metadata: Mapping):
+        super().__init__()
         self._es_index = es_index
         self.datapackage_json = datapackage_metadata
 
     def publish(self):
-        ''' - Iterates through all bucket storage connections in the settings.json file and publishes the datapackage
-            - Updates ES index with metadata for the datapackage
+        """ Updates ES index with metadata for the datapackage
 
         :return: None
-        '''
+        """
 
         try:
             dp = self.datapackage_json
@@ -75,10 +75,9 @@ class ElasticSearchUpdater:
             js['resource_names'] = resource_names
             js['resource_descriptions'] = resource_descriptions
 
-            res = self._es_index.write(id, js)
-            print(res.text)
+            self._es_index.write(id, js)
         except urllib3.exceptions.LocationValueError as err:
-            print(f'write to elastic search failed, host_uri could not be resolved')
+            self.log.error(f"write to elastic search failed, host_uri could not be resolved")
             raise urllib3.exceptions.LocationValueError(err)
 
 

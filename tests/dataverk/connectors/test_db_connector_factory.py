@@ -5,7 +5,8 @@ from dataverk.connectors import OracleConnector, SQLiteConnector, PostgresConnec
 SETTINGS = {
     "db_connection_strings": {
         "oracle": "oracle://user:password@host:8080/service",
-        "postgres": "postgres://user:password@host:8080/service"
+        "postgres": "postgres://user:password@host:8080/service",
+        "sqllite": ":memory:"
     }
 }
 
@@ -14,7 +15,7 @@ class DataverkTest(unittest.TestCase):
 
     def test__get_db_connector_valid(self):
         connector_types = [("Oracle", "oracle", OracleConnector), ("Postgres", "postgres", PostgresConnector),
-                           ("Sqllite", ":memory:", SQLiteConnector)]
+                           ("Sqllite", "sqllite", SQLiteConnector)]
 
         for connector_type in connector_types:
             with self.subTest(msg="Testing sql connector type factory method", _input=connector_type):

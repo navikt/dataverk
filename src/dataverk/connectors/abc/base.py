@@ -1,19 +1,27 @@
+import os
 from abc import ABC
-
-from dataverk.mixins.logger_mixin import LoggerMixin
-from dataverk.mixins.auth_mixin import AuthMixin, AuthError
-from prometheus_client import Summary
+from dataverk.utils.logger import Logger
 
 
-# Create a metric to track time spent and requests made.
-REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
-
-
-class BaseConnector(ABC, AuthMixin, LoggerMixin):
-    """Common connection methods
-    
+class DataverkBase(ABC):
+    """
+    Base class for all dataverk classes
     """
     def __init__(self):
-        self.user = self.get_user()
-        if self._is_authorized() is not True:
-            raise AuthError("auth", "not authorized")
+        self._logger = Logger(user=self._get_user(),
+                              connector_name=self._get_class_name())
+
+    @property
+    def log(self):
+        return self._logger.log
+
+    @staticmethod
+    def _get_user():
+        try:
+            import pwd
+            return pwd.getpwuid(os.getuid()).pw_name
+        except ImportError:
+            return os.getlogin()
+
+    def _get_class_name(self):
+        return self.__class__.__name__

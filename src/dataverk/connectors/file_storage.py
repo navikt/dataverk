@@ -1,16 +1,16 @@
 import os
 import json
-from dataverk.connectors.abc.base import BaseConnector
+from dataverk.connectors.abc.base import DataverkBase
 from dataverk.utils.file_functions import write_file, read_file
 from dataverk.context.settings_classes import SettingsStore
 
 
-class FileStorageConnector(BaseConnector):
+class FileStorageConnector(DataverkBase):
     """File Storage connector"""
     
-    def __init__(self, settings: SettingsStore, encrypted=True, bucket=None):
+    def __init__(self, settings: SettingsStore, bucket=None):
 
-        super(self.__class__, self).__init__(encrypted=encrypted)
+        super().__init__()
 
         self.bucket = bucket
         self.settings = settings
