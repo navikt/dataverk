@@ -21,7 +21,7 @@ class PostgresConnector(DBBaseConnector):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._engine.dispose()
 
-    def get_pandas_df(self, query: str, verbose_output: int=False) -> pd.DataFrame:
+    def get_pandas_df(self, query: str, verbose_output: bool=False) -> pd.DataFrame:
         start_time = time.time()
         self.log.info(f"Reading from PostgreSQL database: {self._source}")
 

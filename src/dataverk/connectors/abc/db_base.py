@@ -23,7 +23,7 @@ class DBBaseConnector(DataverkBase):
         pass
 
     @abstractmethod
-    def get_pandas_df(self, query, verbose_output):
+    def get_pandas_df(self, query: str, verbose_output: bool):
         """Get Pandas dataframe
 
         """

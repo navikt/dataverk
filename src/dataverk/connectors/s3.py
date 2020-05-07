@@ -20,8 +20,10 @@ class S3Connector(DataverkBase):
             res.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.log.error(f"Unable to write object {destination_blob_name} to bucket {self.bucket_name}: {str(err)}")
+            raise requests.exceptions.HTTPError(err)
         except requests.exceptions.RequestException as err:
             self.log.error(f"Connection error {self.s3_api_url}: {str(err)}")
+            raise requests.exceptions.RequestException(err)
         else:
             self.log.info(f"Object {destination_blob_name} written to bucket {self.bucket_name}")
 
@@ -31,8 +33,10 @@ class S3Connector(DataverkBase):
             res.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.log.error(f"Unable to read object {blob_name} from bucket {self.bucket_name}: {str(err)}")
+            raise requests.exceptions.HTTPError(err)
         except requests.exceptions.RequestException as err:
             self.log.error(f"Connection error {self.s3_api_url}: {str(err)}")
+            raise requests.exceptions.RequestException(err)
         else:
             self.log.info(f"Object {blob_name} successfully read from bucket {self.bucket_name}")
             return res.text

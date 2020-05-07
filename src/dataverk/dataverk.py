@@ -20,7 +20,7 @@ class Dataverk:
     def context(self):
         return self._context
 
-    def read_sql(self, source, sql, connector='Oracle', verbose_output=False) -> pd.DataFrame:
+    def read_sql(self, source: str, sql: str, connector: str='Oracle', verbose_output: bool=False) -> pd.DataFrame:
         """ Read pandas dataframe from SQL database
 
         :param source: str: database source reference
