@@ -23,7 +23,7 @@ class Datapackage:
         self._resources = {}
         self.views = []
         self._datapackage_metadata = self._create_datapackage(dict(metadata))
-        self.validate_metadata()
+        self._validate_metadata()
 
     def _create_datapackage(self, metadata):
         today = datetime.date.today().strftime('%Y-%m-%d')
@@ -61,7 +61,7 @@ class Datapackage:
         metadata["datasets"] = {}
         return metadata
 
-    def validate_metadata(self):
+    def _validate_metadata(self):
         validator = DatasetModel(self._datapackage_metadata)
         validator.validate()
         validator.error_report()
