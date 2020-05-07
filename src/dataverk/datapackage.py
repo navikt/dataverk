@@ -7,6 +7,7 @@ import re
 from urllib3.util import url
 from os import environ
 
+from data_catalog_dcat_validator.models.dataset import DatasetModel
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 from dataverk.utils import validators, file_functions
 from collections.abc import Mapping, Sequence
@@ -22,6 +23,7 @@ class Datapackage:
         self._resources = {}
         self.views = []
         self._datapackage_metadata = self._create_datapackage(dict(metadata))
+        self.validate_metadata()
 
     def _create_datapackage(self, metadata):
         today = datetime.date.today().strftime('%Y-%m-%d')
@@ -58,6 +60,11 @@ class Datapackage:
         metadata["resources"] = []
         metadata["datasets"] = {}
         return metadata
+
+    def validate_metadata(self):
+        validator = DatasetModel(self._datapackage_metadata)
+        validator.validate()
+        validator.error_report()
 
     @property
     def datapackage_metadata(self):
