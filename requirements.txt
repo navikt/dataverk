@@ -22,3 +22,4 @@ nbsphinx==0.6.0
 kafka-python==2.0.1
 elasticsearch==7.6.0
 streamz==0.5.3
+data-catalog-dcat-validator==0.0.4
