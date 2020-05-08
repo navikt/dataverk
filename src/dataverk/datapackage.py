@@ -22,8 +22,8 @@ class Datapackage:
     def __init__(self, metadata: Mapping):
         self._resources = {}
         self.views = []
+        self._validate_metadata(metadata)
         self._datapackage_metadata = self._create_datapackage(dict(metadata))
-        self._validate_metadata()
 
     def _create_datapackage(self, metadata):
         today = datetime.date.today().strftime('%Y-%m-%d')
@@ -61,8 +61,9 @@ class Datapackage:
         metadata["datasets"] = {}
         return metadata
 
-    def _validate_metadata(self):
-        validator = DatasetModel(self._datapackage_metadata)
+    @staticmethod
+    def _validate_metadata(metadata: Mapping):
+        validator = DatasetModel(metadata)
         validator.validate()
         validator.error_report()
 
