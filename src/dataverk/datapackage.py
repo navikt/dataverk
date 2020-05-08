@@ -62,7 +62,7 @@ class Datapackage:
         return metadata
 
     @staticmethod
-    def _validate_metadata(metadata: dict):
+    def _validate_metadata(metadata: Mapping):
         validator = DatasetModel(metadata)
         validator.validate()
         validator.error_report()
