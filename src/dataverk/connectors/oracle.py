@@ -52,3 +52,14 @@ class OracleConnector(DBBaseConnector):
     def _create_engine(self) -> Engine:
         connection_string = self._connection_string()
         return create_engine(connection_string)
+    
+    def _connection_string(self):
+        connection_string = self._settings["db_connection_strings"][self._source]
+        return self._format_connection_string(connection_string)
+
+    def _format_connection_string(self, connection_string):
+        parsed_url = parse_url(connection_string)
+        if "?" not in parsed_url.request_uri:
+            return str(parsed_url).replace(parsed_url.request_uri, f"/?service_name={parsed_url.request_uri.split('/')[1]}")
+        else:
+            return connection_string
