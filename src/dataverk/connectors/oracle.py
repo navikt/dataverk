@@ -1,5 +1,6 @@
 import time
 import pandas as pd
+from urllib3.util import parse_url
 from sqlalchemy import create_engine
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.exc import SQLAlchemyError
