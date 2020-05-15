@@ -18,6 +18,12 @@ class DataverkContext:
     def settings(self):
         return self._settings_store
 
+    def connection_string(self, database):
+        return self._settings_store["db_connection_strings"][database]
+
+    def vault_path(self, database):
+        return self._settings_store["db_vault_path"][database]
+
     def _load_settings(self):
         return json.loads(file_functions.get_package_resource("settings.json", self._resource_path, self._http_headers))
 

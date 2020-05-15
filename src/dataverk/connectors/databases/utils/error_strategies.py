@@ -1,9 +1,23 @@
+from abc import ABC, abstractmethod
+
 from urllib3.util import url
 from dataverk_vault import api as vault_api
 from dataverk.connectors.databases.base import DBBaseConnector
 
 
-class OperationalErrorStrategy:
+class ErrorStrategy(ABC):
+
+    @staticmethod
+    @abstractmethod
+    def handle_error(connector: DBBaseConnector):
+        raise NotImplementedError()
+
+
+class OperationalErrorStrategy(ErrorStrategy):
+
+    @staticmethod
+    def handle_error(connector: DBBaseConnector):
+        OperationalErrorStrategy.reset_db_connection(connector)
 
     @staticmethod
     def reset_db_connection(connector: DBBaseConnector):

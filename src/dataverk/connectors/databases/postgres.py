@@ -23,7 +23,7 @@ class PostgresConnector(DBBaseConnector):
         try:
             df = pd.read_sql_query(query, self._engine)
         except OperationalError:
-            self.error_strategy.reset_db_connection(self)
+            self.error_strategy.handle_error(self)
             df = pd.read_sql_query(query, self._engine)
         except SQLAlchemyError as error:
             self.log.error(f"{error.__dict__['orig']}")
@@ -44,7 +44,7 @@ class PostgresConnector(DBBaseConnector):
             self._set_role()
             df.to_sql(table, self._engine, *args, **kwargs)
         except OperationalError:
-            self.error_strategy.reset_db_connection(self)
+            self.error_strategy.handle_error(self)
             self._set_role()
             df.to_sql(table, self._engine, *args, **kwargs)
         except SQLAlchemyError as error:

@@ -1,10 +1,12 @@
 import math
 import pandas as pd
 from collections.abc import Sequence
+
+from dataverk import Datapackage
 from dataverk.context import EnvStore
 from dataverk.dataverk_context import DataverkContext
 from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector
-from dataverk.connectors import db_connector_factory
+from dataverk.connectors.databases import db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from dataverk.package_publisher import PackagePublisher
@@ -20,7 +22,7 @@ class Dataverk:
     def context(self):
         return self._context
 
-    def read_sql(self, source: str, sql: str, connector: str='Oracle', verbose_output: bool=False) -> pd.DataFrame:
+    def read_sql(self, source: str, sql: str, connector: str='Oracle', verbose_output: bool=False, *args, **kwargs) -> pd.DataFrame:
         """ Read pandas dataframe from SQL database
 
         :param source: str: database source reference
@@ -29,11 +31,11 @@ class Dataverk:
         :param verbose_output: bool: flag for verbose output option
         :return: pd.Dataframe: Dataframe with result
         """
-        conn = db_connector_factory.get_db_connector(settings_store=self.context.settings, connector=connector, source=source)
+        conn = db_connector_factory.get_db_connector(settings_store=self.context.settings, source=source)
         query = self._get_sql_query(sql=sql)
 
         with conn:
-            return conn.get_pandas_df(query=query, verbose_output=verbose_output)
+            return conn.get_pandas_df(query=query, verbose_output=verbose_output, *args, **kwargs)
 
     def read_kafka_message_fields(self, topics: Sequence, fetch_mode: str = "from_beginning") -> pd.DataFrame:
         """ Read single kafka message from topic and return list of message fields
@@ -72,7 +74,7 @@ class Dataverk:
         conn = JSONStatConnector()
         return conn.get_pandas_df(url, params=params)
 
-    def to_sql(self, df: pd.DataFrame, table: str, sink: str, connector: str='Oracle', if_exists: str='append'):
+    def to_sql(self, df: pd.DataFrame, table: str, sink: str, connector: str='Oracle', if_exists: str='append', *args, **kwargs) -> None:
         """ Write records in dataframe to a SQL database table
 
         :param df: pd.Dataframe: Dataframe to write
@@ -81,12 +83,12 @@ class Dataverk:
         :param connector: str: Connector type (default: Oracle)
         :param if_exists: str: Action if table already exists in database (default: replace)
         """
-        conn = db_connector_factory.get_db_connector(settings_store=self._context.settings, connector=connector, source=sink)
+        conn = db_connector_factory.get_db_connector(settings_store=self._context.settings, source=sink)
 
         with conn:
-            return conn.persist_pandas_df(table, df=df, if_exists=if_exists)
+            return conn.persist_pandas_df(table, df=df, if_exists=if_exists, *args, **kwargs)
 
-    def publish(self, datapackage):
+    def publish(self, datapackage: Datapackage):
         resources = datapackage.resources
         metadata = datapackage.datapackage_metadata
 
