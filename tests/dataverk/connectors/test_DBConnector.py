@@ -1,30 +1,22 @@
 # -*- coding: utf-8 -*-
 # Import statements
 # =================
-from unittest import TestCase
 import pandas as pd
-from dataverk.connectors import SQLiteConnector
+from unittest import TestCase
+from dataverk.connectors.abc.db_base import DBConnector
 
 
-class Base(TestCase):
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-
-class MethodsReturnValues(Base):
+class MethodsReturnValues(TestCase):
 
     def test_sql_lite_in_memory_roundtrip(self):
         people = [{'id': 1, 'name': 'Per'}]
         df = pd.DataFrame(people)
         settings = {
             "db_connection_strings": {
-                "kilde": ":memory:"
+                "sqlite": "sqlite://"
             }
         }
-        with SQLiteConnector(settings_store=settings, source="kilde") as con:
+        with DBConnector(settings_store=settings, source="sqlite") as con:
             con.persist_pandas_df('people', df=df)
             df = con.get_pandas_df("select * from people")
-            self.assertTrue(df.iloc[0]['name'] == 'Per')
+            self.assertTrue(df.iloc[0]['name'] == people[0]["name"])
