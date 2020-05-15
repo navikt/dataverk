@@ -13,6 +13,7 @@ urllib3==1.25.8
 pyjstat==2.2.0
 requests==2.23.0
 pandas==1.0.3
+psycopg2==2.8.5
 cx_Oracle==7.3.0
 sphinx-rtd-theme==0.4.3
 Sphinx==3.0.0
