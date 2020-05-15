@@ -2,7 +2,7 @@ import math
 import pandas as pd
 from collections.abc import Sequence
 
-from dataverk import Datapackage
+from dataverk.datapackage import Datapackage
 from dataverk.context import EnvStore
 from dataverk.dataverk_context import DataverkContext
 from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector

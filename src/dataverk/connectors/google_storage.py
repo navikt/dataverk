@@ -1,13 +1,11 @@
 from collections.abc import Mapping
-import os
 import google.cloud.storage as storage
 from io import BytesIO
 from datetime import timedelta
-import google.auth
 import json
 from google.cloud import exceptions
 from google.oauth2 import service_account
-from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
+from dataverk.connectors.bucket_storage_base import BucketStorageConnector
 
 
 class GoogleStorageConnector(BucketStorageConnector):

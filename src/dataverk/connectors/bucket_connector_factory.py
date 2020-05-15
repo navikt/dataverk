@@ -1,4 +1,4 @@
-from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
+from dataverk.connectors.bucket_storage_base import BucketStorageConnector
 from dataverk.connectors.google_storage import GoogleStorageConnector
 from collections.abc import Mapping
 from enum import Enum
