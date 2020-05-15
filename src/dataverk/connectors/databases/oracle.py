@@ -4,7 +4,6 @@ from dataverk.connectors.databases.base import DBBaseConnector
 
 
 class OracleConnector(DBBaseConnector):
-
     def __init__(self, settings_store: Mapping, source: str):
         super().__init__(settings_store, source)
 
@@ -16,7 +15,9 @@ class OracleConnector(DBBaseConnector):
     def _format_connection_string(connection_string):
         parsed_url = parse_url(connection_string)
         if "?" not in parsed_url.request_uri:
-            return str(parsed_url).replace(parsed_url.request_uri,
-                                           f"/?service_name={parsed_url.request_uri.split('/')[1]}")
+            return str(parsed_url).replace(
+                parsed_url.request_uri,
+                f"/?service_name={parsed_url.request_uri.split('/')[1]}",
+            )
         else:
             return connection_string

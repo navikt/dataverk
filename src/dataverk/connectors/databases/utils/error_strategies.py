@@ -6,7 +6,6 @@ from dataverk.connectors.databases.base import DBBaseConnector
 
 
 class ErrorStrategy(ABC):
-
     @staticmethod
     @abstractmethod
     def handle_error(connector: DBBaseConnector):
@@ -28,8 +27,12 @@ class OperationalErrorStrategy(ErrorStrategy):
         try:
             vault_path = connector.settings["db_vault_path"][connector.source]
         except KeyError as err:
-            connector.log.error(f"No vault path specified in settings, unable to update credentials: {err}")
-            raise KeyError("No vault path specified in settings, unable to update credentials: {err}")
+            connector.log.error(
+                f"No vault path specified in settings, unable to update credentials: {err}"
+            )
+            raise KeyError(
+                "No vault path specified in settings, unable to update credentials: {err}"
+            )
         else:
             OperationalErrorStrategy._update_credentials(connector, vault_path)
             connector._engine = connector._create_engine()
@@ -39,6 +42,9 @@ class OperationalErrorStrategy(ErrorStrategy):
         connector.log.warning(f"Updating db credentials")
         conn_string = connector._connection_string()
         parsed_url = url.parse_url(conn_string)
-        new_credentials = OperationalErrorStrategy.vault_api.get_database_creds(vault_path)
-        connector.settings["db_connection_strings"][connector.source] = conn_string.replace(parsed_url.auth,
-                                                                                            new_credentials)
+        new_credentials = OperationalErrorStrategy.vault_api.get_database_creds(
+            vault_path
+        )
+        connector.settings["db_connection_strings"][
+            connector.source
+        ] = conn_string.replace(parsed_url.auth, new_credentials)

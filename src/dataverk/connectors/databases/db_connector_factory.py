@@ -2,7 +2,12 @@ from collections import Mapping
 from enum import Enum
 from urllib3.util import parse_url
 from dataverk.connectors.databases.base import DBBaseConnector
-from dataverk.connectors import OracleConnector, PostgresConnector, Db2Connector, SqliteConnector
+from dataverk.connectors import (
+    OracleConnector,
+    PostgresConnector,
+    Db2Connector,
+    SqliteConnector,
+)
 
 
 class DbType(Enum):
@@ -22,8 +27,10 @@ def get_db_connector(settings_store: Mapping, source: str) -> DBBaseConnector:
     try:
         connection_string = parse_url(settings_store["db_connection_strings"][source])
     except KeyError:
-        raise ValueError(f'Database connection string not found in settings file. '
-                         f'Unable to establish connection to database: {source}')
+        raise ValueError(
+            f"Database connection string not found in settings file. "
+            f"Unable to establish connection to database: {source}"
+        )
 
     if DbType.ORACLE.value in connection_string.scheme.lower():
         return OracleConnector(settings_store=settings_store, source=source)

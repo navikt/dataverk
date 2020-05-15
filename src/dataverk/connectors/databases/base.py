@@ -9,7 +9,6 @@ from dataverk.connectors.abc.base import DataverkBase
 
 
 class DBBaseConnector(DataverkBase):
-
     def __init__(self, settings_store: Mapping, source: str):
         super().__init__()
         self.settings = settings_store
@@ -22,7 +21,9 @@ class DBBaseConnector(DataverkBase):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._engine.dispose()
 
-    def get_pandas_df(self, query: str, verbose_output: bool=False, *args, **kwargs) -> pd.DataFrame:
+    def get_pandas_df(
+        self, query: str, verbose_output: bool = False, *args, **kwargs
+    ) -> pd.DataFrame:
         start_time = time.time()
         self.log.info(f"Reading from database: {self.source}")
 
@@ -41,7 +42,9 @@ class DBBaseConnector(DataverkBase):
 
     def persist_pandas_df(self, table: str, df: pd.DataFrame, *args, **kwargs) -> None:
         start_time = time.time()
-        self.log.info(f"Persisting {len(df)} records to table: {table} in database: {self.source}")
+        self.log.info(
+            f"Persisting {len(df)} records to table: {table} in database: {self.source}"
+        )
 
         try:
             df.to_sql(table, self._engine, *args, **kwargs)
@@ -50,7 +53,9 @@ class DBBaseConnector(DataverkBase):
             raise SQLAlchemyError(f"{error}")
 
         end_time = time.time()
-        self.log.info(f"Persisted {len(df)} records to table {table} in {end_time - start_time} seconds")
+        self.log.info(
+            f"Persisted {len(df)} records to table {table} in {end_time - start_time} seconds"
+        )
 
     def _create_engine(self) -> engine.Engine:
         db = self._connection_string()
