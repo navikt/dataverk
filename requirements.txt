@@ -1,3 +1,4 @@
+data-catalog-dcat-validator==0.0.4
 dataverk-vault==0.1.4
 google-api-core==1.16.0
 google-auth==1.13.1
@@ -9,17 +10,13 @@ googleapis-common-protos==1.51.0
 avro-python3==1.9.2.1
 SQLAlchemy==1.3.15
 urllib3==1.25.8
-fire==0.3.0
-prometheus_client==0.7.1
 pyjstat==2.2.0
 requests==2.23.0
 pandas==1.0.3
 cx_Oracle==7.3.0
-protobuf==3.11.3
 sphinx-rtd-theme==0.4.3
 Sphinx==3.0.0
 nbsphinx==0.6.0
 kafka-python==2.0.1
 elasticsearch==7.6.0
 streamz==0.5.3
-data-catalog-dcat-validator==0.0.4

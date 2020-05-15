@@ -4,7 +4,7 @@ import pandas as pd
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
 from collections.abc import Mapping
 from dataverk.connectors.databases.base import DBBaseConnector
-from dataverk.connectors.databases.utils.error_strategies import OperationalErrorStrategy
+from dataverk.connectors.databases.utils.error_strategies import OperationalErrorStrategy, ErrorStrategy
 
 
 class PostgresConnector(DBBaseConnector):
@@ -12,7 +12,7 @@ class PostgresConnector(DBBaseConnector):
     def __init__(self,
                  settings_store: Mapping,
                  source: str,
-                 error_strategy: OperationalErrorStrategy=OperationalErrorStrategy()):
+                 error_strategy: ErrorStrategy=OperationalErrorStrategy()):
         super().__init__(settings_store, source)
         self.error_strategy = error_strategy
 
@@ -55,7 +55,7 @@ class PostgresConnector(DBBaseConnector):
         self.log.info(f"Persisted {len(df)} records to table {table} in {end_time - start_time} seconds")
 
     def _get_role_name(self) -> str:
-        vault_path = self.settings.vault_path(self.source)
+        vault_path = self.settings["db_vault_path"][self.source]
         return f"{vault_path.split('/')[-1]}"
 
     def _set_role(self) -> None:

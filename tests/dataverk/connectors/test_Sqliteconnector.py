@@ -3,7 +3,7 @@
 # =================
 import pandas as pd
 from unittest import TestCase
-from dataverk.connectors.abc.db_base import DBConnector
+from dataverk.connectors.databases.base import DBBaseConnector
 
 
 class MethodsReturnValues(TestCase):
@@ -16,7 +16,7 @@ class MethodsReturnValues(TestCase):
                 "sqlite": "sqlite://"
             }
         }
-        with DBConnector(settings_store=settings, source="sqlite") as con:
+        with DBBaseConnector(settings_store=settings, source="sqlite") as con:
             con.persist_pandas_df('people', df=df)
             df = con.get_pandas_df("select * from people")
             self.assertTrue(df.iloc[0]['name'] == people[0]["name"])

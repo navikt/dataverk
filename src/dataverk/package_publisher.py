@@ -4,7 +4,7 @@ import gzip
 from collections import Mapping
 
 from dataverk.connectors import DataverkBase
-from dataverk.connectors.abc.bucket_storage_base import BucketStorageConnector
+from dataverk.connectors.bucket_storage_base import BucketStorageConnector
 from dataverk.connectors.bucket_connector_factory import (
     get_storage_connector,
     BucketType,
