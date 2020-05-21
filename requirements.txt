@@ -15,7 +15,7 @@ pyjstat==2.2.0
 requests==2.23.0
 pandas==1.0.3
 cx_Oracle==7.3.0
-protobuf==3.11.3
+protobuf==3.12.1
 sphinx-rtd-theme==0.4.3
 Sphinx==3.0.0
 nbsphinx==0.6.0
