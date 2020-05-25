@@ -3,6 +3,8 @@ import requests
 from dataverk.connectors.abc.base import DataverkBase
 from collections.abc import Mapping
 
+from dataverk.exceptions import dataverk_exceptions
+
 
 class ElasticsearchConnector(DataverkBase):
     """Elasticsearch connector"""
@@ -10,8 +12,7 @@ class ElasticsearchConnector(DataverkBase):
     def __init__(self, settings: Mapping, host="elastic_host"):
         super().__init__()
 
-        self._es_address = self._es_address(settings, host)
-        self.index = settings["index_connections"]["index"]
+        self._es_address = self._get_es_address(settings, host)
 
     def write(self, dp_id: str, doc: Mapping):
         """ Add or update document in es index
@@ -30,14 +31,14 @@ class ElasticsearchConnector(DataverkBase):
             self.log.error(f"ES index connection error: {str(err)}")
             raise requests.exceptions.RequestException(err)
         else:
-            self.log.info(f"Document {dp_id} successfully written to elastic index {self.index}.")
+            self.log.info(f"Document {dp_id} successfully written to elastic index.")
             return res
 
-    def _es_address(self, settings: Mapping, host):
+    def _get_es_address(self, settings: Mapping, host):
         try:
             address = settings["index_connections"][host]
         except KeyError as err:
-            self.log.error(f"No ES index specified: {err}")
-            raise ValueError(f'Connection settings are not available for the host: {host}')
+            self.log.warning(f"No ES index specified: {err}")
+            raise dataverk_exceptions.IncompleteSettingsObject(f'Connection settings are not available for the host: {host}')
         else:
             return address

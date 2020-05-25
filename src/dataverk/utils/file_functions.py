@@ -1,6 +1,7 @@
 import os
 import errno
 import json
+import pathlib
 import shutil
 import stat
 import requests
@@ -8,7 +9,7 @@ from pathlib import Path
 from urllib3.exceptions import LocationParseError
 from urllib3.util import url
 
-from dataverk.connectors.google_storage import GoogleStorageConnector
+from dataverk.connectors.storage.google_storage import GoogleStorageConnector
 
 
 def get_package_resource(resource_name: str, base_path: str, http_headers: dict):
@@ -31,21 +32,15 @@ def get_package_resource(resource_name: str, base_path: str, http_headers: dict)
                 return read_file(Path(base_path).joinpath(resource_name))
 
 
-def write_file(path, content):
-    if not os.path.exists(os.path.dirname(path)):
-        try:
-            os.makedirs(os.path.dirname(path))
-        except OSError as exc: # Guard against race condition
-            if exc.errno != errno.EEXIST:
-                raise
-
-    with open(path, "w") as f:
-        f.write(content)
+def write_file(path, content, compressed: bool=False):
+    pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
+    with Path(path).open("w" if not compressed else "wb") as file:
+        file.write(content)
 
 
-def read_file(path):
-    with open(path, mode="r", encoding="utf-8") as f:
-        return f.read()
+def read_file(path, encoding="utf-8"):
+    with Path(path).open("r", encoding=encoding) as file:
+        return file.read()
 
 
 def json_to_dict(path: Path):

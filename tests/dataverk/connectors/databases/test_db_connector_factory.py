@@ -13,7 +13,7 @@ SETTINGS = {
 }
 
 
-class DataverkTest(unittest.TestCase):
+class TestDbConnectorFactory(unittest.TestCase):
 
     def test__get_db_connector_valid(self):
         connector_types = [("oracle", OracleConnector), ("postgres", PostgresConnector),

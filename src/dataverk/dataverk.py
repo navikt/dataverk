@@ -1,20 +1,23 @@
 import math
 import pandas as pd
-from collections.abc import Sequence
 
+from collections.abc import Sequence
+from dataverk.utils import dataverk_doc_address
+from dataverk.exceptions import dataverk_exceptions
 from dataverk.datapackage import Datapackage
 from dataverk.context import EnvStore
 from dataverk.dataverk_context import DataverkContext
-from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector
+from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector, DataverkBase
 from dataverk.connectors.databases import db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from dataverk.package_publisher import PackagePublisher
 
 
-class Dataverk:
+class Dataverk(DataverkBase):
 
     def __init__(self, resource_path: str=".", env_file: str='.env', auth_token: str=None):
+        super().__init__()
         env_store = EnvStore.safe_create(env_file)
         self._context = DataverkContext(env_store, resource_path, auth_token)
 
@@ -97,9 +100,17 @@ class Dataverk:
         package_publisher.publish(resources=resources)
 
         # Publish metadata to elastic search
-        es_conn = ElasticsearchConnector(self._context.settings)
-        eu = ElasticSearchUpdater(es_conn, metadata)
-        eu.publish()
+        try:
+            es_conn = ElasticsearchConnector(self._context.settings)
+        except dataverk_exceptions.IncompleteSettingsObject:
+            self.log.warning(
+                f"""Could not publish metadata to elastic search index.
+                ES index not specified in settings object.
+                See {dataverk_doc_address} for guidelines on how to setup the settings file."""
+            )
+        else:
+            eu = ElasticSearchUpdater(es_conn, metadata)
+            eu.publish()
 
     def _get_sql_query(self, sql):
         if self._is_sql_file(sql):

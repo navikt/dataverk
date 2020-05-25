@@ -27,7 +27,7 @@ class PostgresConnector(DBBaseConnector):
         self.log.info(f"Reading from PostgreSQL database: {self.source}")
 
         try:
-            df = pd.read_sql_query(query, self._engine)
+            df = pd.read_sql_query(query, self._engine, *args, **kwargs)
         except OperationalError:
             self.error_strategy.handle_error(self)
             df = pd.read_sql_query(query, self._engine)

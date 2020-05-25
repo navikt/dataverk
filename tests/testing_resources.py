@@ -5,7 +5,7 @@ MOCK_SETTINGS = {
     "index": "index-name"
     },
 
-    "bucket_storage_connections": {
+    "bucket_storage": {
     "github": {
       "publish": "True",
       "host": "https://raw.githubusercontent.com"

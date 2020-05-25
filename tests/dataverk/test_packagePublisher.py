@@ -16,14 +16,6 @@ class TestPackagePublisher(TestCase):
     def test__is_publish_set(self):
         pp = PackagePublisher(settings_store=MOCK_SETTINGS, datapackage_metadata=MOCK_METADATA, env_store=MOCK_ENVSTORE)
 
-    def test_publish(self):
-        pp = PackagePublisher(settings_store=MOCK_SETTINGS, datapackage_metadata=MOCK_METADATA, env_store=MOCK_ENVSTORE)
-        pp.publish(["resource1, resource2"])
-
-    def test_upload_to_storage_bucket(self):
-        pp = PackagePublisher(settings_store=MOCK_SETTINGS, datapackage_metadata=MOCK_METADATA, env_store=MOCK_ENVSTORE)
-        pp.upload_to_storage_bucket(MOCK_METADATA, [], conn=None, datapackage_key_prefix="prefix")
-
     def test__compress_content(self):
         orig_data = "col1;col2;col3 value;1;2.3"
         data_buff = io.StringIO()

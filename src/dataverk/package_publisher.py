@@ -4,10 +4,10 @@ import gzip
 from collections import Mapping
 
 from dataverk.connectors import DataverkBase
-from dataverk.connectors.bucket_storage_base import BucketStorageConnector
-from dataverk.connectors.bucket_connector_factory import (
+from dataverk.connectors.storage.bucket_storage_base import BucketStorageBase
+from dataverk.connectors.storage.storage_connector_factory import (
     get_storage_connector,
-    BucketType,
+    StorageType,
 )
 
 
@@ -34,10 +34,9 @@ class PackagePublisher(DataverkBase):
         self.upload_to_storage_bucket(
             datapackage_metadata=self._datapackage_metadata,
             conn=get_storage_connector(
-                bucket_type=BucketType(bucket_type),
+                storage_type=StorageType(bucket_type),
                 bucket_name=self._datapackage_metadata.get("bucket"),
-                settings=self._settings_store,
-                encrypted=False,
+                settings=self._settings_store
             ),
             datapackage_key_prefix=self._datapackage_key_prefix(
                 self._datapackage_metadata.get("id")
@@ -49,7 +48,7 @@ class PackagePublisher(DataverkBase):
     def upload_to_storage_bucket(
         datapackage_metadata,
         resources,
-        conn: BucketStorageConnector,
+        conn: BucketStorageBase,
         datapackage_key_prefix: str,
     ) -> None:
         """ Publish data to bucket storage.
@@ -61,34 +60,33 @@ class PackagePublisher(DataverkBase):
         :param datapackage_key_prefix: str: prefix for datapackage key
         :return: None
         """
-        if conn is not None:
-            conn.write(
-                json.dumps(datapackage_metadata),
-                datapackage_key_prefix + "datapackage",
-                "json", datapackage_metadata
-            )
-            for filename, item in resources.items():
-                df = item['df']
-                sep = item['dsv_separator']
-                fmt = item["format"]
-                compressed = item["compressed"]
+        conn.write(
+            json.dumps(datapackage_metadata),
+            datapackage_key_prefix + "datapackage",
+            "json", metadata=datapackage_metadata
+        )
+        for filename, item in resources.items():
+            df = item['df']
+            sep = item['dsv_separator']
+            fmt = item["format"]
+            compressed = item["compressed"]
 
-                data_buff = io.StringIO()
-                df.to_csv(data_buff, sep=sep, index=False)
+            data_buff = io.StringIO()
+            df.to_csv(data_buff, sep=sep, index=False)
 
-                if compressed:
-                    compressed_data = PackagePublisher._compress_content(data_buff)
-                    PackagePublisher._upload(conn=conn,
-                                             data=compressed_data,
-                                             destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
-                                             metadata=datapackage_metadata,
-                                             fmt=f"{fmt}.gz")
-                else:
-                    PackagePublisher._upload(conn=conn,
-                                             data=data_buff.getvalue(),
-                                             destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
-                                             metadata=datapackage_metadata,
-                                             fmt=fmt)
+            if compressed:
+                compressed_data = PackagePublisher._compress_content(data_buff)
+                PackagePublisher._upload(conn=conn,
+                                         data=compressed_data,
+                                         destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
+                                         metadata=datapackage_metadata,
+                                         fmt=f"{fmt}.gz")
+            else:
+                PackagePublisher._upload(conn=conn,
+                                         data=data_buff.getvalue(),
+                                         destination_blob_name=f"{datapackage_key_prefix}resources/{filename}",
+                                         metadata=datapackage_metadata,
+                                         fmt=fmt)
 
     @staticmethod
     def _compress_content(data_buff):

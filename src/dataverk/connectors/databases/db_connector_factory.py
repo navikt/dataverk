@@ -8,6 +8,7 @@ from dataverk.connectors import (
     Db2Connector,
     SqliteConnector,
 )
+from dataverk.exceptions import dataverk_exceptions
 
 
 class DbType(Enum):
@@ -27,7 +28,7 @@ def get_db_connector(settings_store: Mapping, source: str) -> DBBaseConnector:
     try:
         connection_string = parse_url(settings_store["db_connection_strings"][source])
     except KeyError:
-        raise ValueError(
+        raise dataverk_exceptions.IncompleteSettingsObject(
             f"Database connection string not found in settings file. "
             f"Unable to establish connection to database: {source}"
         )
@@ -41,4 +42,7 @@ def get_db_connector(settings_store: Mapping, source: str) -> DBBaseConnector:
     elif DbType.SQLITE.value in connection_string.scheme.lower():
         return SqliteConnector(settings_store=settings_store, source=source)
     else:
-        raise NotImplementedError()
+        raise NotImplementedError(
+            f"""Database type {connection_string.scheme.lower()} is not supported.
+            Supported types are {[name.value for name in DbType]}"""
+        )
