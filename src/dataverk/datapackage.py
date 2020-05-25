@@ -11,7 +11,7 @@ from data_catalog_dcat_validator.models.dataset import DatasetModel
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 from dataverk.utils import validators, file_functions
 from collections.abc import Mapping, Sequence
-from dataverk.connectors.bucket_connector_factory import BucketType
+from dataverk.connectors.storage.storage_connector_factory import StorageType
 
 
 class Datapackage:
@@ -41,7 +41,7 @@ class Datapackage:
             raise AttributeError(f"title is required to be set in datapackage metadata")
 
         # set defaults for store and repo when not specified
-        metadata['store'] = metadata.get('store', BucketType.LOCAL)
+        metadata['store'] = metadata.get('store', StorageType.LOCAL)
         metadata['repo'] = metadata.get('repo', metadata.get('github-repo', ''))
 
         try:
@@ -256,9 +256,9 @@ class Datapackage:
         bucket = metadata['bucket']
         dp_id = metadata['id']
 
-        if BucketType(store) is BucketType.NAIS:
+        if StorageType(store) is StorageType.NAIS:
             path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
-        elif BucketType(store) is BucketType.GCS:
+        elif StorageType(store) is StorageType.GCS:
             path = f'https://storage.googleapis.com/{bucket}/{dp_id}'
             store_path = f'gs://{bucket}/{dp_id}'
         else: #default is local storage
