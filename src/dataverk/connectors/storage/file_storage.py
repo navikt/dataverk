@@ -3,7 +3,6 @@ from pathlib import Path
 from dataverk.exceptions import dataverk_exceptions
 from dataverk.connectors.storage.bucket_storage_base import BucketStorageBase
 from dataverk.utils import file_functions
-from dataverk.utils import dataverk_doc_address
 
 
 class FileStorageConnector(BucketStorageBase):
@@ -14,11 +13,8 @@ class FileStorageConnector(BucketStorageBase):
 
         try:
             self._path = settings["bucket_storage"]["local"]["path"]
-        except KeyError:
-            raise dataverk_exceptions.IncompleteSettingsObject(
-                f"""No path specified for file storage in settings object. 
-                See {dataverk_doc_address} for guidelines on how to setup settings file."""
-            )
+        except KeyError as missing:
+            raise dataverk_exceptions.IncompleteSettingsObject(f"{missing}")
 
     def write(self, data, destination_blob_name: str, fmt: str, **kwargs) -> None:
         """Write resource to file"""

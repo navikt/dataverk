@@ -1,4 +1,3 @@
-from dataverk.connectors.abc.base import DataverkBase
 from dataverk.connectors.jsonstat import JSONStatConnector
 from dataverk.connectors.storage.google_storage import GoogleStorageConnector
 from dataverk.connectors.databases.db2 import Db2Connector

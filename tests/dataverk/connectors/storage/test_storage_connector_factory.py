@@ -8,8 +8,8 @@ from dataverk.connectors import NaisS3Connector, GoogleStorageConnector
 from dataverk.connectors.storage import storage_connector_factory
 from dataverk.connectors.storage.file_storage import FileStorageConnector
 from dataverk.connectors.storage.storage_connector_factory import StorageType
-from tests.dataverk.connectors.storage.test_utils.google_storage_common import GOOGLE_SERVICE_ACCOUNT, GCS_BUCKET_NAME
-from tests.dataverk.connectors.storage.test_utils.mock_google_cloud_api import MockGoogleClient, MockGoogleCredentials
+from tests.dataverk.connectors.storage.test_resources.google_storage_common import GOOGLE_SERVICE_ACCOUNT, GCS_BUCKET_NAME
+from tests.dataverk.connectors.storage.test_resources.mock_google_cloud_api import MockGoogleClient, MockGoogleCredentials
 
 
 class TestStorageConnectorFactory(unittest.TestCase):

@@ -1,22 +1,10 @@
-name: Release dataverk
+name: Release pypi
 
 on:
   release:
     types: [published]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    container:
-      image: python:3.7
-    steps:
-    - name: Checkout
-      uses: actions/checkout@master
-    - name: Install dependencies
-      run: pip3 install .
-    - name: Run unittests
-      run: python3 -m unittest discover
-
   release-pypi:
     name: Set dataverk version in setup.py to release tag
     needs: test

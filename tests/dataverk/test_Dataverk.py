@@ -1,11 +1,10 @@
 import json
 import unittest
+
 from pathlib import Path
-
 from dataverk.dataverk import Dataverk
-from os import environ
-
 from tests.windows_safe_tempdir import WindowsSafeTempDirectory
+
 
 SETTINGS = {
     "index_connections": {
@@ -31,10 +30,7 @@ INVALID_METADATA = {
 }
 
 
-class DataverkTest(unittest.TestCase):
-
-    def setUp(self):
-        environ["DATAVERK_NO_SETTINGS_SECRETS"] = "true"
+class TestDataverk(unittest.TestCase):
 
     def test_init(self):
         tempdir = WindowsSafeTempDirectory()

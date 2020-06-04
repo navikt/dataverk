@@ -3,7 +3,7 @@ import json
 import gzip
 from collections import Mapping
 
-from dataverk.connectors import DataverkBase
+from dataverk.abc.base import DataverkBase
 from dataverk.connectors.storage.bucket_storage_base import BucketStorageBase
 from dataverk.connectors.storage.storage_connector_factory import (
     get_storage_connector,

@@ -1,4 +1,4 @@
-from dataverk.connectors.abc.base import DataverkBase
+from dataverk.abc.base import DataverkBase
 
 
 class BucketStorageBase(DataverkBase):

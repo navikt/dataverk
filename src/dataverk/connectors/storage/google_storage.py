@@ -7,7 +7,6 @@ from google.cloud import exceptions as gcloud_exceptions
 from google.oauth2 import service_account
 from pathlib import Path
 from dataverk.connectors.storage.utils import blob_metadata
-from dataverk.utils import dataverk_doc_address
 from dataverk.exceptions import dataverk_exceptions
 from dataverk.connectors.storage.bucket_storage_base import BucketStorageBase
 
@@ -82,11 +81,8 @@ class GoogleStorageConnector(BucketStorageBase):
     def _get_gcp_credentials(self, settings):
         try:
             info = settings["bucket_storage"]["gcs"]["credentials"]
-        except KeyError:
-            raise dataverk_exceptions.IncompleteSettingsObject(
-                f"""No gcs credentials is provided in settings object. 
-                See {dataverk_doc_address} for guidelines on how to setup settings file."""
-            )
+        except KeyError as missing:
+            raise dataverk_exceptions.IncompleteSettingsObject(f"{missing}")
         else:
             info = self.parse_gcp_credentials(info)
             scope = "https://www.googleapis.com/auth/cloud-platform"

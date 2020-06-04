@@ -4,8 +4,7 @@ import pandas as pd
 from typing import Mapping
 from sqlalchemy import engine
 from sqlalchemy.exc import SQLAlchemyError
-
-from dataverk.connectors.abc.base import DataverkBase
+from dataverk.abc.base import DataverkBase
 
 
 class DBBaseConnector(DataverkBase):
@@ -30,7 +29,7 @@ class DBBaseConnector(DataverkBase):
         try:
             df = pd.read_sql(query, self._engine, *args, **kwargs)
         except SQLAlchemyError as error:
-            self.log.error(f"{error.__dict__['orig']}")
+            self.log.error(f"{error}")
             raise SQLAlchemyError(f"{error}")
 
         end_time = time.time()
@@ -47,9 +46,9 @@ class DBBaseConnector(DataverkBase):
         )
 
         try:
-            df.to_sql(table, self._engine, *args, **kwargs)
+            df.to_sql(name=table, con=self._engine, *args, **kwargs)
         except SQLAlchemyError as error:
-            self.log.error(f"{error.__dict__['orig']}")
+            self.log.error(f"{error}")
             raise SQLAlchemyError(f"{error}")
 
         end_time = time.time()

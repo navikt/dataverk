@@ -2,12 +2,13 @@ import math
 import pandas as pd
 
 from collections.abc import Sequence
+from dataverk.abc.base import DataverkBase
 from dataverk.utils import dataverk_doc_address
 from dataverk.exceptions import dataverk_exceptions
 from dataverk.datapackage import Datapackage
 from dataverk.context import EnvStore
 from dataverk.dataverk_context import DataverkContext
-from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector, DataverkBase
+from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector
 from dataverk.connectors.databases import db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector

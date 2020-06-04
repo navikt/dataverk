@@ -3,8 +3,8 @@ import requests
 
 from unittest import mock
 from dataverk.connectors import NaisS3Connector
-from tests.dataverk.connectors.storage.test_utils.mock_nais_s3_api import mock_requests_put, mock_requests_get
-from tests.dataverk.connectors.storage.test_utils.nais_s3_storage_common import NAIS_S3_ENDPOINT, NAIS_S3_BLOB_NAME, \
+from tests.dataverk.connectors.storage.test_resources.mock_nais_s3_api import mock_requests_put, mock_requests_get
+from tests.dataverk.connectors.storage.test_resources.nais_s3_storage_common import NAIS_S3_ENDPOINT, NAIS_S3_BLOB_NAME, \
     NAIS_S3_RESOURCE_FMT, NAIS_S3_BUCKET_NAME, NAIS_S3_RESOURCE_CONTENT
 
 

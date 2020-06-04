@@ -15,7 +15,7 @@ from kafka import KafkaConsumer
 from collections.abc import Mapping, Sequence
 from enum import Enum
 from datetime import datetime
-from dataverk.connectors import DataverkBase
+from dataverk.abc.base import DataverkBase
 import streamz
 
 

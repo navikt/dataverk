@@ -7,9 +7,9 @@ from unittest import mock
 from pathlib import Path
 from dataverk.exceptions import dataverk_exceptions
 from dataverk.connectors import GoogleStorageConnector
-from tests.dataverk.connectors.storage.test_utils.google_storage_common import GCS_BUCKET_NAME, SETTINGS, \
+from tests.dataverk.connectors.storage.test_resources.google_storage_common import GCS_BUCKET_NAME, SETTINGS, \
     GOOGLE_SERVICE_ACCOUNT, BLOB_PUBLIC_URL, BLOB_DATA, EXPECTED_BLOB_METADATA_MARKDOWN, EXPECTED_BLOB_METADATA_OBJECT
-from tests.dataverk.connectors.storage.test_utils.mock_google_cloud_api import MockGoogleClient, MockGoogleCredentials
+from tests.dataverk.connectors.storage.test_resources.mock_google_cloud_api import MockGoogleClient, MockGoogleCredentials
 
 
 class TestGoogleStorageConnectorStaticMethods(unittest.TestCase):

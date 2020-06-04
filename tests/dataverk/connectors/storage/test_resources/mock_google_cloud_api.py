@@ -1,7 +1,7 @@
 import io
 
 from google.cloud import exceptions
-from tests.dataverk.connectors.storage.test_utils.google_storage_common import GCS_BUCKET_NAME, BLOB_PUBLIC_URL, BLOB_DATA
+from tests.dataverk.connectors.storage.test_resources.google_storage_common import GCS_BUCKET_NAME, BLOB_PUBLIC_URL, BLOB_DATA
 
 
 class MockBucket:

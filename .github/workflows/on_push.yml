@@ -1,4 +1,4 @@
-name: Run unittests
+name: Unittests
 
 on:
   push:
@@ -16,6 +16,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
       - name: Install dependencies
-        run: pip3 install .
+        run: |
+          pip3 install .
+          pip3 install pytest
       - name: Run unittests
-        run: python3 -m unittest discover
+        run: pytest --no-print-logs

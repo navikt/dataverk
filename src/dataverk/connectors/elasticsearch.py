@@ -1,6 +1,6 @@
 import requests
 
-from dataverk.connectors.abc.base import DataverkBase
+from dataverk.abc.base import DataverkBase
 from collections.abc import Mapping
 
 from dataverk.exceptions import dataverk_exceptions

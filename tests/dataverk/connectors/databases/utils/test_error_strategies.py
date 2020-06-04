@@ -1,6 +1,11 @@
-from unittest import TestCase
+from unittest import TestCase, mock
+
+from dataverk.exceptions import dataverk_exceptions
+
 from dataverk.connectors import PostgresConnector
-from dataverk.connectors.databases.utils.error_strategies import OperationalErrorStrategy
+from dataverk.connectors.databases.utils.error_strategies import PostgresOperationalErrorStrategy
+from tests.dataverk.connectors.databases.test_resources.mock_vault import expected_user_password, \
+    mock_get_database_creds
 
 source = "database"
 settings = {
@@ -18,7 +23,6 @@ incomplete_settings = {
     }
 }
 
-expected_user_password = "new_user:new_password"
 expected_settings = {
     "db_connection_strings": {
         f"{source}": f"postgresql://{expected_user_password}@host:5432/db"
@@ -27,12 +31,6 @@ expected_settings = {
         f"{source}": "postgresql/vault/path"
     }
 }
-
-
-class MockVaultApi:
-
-    def get_database_creds(self, vault_path: str):
-        return expected_user_password
 
 
 class TestHandleOperationalErrorStrategy(TestCase):
@@ -44,15 +42,15 @@ class TestHandleOperationalErrorStrategy(TestCase):
     def tearDown(self):
         self.postgres_conn.__exit__(None, None, None)
 
-    def test_handle_operational_error(self):
-        error_strategy = OperationalErrorStrategy()
-        OperationalErrorStrategy.vault_api = MockVaultApi()
+    @mock.patch("dataverk_vault.api.get_database_creds", side_effect=mock_get_database_creds)
+    def test_handle_operational_error(self, mock_vault):
+        error_strategy = PostgresOperationalErrorStrategy()
         error_strategy.handle_error(self.postgres_conn)
         self.assertEqual(expected_settings, self.postgres_conn.settings)
 
     def test_incomplete_settings_object(self):
         self.postgres_conn.settings = incomplete_settings
-        error_strategy = OperationalErrorStrategy()
+        error_strategy = PostgresOperationalErrorStrategy()
 
-        with self.assertRaises(KeyError):
+        with self.assertRaises(dataverk_exceptions.IncompleteSettingsObject):
             error_strategy.handle_error(self.postgres_conn)
