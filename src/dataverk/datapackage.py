@@ -8,6 +8,7 @@ from urllib3.util import url
 from os import environ
 
 from data_catalog_dcat_validator.models.dataset import DatasetModel
+from data_catalog_dcat_validator.models.distribution import DistributionModel
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 from dataverk.utils import validators, file_functions
 from collections.abc import Mapping, Sequence
@@ -66,6 +67,12 @@ class Datapackage:
         validator = DatasetModel(metadata)
         validator.validate()
         validator.error_report()
+
+    @staticmethod
+    def _validate_resource(metadata: Mapping):
+        validator = DistributionModel(metadata)
+        validator.validate()
+        validator. error_report()
 
     @property
     def datapackage_metadata(self):
@@ -159,6 +166,9 @@ class Datapackage:
                                                          resource_description=resource_description, format=format,
                                                          compress=compress, dsv_separator=dsv_separator, spec=spec)
         self.resources[resource_name]['df'] = df
+
+        self._validate_resource(self.resources[resource_name])
+
         self._datapackage_metadata["datasets"][resource_name] = resource_description
         self._datapackage_metadata['resources'].append(self._get_schema(df=df, path=self.path,
                                                                         resource_name=resource_name,
