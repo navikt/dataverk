@@ -75,7 +75,7 @@ class Dataverk:
 
     def anonymize(self, df, eval_column, anonymize_columns=None, evaluator=lambda x: x < 4, replace_by="*",
                   anonymize_eval=True):
-        """ Replace values in columns when value in eval_column is less than lower_limit
+        """ Replace values in columns when condition in evaluator is satisfied
 
             :param df: pandas DataFrame
             :param eval_column: name of column to evaluate for anonymization
@@ -88,7 +88,7 @@ class Dataverk:
             a) anonymize_columns + eval_columns if anonymize_eval=True and eval_column is _not_ given in anonymize_columns
             b) anonymize_columns                if anonymize_eval=True and eval_column is given in anonymize_columns
                                                 or anonymize_eval=False
-            c) eval_column                      if anonymize_eval=True and anonymize_columns=False or anonymize_columns=[]
+            c) eval_column                      if anonymize_eval=True and anonymize_columns is None or anonymize_columns=[]
 
             The order of values to replace by in dictionary does not matter.
 

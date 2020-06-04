@@ -8,12 +8,8 @@ import requests
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 
 
-def anonymize_replace(df, eval_column, anonymize_columns=None, evaluator=lambda x: x < 4, replace_by="*",
-                      anonymize_eval=True) -> pd.DataFrame:
-    return _replace(df, eval_column, anonymize_columns, evaluator, replace_by, anonymize_eval)
-
-
-def _replace(df: pd.DataFrame, eval_column, anonymize_columns, evaluator, replace_by, anonymize_eval):
+def anonymize_replace(df: pd.DataFrame, eval_column, anonymize_columns=None, evaluator=lambda x: x < 4,
+                      replace_by="*", anonymize_eval=True) -> pd.DataFrame:
     _check_valid_anonymization(anonymize_columns, anonymize_eval)
     columns = _set_columns_to_anonymize(df, eval_column, anonymize_columns, anonymize_eval)
 
