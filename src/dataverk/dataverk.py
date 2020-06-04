@@ -8,6 +8,7 @@ from dataverk.connectors import db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from dataverk.package_publisher import PackagePublisher
+from dataverk.utils.anonymization import anonymize_replace
 
 
 class Dataverk:
@@ -71,6 +72,33 @@ class Dataverk:
         """
         conn = JSONStatConnector()
         return conn.get_pandas_df(url, params=params)
+
+    def anonymize(self, df, eval_column, anonymize_columns=None, evaluator=lambda x: x < 4, replace_by="*",
+                  anonymize_eval=True):
+        """ Replace values in columns when value in eval_column is less than lower_limit
+
+            :param df: pandas DataFrame
+            :param eval_column: name of column to evaluate for anonymization
+            :param anonymize_columns: optional, column name or list of column(s) to anonymize if value in eval_column satisfies the
+            condition given in evaluator, default=None
+            :param evaluator: lambda function, condition for anonymization based on values in eval_column, default=lambda x: x < 4
+            :param replace_by: value or list or dict of values to replace by. List or dict passed must have same length as the number
+            of columns to anonymize. Elements in list passed should in addition have the same order as columns in
+
+            a) anonymize_columns + eval_columns if anonymize_eval=True and eval_column is _not_ given in anonymize_columns
+            b) anonymize_columns                if anonymize_eval=True and eval_column is given in anonymize_columns
+                                                or anonymize_eval=False
+            c) eval_column                      if anonymize_eval=True and anonymize_columns=False or anonymize_columns=[]
+
+            The order of values to replace by in dictionary does not matter.
+
+            :param anonymize_eval, bool, whether to anonymize eval_column, default=True
+
+            :return: anonymized pandas DataFrame
+            """
+        return anonymize_replace(df=df, eval_column=eval_column, anonymize_columns=anonymize_columns,
+                                 evaluator=evaluator, replace_by=replace_by,
+                                 anonymize_eval=anonymize_eval)
 
     def to_sql(self, df: pd.DataFrame, table: str, sink: str, connector: str='Oracle', if_exists: str='append'):
         """ Write records in dataframe to a SQL database table
