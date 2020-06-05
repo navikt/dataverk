@@ -1,7 +1,7 @@
 import urllib3
 
 from collections import Mapping
-from dataverk.connectors.abc.base import DataverkBase
+from dataverk.abc.base import DataverkBase
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from datetime import datetime
 

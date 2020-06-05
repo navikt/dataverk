@@ -4,7 +4,7 @@ from pyjstat import pyjstat
 from collections import OrderedDict
 import pandas as pd
 import ast
-from dataverk.connectors.abc.base import DataverkBase
+from dataverk.abc.base import DataverkBase
 
 
 class JSONStatConnector(DataverkBase):

@@ -1,19 +1,25 @@
 import math
 import pandas as pd
+
 from collections.abc import Sequence
+from dataverk.abc.base import DataverkBase
+from dataverk.utils import dataverk_doc_address
+from dataverk.exceptions import dataverk_exceptions
+from dataverk.datapackage import Datapackage
 from dataverk.context import EnvStore
 from dataverk.dataverk_context import DataverkContext
 from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector
-from dataverk.connectors import db_connector_factory
+from dataverk.connectors.databases import db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from dataverk.package_publisher import PackagePublisher
 from dataverk.utils.anonymization import anonymize_replace
 
 
-class Dataverk:
+class Dataverk(DataverkBase):
 
     def __init__(self, resource_path: str=".", env_file: str='.env', auth_token: str=None):
+        super().__init__()
         env_store = EnvStore.safe_create(env_file)
         self._context = DataverkContext(env_store, resource_path, auth_token)
 
@@ -21,7 +27,7 @@ class Dataverk:
     def context(self):
         return self._context
 
-    def read_sql(self, source: str, sql: str, connector: str='Oracle', verbose_output: bool=False) -> pd.DataFrame:
+    def read_sql(self, source: str, sql: str, connector: str='Oracle', verbose_output: bool=False, *args, **kwargs) -> pd.DataFrame:
         """ Read pandas dataframe from SQL database
 
         :param source: str: database source reference
@@ -30,11 +36,11 @@ class Dataverk:
         :param verbose_output: bool: flag for verbose output option
         :return: pd.Dataframe: Dataframe with result
         """
-        conn = db_connector_factory.get_db_connector(settings_store=self.context.settings, connector=connector, source=source)
+        conn = db_connector_factory.get_db_connector(settings_store=self.context.settings, source=source)
         query = self._get_sql_query(sql=sql)
 
         with conn:
-            return conn.get_pandas_df(query=query, verbose_output=verbose_output)
+            return conn.get_pandas_df(query=query, verbose_output=verbose_output, *args, **kwargs)
 
     def read_kafka_message_fields(self, topics: Sequence, fetch_mode: str = "from_beginning") -> pd.DataFrame:
         """ Read single kafka message from topic and return list of message fields
@@ -77,30 +83,30 @@ class Dataverk:
                   anonymize_eval=True):
         """ Replace values in columns when condition in evaluator is satisfied
 
-            :param df: pandas DataFrame
-            :param eval_column: name of column to evaluate for anonymization
-            :param anonymize_columns: optional, column name or list of column(s) to anonymize if value in eval_column satisfies the
-            condition given in evaluator, default=None
-            :param evaluator: lambda function, condition for anonymization based on values in eval_column, default=lambda x: x < 4
-            :param replace_by: value or list or dict of values to replace by. List or dict passed must have same length as the number
-            of columns to anonymize. Elements in list passed should in addition have the same order as columns in
+        :param df: pandas DataFrame
+        :param eval_column: name of column to evaluate for anonymization
+        :param anonymize_columns: optional, column name or list of column(s) to anonymize if value in eval_column satisfies the
+        condition given in evaluator, default=None
+        :param evaluator: lambda function, condition for anonymization based on values in eval_column, default=lambda x: x < 4
+        :param replace_by: value or list or dict of values to replace by. List or dict passed must have same length as the number
+        of columns to anonymize. Elements in list passed should in addition have the same order as columns in
 
-            a) anonymize_columns + eval_columns if anonymize_eval=True and eval_column is _not_ given in anonymize_columns
-            b) anonymize_columns                if anonymize_eval=True and eval_column is given in anonymize_columns
-                                                or anonymize_eval=False
-            c) eval_column                      if anonymize_eval=True and anonymize_columns is None or anonymize_columns=[]
+        a) anonymize_columns + eval_columns if anonymize_eval=True and eval_column is _not_ given in anonymize_columns
+        b) anonymize_columns                if anonymize_eval=True and eval_column is given in anonymize_columns
+                                            or anonymize_eval=False
+        c) eval_column                      if anonymize_eval=True and anonymize_columns is None or anonymize_columns=[]
 
-            The order of values to replace by in dictionary does not matter.
+        The order of values to replace by in dictionary does not matter.
 
-            :param anonymize_eval, bool, whether to anonymize eval_column, default=True
+        :param anonymize_eval, bool, whether to anonymize eval_column, default=True
 
-            :return: anonymized pandas DataFrame
-            """
+        :return: anonymized pandas DataFrame
+        """
         return anonymize_replace(df=df, eval_column=eval_column, anonymize_columns=anonymize_columns,
                                  evaluator=evaluator, replace_by=replace_by,
                                  anonymize_eval=anonymize_eval)
 
-    def to_sql(self, df: pd.DataFrame, table: str, sink: str, connector: str='Oracle', if_exists: str='append'):
+    def to_sql(self, df: pd.DataFrame, table: str, sink: str, connector: str='Oracle', if_exists: str='append', *args, **kwargs):
         """ Write records in dataframe to a SQL database table
 
         :param df: pd.Dataframe: Dataframe to write
@@ -109,12 +115,12 @@ class Dataverk:
         :param connector: str: Connector type (default: Oracle)
         :param if_exists: str: Action if table already exists in database (default: replace)
         """
-        conn = db_connector_factory.get_db_connector(settings_store=self._context.settings, connector=connector, source=sink)
+        conn = db_connector_factory.get_db_connector(settings_store=self._context.settings, source=sink)
 
         with conn:
-            return conn.persist_pandas_df(table, df=df, if_exists=if_exists)
+            return conn.persist_pandas_df(table, df=df, if_exists=if_exists, *args, **kwargs)
 
-    def publish(self, datapackage):
+    def publish(self, datapackage: Datapackage):
         resources = datapackage.resources
         metadata = datapackage.datapackage_metadata
 
@@ -123,9 +129,17 @@ class Dataverk:
         package_publisher.publish(resources=resources)
 
         # Publish metadata to elastic search
-        es_conn = ElasticsearchConnector(self._context.settings)
-        eu = ElasticSearchUpdater(es_conn, metadata)
-        eu.publish()
+        try:
+            es_conn = ElasticsearchConnector(self._context.settings)
+        except dataverk_exceptions.IncompleteSettingsObject:
+            self.log.warning(
+                f"""Could not publish metadata to elastic search index.
+                ES index not specified in settings object.
+                See {dataverk_doc_address} for guidelines on how to setup the settings file."""
+            )
+        else:
+            eu = ElasticSearchUpdater(es_conn, metadata)
+            eu.publish()
 
     def _get_sql_query(self, sql):
         if self._is_sql_file(sql):
