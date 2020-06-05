@@ -106,7 +106,7 @@ class Dataverk(DataverkBase):
                                  evaluator=evaluator, replace_by=replace_by,
                                  anonymize_eval=anonymize_eval)
 
-    def to_sql(self, df: pd.DataFrame, table: str, sink: str, connector: str='Oracle', if_exists: str='append'):
+    def to_sql(self, df: pd.DataFrame, table: str, sink: str, connector: str='Oracle', if_exists: str='append', *args, **kwargs):
         """ Write records in dataframe to a SQL database table
 
         :param df: pd.Dataframe: Dataframe to write
