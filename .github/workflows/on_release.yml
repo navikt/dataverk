@@ -7,7 +7,6 @@ on:
 jobs:
   release-pypi:
     name: Set dataverk version in setup.py to release tag
-    needs: test
     runs-on: ubuntu-latest
     container:
       image: python:3.7
