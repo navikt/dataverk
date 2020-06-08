@@ -4,8 +4,10 @@ import datetime
 import uuid
 import hashlib
 import re
+import requests
 from urllib3.util import url
 from os import environ
+
 
 from data_catalog_dcat_validator.models.dataset import DatasetModel
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
@@ -139,6 +141,25 @@ class Datapackage:
         else:
             return f'{path}/resources/{resource_name}.{fmt}'
 
+    def add_and_publish_resource(self, resource, resource_name, format,  resource_description: str = '',
+                                 spec: Mapping = None):
+        """
+        Adds a provided resource as resource in the Datapackage
+        :param resource: Resource to be added
+        :param resource_name: Name of the resource
+        :param format: File format of resource
+        :param resource_description: Description of the resource
+        :param spec: Resource specification
+        :return: None
+        """
+
+        resource_name = file_functions.remove_whitespace(resource_name)
+        resource_path = self._resource_path(self.path, resource_name=resource_name, fmt=format, compress=False)
+        res = requests.put(resource_path, data=resource)
+        res.raise_for_status()
+
+        self.add_remote_resource(resource_path, resource_description, spec)
+
     def add_resource(self, df: pd.DataFrame, resource_name: str, resource_description: str="",
                      format="csv", compress: bool=True, dsv_separator=";", spec: Mapping=None):
         """
@@ -166,14 +187,15 @@ class Datapackage:
                                                                         format=format, compress=compress,
                                                                         dsv_separator=dsv_separator, spec=spec))
 
-    def add_remote_resource(self, resource_url: str, resource_description: str=""):
+    def add_remote_resource(self, resource_url: str, resource_description: str = "", spec: Mapping = None):
         resource_name, resource_fmt = self._resource_name_and_type_from_url(resource_url)
         self._datapackage_metadata['datasets'][resource_name] = resource_description
         self._datapackage_metadata['resources'].append({
             'name': resource_name,
             'description': resource_description,
             'path': resource_url,
-            'format': resource_fmt
+            'format': resource_fmt,
+            'spec': spec
         })
 
     @staticmethod
