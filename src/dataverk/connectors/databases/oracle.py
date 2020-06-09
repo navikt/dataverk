@@ -28,6 +28,15 @@ class OracleConnector(DBBaseConnector):
         partial_sql = f"{sql} {where}"
         return pd.read_sql(partial_sql, db_conn)
 
+    @staticmethod
+    def _get_db_conn(parsed_conn_string, dsn):
+        return cx_Oracle.connect(
+                user=parsed_conn_string['user'],
+                password=parsed_conn_string['password'],
+                dsn=dsn,
+                encoding='utf-8'
+            )
+
     def _connection_string(self):
         connection_string = self.settings["db_connection_strings"][self.source]
         return OracleConnector._format_connection_string(connection_string)

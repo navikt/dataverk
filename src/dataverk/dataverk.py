@@ -3,13 +3,17 @@ import pandas as pd
 import dask.dataframe as dd
 
 from collections.abc import Sequence
+
+from urllib3.util import parse_url
+
 from dataverk.abc.base import DataverkBase
+from dataverk.connectors.databases.db_connector_factory import DbType
 from dataverk.utils import dataverk_doc_address
 from dataverk.exceptions import dataverk_exceptions
 from dataverk.datapackage import Datapackage
 from dataverk.context import EnvStore
 from dataverk.dataverk_context import DataverkContext
-from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector
+from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector, OracleConnector
 from dataverk.connectors.databases import db_connector_factory
 from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
@@ -64,10 +68,20 @@ class Dataverk(DataverkBase):
         :param connector: Database connector
         :return: dask dataframe with result
         """
-        conn = db_connector_factory.get_db_connector(settings_store=self.context.settings,
-                                                     source=source)
 
-        return conn.get_dask_df(query=sql, where_values=where_values)
+        try:
+            connection_string = parse_url(self.context.settings["db_connection_strings"][source])
+        except KeyError:
+            raise dataverk_exceptions.IncompleteSettingsObject(
+                f"Database connection string not found in settings file. "
+                f"Unable to establish connection to database: {source}"
+            )
+
+        if DbType.ORACLE.value in connection_string.scheme.lower():
+            conn = OracleConnector(settings_store=self.context.settings, source=source)
+            return conn.get_dask_df(query=sql, where_values=where_values)
+        else:
+            raise NotImplementedError("Dask is currently only supported for oracle databases")
 
     def read_kafka(self, topics: Sequence, strategy=None, fields=None, fetch_mode: str = "from_beginning", max_mesgs: int=math.inf) -> pd.DataFrame:
         """ Read kafka topics and return pandas dataframe
