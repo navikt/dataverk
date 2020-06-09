@@ -54,6 +54,20 @@ class Dataverk(DataverkBase):
 
         return conn.get_message_fields()
 
+    def read_sql_dask(self, source, sql, where_values, connector='Oracle') -> dd.DataFrame:
+        """ Read dask dataframe from SQL database
+
+        :param source: str: database source
+        :param sql: str: sql query
+        :param where_values: where values for specifying dask partitions
+        :param connector: Database connector
+        :return: dask dataframe with result
+        """
+        conn = db_connector_factory.get_db_connector(settings_store=self.context.settings,
+                                                     source=source)
+
+        return conn.get_dask_df(query=sql, where_values=where_values)
+
     def read_kafka(self, topics: Sequence, strategy=None, fields=None, fetch_mode: str = "from_beginning", max_mesgs: int=math.inf) -> pd.DataFrame:
         """ Read kafka topics and return pandas dataframe
 
