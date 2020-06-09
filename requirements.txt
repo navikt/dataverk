@@ -1,3 +1,4 @@
+dask[complete]==2.18.0
 data-catalog-dcat-validator==0.0.5
 dataverk-vault==0.1.5
 google-api-core==1.19.1

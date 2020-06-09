@@ -1,3 +1,8 @@
+import dask
+import pandas as pd
+import dask.dataframe as dd
+import cx_Oracle
+
 from urllib3.util import parse_url
 from collections.abc import Mapping
 from dataverk.connectors.databases.base import DBBaseConnector
@@ -8,7 +13,7 @@ class OracleConnector(DBBaseConnector):
         super().__init__(settings_store, source)
 
     def get_dask_df(self, query, where_values) -> dd.DataFrame:
-        parsed_conn_string = self._parse_connection_string(self._settings["db_connection_strings"][self._source])
+        parsed_conn_string = parse_url(self.settings["db_connection_strings"][self.source])
         return self._read_sql_query_dask(parsed_conn_string, query, where_values)
 
     def _read_sql_query_dask(self, parsed_conn_string, sql, where_values):

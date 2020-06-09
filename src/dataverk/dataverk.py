@@ -1,5 +1,6 @@
 import math
 import pandas as pd
+import dask.dataframe as dd
 
 from collections.abc import Sequence
 from dataverk.abc.base import DataverkBase
