@@ -79,7 +79,8 @@ class Dataverk(DataverkBase):
 
         if DbType.ORACLE.value in connection_string.scheme.lower():
             conn = OracleConnector(settings_store=self.context.settings, source=source)
-            return conn.get_dask_df(query=sql, where_values=where_values)
+            with conn:
+                return conn.get_dask_df(query=sql, where_values=where_values)
         else:
             raise NotImplementedError("Dask is currently only supported for oracle databases")
 

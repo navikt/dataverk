@@ -17,7 +17,7 @@ class OracleConnector(DBBaseConnector):
 
     def _read_sql_query_dask(self, sql, where_values):
         dload = dask.delayed(self._load_df_part)
-        parts = [dload(sql, self._engine, where) for where in where_values]
+        parts = [dload(sql, where) for where in where_values]
         return dd.from_delayed(parts)
 
     def _load_df_part(self, sql, where):
