@@ -1,19 +1,22 @@
 import copy
+from typing import Any
 import pandas as pd
 import datetime
 import uuid
 import hashlib
 import re
-import requests
-from urllib3.util import url
+
 from os import environ
 
 
 from data_catalog_dcat_validator.models.dataset import DatasetModel
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 from dataverk.utils import validators, file_functions
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from dataverk.connectors.storage.storage_connector_factory import StorageType
+from dataverk.resources.dataframe_resource import DataFrameResource
+from dataverk.resources.remote_resource import RemoteResource
+from dataverk.resources.pdf_resource import PDFResource
 
 
 class Datapackage:
@@ -21,7 +24,7 @@ class Datapackage:
     Understands packaging of data resources and views on those resources for publication
     """
 
-    def __init__(self, metadata: Mapping):
+    def __init__(self, metadata: dict):
         self._resources = {}
         self.views = []
         self._validate_metadata(metadata)
@@ -64,7 +67,7 @@ class Datapackage:
         return metadata
 
     @staticmethod
-    def _validate_metadata(metadata: Mapping):
+    def _validate_metadata(metadata: dict):
         validator = DatasetModel(metadata)
         validator.validate()
         validator.error_report()
@@ -93,122 +96,52 @@ class Datapackage:
     def url(self):
         return self._datapackage_metadata.get("url")
 
-    def _get_schema(self, df, path, resource_name, resource_description, format, compress, dsv_separator, spec):
-        fields = []
+    def add_resource(self, resource: Any, resource_type: str, resource_name: str,
+                     resource_description: str = "", spec: dict = None):
+        """
+        :param resource:
+        :param resource_type:
+        :param resource_name:
+        :param compress:
+        :param resource_description:
+        :param spec:
+        :return:
+        """
 
-        for name, dtype in zip(df.columns, df.dtypes):
-            if str(dtype) == 'object':
-                dtype = 'string'
-            else:
-                dtype = 'number'
+        if resource_type == 'df':
+            fmt = spec.get('format', 'csv')
+            compress = spec.get('compress', True)
+            formatted_resource = DataFrameResource(resource=resource, datapackage_path=self.path,
+                                                   resource_name=resource_name,
+                                                   resource_description=resource_description,
+                                                   fmt=fmt, compress=compress, spec=spec).get_schema()
 
-            description = ''
-            if spec and spec.get('fields'):
-                spec_fields = spec['fields']
-                for field in spec_fields:
-                    if field['name'] == name:
-                        description = field['description']
+            self._datapackage_metadata["datasets"][formatted_resource.get('resource_name')] = resource_description
 
-            fields.append({'name': name, 'description': description, 'type': dtype})
+        elif resource_type == 'remote':
+            formatted_resource = RemoteResource(resource=resource, datapackage_path=self.path,
+                                                resource_name=resource_name,
+                                                resource_description=resource_description,
+                                                fmt="", compress=False, spec=spec)
+        elif resource_type == 'pdf':
+            compress = spec.get('compress', False)
+            formatted_resource = RemoteResource(resource=resource, datapackage_path=self.path,
+                                                resource_name=resource_name,
+                                                resource_description=resource_description,
+                                                fmt="pdf", compress=compress, spec=spec)
 
-        mediatype = self._media_type(format)
-
-        return {
-            'name': resource_name,
-            'description': resource_description,
-            'path': self._resource_path(path, resource_name, format, compress),
-            'format': format,
-            'dsv_separator': dsv_separator,
-            'compressed': compress,
-            'mediatype': mediatype,
-            'schema': {'fields': fields},
-            'spec': spec
-        }
-
-    @staticmethod
-    def _media_type(fmt):
-        if fmt == 'csv':
-            return 'text/csv'
-        elif fmt == 'json':
-            return 'application/json'
         else:
-            return 'text/csv'
+            raise TypeError(f"Resources of type {resource_type} is not supported.")
 
-    @staticmethod
-    def _resource_path(path, resource_name, fmt, compress):
-        if compress:
-            return f'{path}/resources/{resource_name}.{fmt}.gz'
-        else:
-            return f'{path}/resources/{resource_name}.{fmt}'
+        formatted_resource_name = formatted_resource.get('resource_name')
 
-    def add_and_publish_resource(self, resource, resource_name, format,  resource_description: str = '',
-                                 spec: Mapping = None):
-        """
-        Adds a provided resource as resource in the Datapackage
-        :param resource: Resource to be added
-        :param resource_name: Name of the resource
-        :param format: File format of resource
-        :param resource_description: Description of the resource
-        :param spec: Resource specification
-        :return: None
-        """
+        self.resources[formatted_resource_name] = formatted_resource
+        if resource_type == 'df':
+            self.resources[formatted_resource_name]['df'] = resource
 
-        resource_name = file_functions.remove_whitespace(resource_name)
-        resource_path = self._resource_path(self.path, resource_name=resource_name, fmt=format, compress=False)
-        res = requests.put(resource_path, data=resource)
-        res.raise_for_status()
+        self._datapackage_metadata['resources'].append(formatted_resource)
 
-        self.add_remote_resource(resource_path, resource_description, spec)
-
-    def add_resource(self, df: pd.DataFrame, resource_name: str, resource_description: str="",
-                     format="csv", compress: bool=True, dsv_separator=";", spec: Mapping=None):
-        """
-        Adds a provided DataFrame as a resource in the Datapackage object with provided name and description.
-
-        :param df: DataFrame to add as resource
-        :param resource_name: Name of the resource
-        :param resource_description: Description of the resource
-        :param format: file format of resource
-        :param compress: boolean value indicating whether to compress resource before storage
-        :param dsv_separator: field separator
-        :param spec: resource specification
-        :return: None
-        """
-        self._verify_add_resource_input_types(df, resource_name, resource_description)
-        resource_name = file_functions.remove_whitespace(resource_name)
-        self.resources[resource_name] = self._get_schema(df=df, path=self.path, resource_name=resource_name,
-                                                         resource_description=resource_description, format=format,
-                                                         compress=compress, dsv_separator=dsv_separator, spec=spec)
-        self.resources[resource_name]['df'] = df
-        self._datapackage_metadata["datasets"][resource_name] = resource_description
-        self._datapackage_metadata['resources'].append(self._get_schema(df=df, path=self.path,
-                                                                        resource_name=resource_name,
-                                                                        resource_description=resource_description,
-                                                                        format=format, compress=compress,
-                                                                        dsv_separator=dsv_separator, spec=spec))
-
-    def add_remote_resource(self, resource_url: str, resource_description: str = "", spec: Mapping = None):
-        resource_name, resource_fmt = self._resource_name_and_type_from_url(resource_url)
-        self._datapackage_metadata['datasets'][resource_name] = resource_description
-        self._datapackage_metadata['resources'].append({
-            'name': resource_name,
-            'description': resource_description,
-            'path': resource_url,
-            'format': resource_fmt,
-            'spec': spec
-        })
-
-    @staticmethod
-    def _resource_name_and_type_from_url(resource_url):
-        parsed_url = url.parse_url(resource_url)
-
-        if not parsed_url.scheme == "https" and not parsed_url.scheme == "http":
-            raise ValueError(f"Remote resource needs to be a web address, scheme is {parsed_url.scheme}")
-
-        resource = parsed_url.path.split('/')[-1]
-        resource_name_and_format = resource.split('.', 1)
-        return resource_name_and_format[0], resource_name_and_format[1]
-
+    # TODO: IMPLEMENT THIS METHOD
     @staticmethod
     def _verify_add_resource_input_types(df, dataset_name, dataset_description):
         if not isinstance(df, pd.DataFrame):
@@ -218,8 +151,9 @@ class Datapackage:
         if not isinstance(dataset_description, str):
             raise TypeError(f'dataset_description must be of type string')
 
-    def add_view(self, name: str, resources: Sequence, title: str="", description: str="", attribution: str="", spec_type: str="simple",
-                 spec: Mapping=None, type: str="", group: str="", series: Sequence=list(), row_limit: int=500, metadata: Mapping=None):
+    def add_view(self, name: str, resources: Sequence, title: str = "", description: str = "", attribution: str = "",
+                 spec_type: str = "simple", spec: dict = None, type: str = "", group: str = "",
+                 series: Sequence = list(), row_limit: int = 500, metadata: dict = None):
         """
         Adds a view to the Datapackage object. A view is a specification of a visualisation the datapackage provides.
 
@@ -294,14 +228,14 @@ class Datapackage:
         try:
             api_endpoint = environ["DATAVERK_API_ENDPOINT"]
         except KeyError as missing_env:
-            raise EnvironmentVariableNotSet(missing_env)
+            raise EnvironmentVariableNotSet(str(missing_env))
         else:
             path = f'{api_endpoint}/{bucket}/{dp_id}'
 
         try:
             bucket_endpoint = environ["DATAVERK_BUCKET_ENDPOINT"]
         except KeyError as missing_env:
-            raise EnvironmentVariableNotSet(missing_env)
+            raise EnvironmentVariableNotSet(str(missing_env))
         else:
             store_path = f'{bucket_endpoint}/{bucket}/{dp_id}'
 
