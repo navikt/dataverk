@@ -102,7 +102,6 @@ class Datapackage:
         :param resource:
         :param resource_type:
         :param resource_name:
-        :param compress:
         :param resource_description:
         :param spec:
         :return:
@@ -125,10 +124,10 @@ class Datapackage:
                                                 fmt="", compress=False, spec=spec)
         elif resource_type == 'pdf':
             compress = spec.get('compress', False)
-            formatted_resource = RemoteResource(resource=resource, datapackage_path=self.path,
-                                                resource_name=resource_name,
-                                                resource_description=resource_description,
-                                                fmt="pdf", compress=compress, spec=spec)
+            formatted_resource = PDFResource(resource=resource, datapackage_path=self.path,
+                                             resource_name=resource_name,
+                                             resource_description=resource_description,
+                                             fmt="pdf", compress=compress, spec=spec)
 
         else:
             raise TypeError(f"Resources of type {resource_type} is not supported.")

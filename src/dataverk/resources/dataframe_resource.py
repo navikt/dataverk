@@ -1,5 +1,3 @@
-from typing import Any
-
 from dataverk.utils import file_functions
 
 from dataverk.resources.base_resource import BaseResource

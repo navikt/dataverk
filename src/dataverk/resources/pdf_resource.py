@@ -17,5 +17,6 @@ class PDFResource(BaseResource):
             'description': self._resource_description,
             'path': self._resource_path(),
             'format': self._fmt,
+            'mediatype': self._media_type(self._fmt),
             'spec': self._spec
         }

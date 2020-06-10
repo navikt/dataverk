@@ -18,16 +18,16 @@ class BaseResource(ABC):
     @property
     @abstractmethod
     def _resource_path(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @property
     @abstractmethod
     def formatted_resource_name(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @abstractmethod
     def get_schema(self):
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @staticmethod
     def _create_resource_path(datapackage_path: str, formatted_resource_name: str, fmt: str, compress: bool):
