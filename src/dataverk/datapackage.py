@@ -14,9 +14,7 @@ from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 from dataverk.utils import validators, file_functions
 from collections.abc import Sequence
 from dataverk.connectors.storage.storage_connector_factory import StorageType
-from dataverk.resources.dataframe_resource import DataFrameResource
-from dataverk.resources.remote_resource import RemoteResource
-from dataverk.resources.pdf_resource import PDFResource
+from dataverk.resources.factory_resources import get_resource_object
 
 
 class Datapackage:
@@ -96,46 +94,27 @@ class Datapackage:
     def url(self):
         return self._datapackage_metadata.get("url")
 
-    def add_resource(self, resource: Any, resource_type: str, resource_name: str,
+    def add_resource(self, resource: Any, resource_type: str, resource_name: str = "",
                      resource_description: str = "", spec: dict = None):
         """
-        :param resource:
-        :param resource_type:
-        :param resource_name:
-        :param resource_description:
-        :param spec:
-        :return:
+        :param resource: Resource to be added to Datapackage
+        :param resource_type: Type of resource
+        :param resource_name: Name of resource
+        :param resource_description: Description of resource
+        :param spec: Resource specification e.g format, compress, etc
+        :return: None
         """
 
-        if resource_type == 'df':
-            fmt = spec.get('format', 'csv')
-            compress = spec.get('compress', True)
-            formatted_resource = DataFrameResource(resource=resource, datapackage_path=self.path,
-                                                   resource_name=resource_name,
-                                                   resource_description=resource_description,
-                                                   fmt=fmt, compress=compress, spec=spec).get_schema()
+        formatted_resource = get_resource_object(resource_type=resource_type, resource=resource,
+                                                 datapackage_path=self.path, resource_name=resource_name,
+                                                 resource_description=resource_description, spec=spec)
 
-            self._datapackage_metadata["datasets"][formatted_resource.get('resource_name')] = resource_description
-
-        elif resource_type == 'remote':
-            formatted_resource = RemoteResource(resource=resource, datapackage_path=self.path,
-                                                resource_name=resource_name,
-                                                resource_description=resource_description,
-                                                fmt="", compress=False, spec=spec)
-        elif resource_type == 'pdf':
-            compress = spec.get('compress', False)
-            formatted_resource = PDFResource(resource=resource, datapackage_path=self.path,
-                                             resource_name=resource_name,
-                                             resource_description=resource_description,
-                                             fmt="pdf", compress=compress, spec=spec)
-
-        else:
-            raise TypeError(f"Resources of type {resource_type} is not supported.")
-
-        formatted_resource_name = formatted_resource.get('resource_name')
+        formatted_resource_name = formatted_resource.get('name')
 
         self.resources[formatted_resource_name] = formatted_resource
+
         if resource_type == 'df':
+            self.datapackage_metadata['datasets'][formatted_resource_name] = resource_description
             self.resources[formatted_resource_name]['df'] = resource
 
         self._datapackage_metadata['resources'].append(formatted_resource)

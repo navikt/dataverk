@@ -36,7 +36,7 @@ class DataFrameResource(BaseResource):
             'name': self.formatted_resource_name(),
             'description': self._resource_description,
             'path': self._resource_path(),
-            'format': format,
+            'format': self._fmt,
             'dsv_separator': dsv_separator,
             'compressed': self._compress,
             'mediatype': mediatype,

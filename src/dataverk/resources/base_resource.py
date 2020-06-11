@@ -5,7 +5,7 @@ from typing import Any
 class BaseResource(ABC):
 
     def __init__(self, resource: Any, datapackage_path: str,  resource_name: str, resource_description: str,
-                 fmt: str, compress: bool, spec: dict):
+                 fmt: str, compress: bool, spec: dict = None):
 
         self._resource = resource
         self._datapackage_path = datapackage_path
