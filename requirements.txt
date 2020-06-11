@@ -1,8 +1,8 @@
 data-catalog-dcat-validator==0.0.5
 dataverk-vault==0.1.5
 google-api-core==1.20.0
-google-auth==1.16.1
 google-cloud-bigquery==1.25.0
+google-auth==1.17.0
 google-cloud-core==1.3.0
 google-cloud-storage==1.28.1
 google-resumable-media==0.5.1
