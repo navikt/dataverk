@@ -1,9 +1,6 @@
 import os
 import unittest
-import pandas as pd
 from dataverk.datapackage import Datapackage
-from dataverk.resources.remote_resource import RemoteResource
-from dataverk.resources.factory_resources import get_resource_object
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 
 valid_metadata = {
@@ -59,78 +56,6 @@ class TestMethodReturnValues(unittest.TestCase):
 
     def setUp(self):
         self.dp = Datapackage(valid_metadata)
-
-    # TODO: []
-    def test__get_schema(self):
-        resource_name = "my-package"
-        resource_description = "desc"
-        fmt = "csv"
-        dsv_separator = ";"
-        compress = True
-        mediatype = "text/csv"
-        path = "https://some.bucket.storage.com"
-        spec = {
-            'format': fmt,
-            'compress': compress
-                }
-
-        expected_schema = {
-            'name': resource_name,
-            'description': resource_description,
-            'path': f'{path}/resources/{resource_name}.{fmt}.gz',
-            'format': fmt,
-            'dsv_separator': dsv_separator,
-            'compressed': compress,
-            'mediatype': mediatype,
-            'schema': {'fields': [
-                {'name': 'col1', 'description': '', 'type': 'number'},
-                {'name': 'col2', 'description': '', 'type': 'number'}
-            ]},
-            'spec': spec
-        }
-        df = pd.DataFrame({'col1': [1, 2], 'col2': [3, 4]})
-        schema = get_resource_object(resource_type="df", resource=df, datapackage_path=path,
-                                     resource_name=resource_name, resource_description=resource_description, spec=spec)
-
-        self.assertEqual(expected_schema, schema)
-
-    # TODO: [X]
-    def test__resource_name_and_type_from_url_zipped(self):
-        resource_name_in = "resource"
-        resource_fmt_in = "csv.gz"
-        resource_url = f"https://remote.storage.location.com/bucket/" \
-                       f"datapackage/resources/{resource_name_in}.{resource_fmt_in}"
-
-        formatted_resource = RemoteResource(resource=resource_url, datapackage_path="", resource_name=resource_name_in,
-                                            resource_description="", fmt="", compress=False).get_schema()
-
-        resource_name = formatted_resource.get('name')
-        resource_fmt = formatted_resource.get('format')
-        self.assertEqual(resource_name_in, resource_name)
-        self.assertEqual(resource_fmt_in, resource_fmt)
-
-    # TODO: [X]
-    def test__resource_name_and_type_from_url(self):
-        resource_name_in = "resource"
-        resource_fmt_in = "csv"
-        resource_url = f"http://remote.storage.location.com/bucket/" \
-                       f"datapackage/resources/{resource_name_in}.{resource_fmt_in}"
-
-        formatted_resource = RemoteResource(resource=resource_url, datapackage_path="", resource_name="",
-                                            resource_description="", fmt="", compress=False).get_schema()
-
-        resource_name = formatted_resource.get('name')
-        resource_fmt = formatted_resource.get('format')
-        self.assertEqual(resource_name_in, resource_name)
-        self.assertEqual(resource_fmt_in, resource_fmt)
-
-    # TODO: [X]
-    def test__resource_name_and_type_from_url_invalid(self):
-        resource_url = "/not/a/web/url/bucket/datapackage/resources/resource.csv.gz"
-        with self.assertRaises(ValueError):
-            formatted_resource = RemoteResource(resource=resource_url, datapackage_path="",
-                                                resource_name="",
-                                                resource_description="", fmt="", compress=False).get_schema()
 
     def test__nais_specific_paths_valid(self):
         api_endpoint = "https://dataverk.no"

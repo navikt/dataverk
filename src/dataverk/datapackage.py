@@ -107,7 +107,7 @@ class Datapackage:
 
         formatted_resource = get_resource_object(resource_type=resource_type, resource=resource,
                                                  datapackage_path=self.path, resource_name=resource_name,
-                                                 resource_description=resource_description, spec=spec)
+                                                 resource_description=resource_description, spec=spec).get_schema()
 
         formatted_resource_name = formatted_resource.get('name')
 
