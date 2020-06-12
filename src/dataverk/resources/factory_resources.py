@@ -25,7 +25,6 @@ def get_resource_object(resource_type: str, resource: Any, datapackage_path: str
 
     elif resource_type == ResourceType.REMOTE.value:
         return RemoteResource(resource=resource, datapackage_path=datapackage_path,
-                              resource_name="",
                               resource_description=resource_description,
                               fmt="", compress=False, spec=spec)
 

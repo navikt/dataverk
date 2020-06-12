@@ -22,10 +22,13 @@ class Datapackage:
     Understands packaging of data resources and views on those resources for publication
     """
 
-    def __init__(self, metadata: dict):
+    def __init__(self, metadata: dict, errors: bool = True):
         self._resources = {}
         self.views = []
-        self._validate_metadata(metadata)
+
+        if errors:
+            self._validate_metadata(metadata)
+
         self._datapackage_metadata = self._create_datapackage(dict(metadata))
 
     def _create_datapackage(self, metadata):
@@ -97,11 +100,20 @@ class Datapackage:
     def add_resource(self, resource: Any, resource_type: str, resource_name: str = "",
                      resource_description: str = "", spec: dict = None):
         """
-        :param resource: Resource to be added to Datapackage
-        :param resource_type: Type of resource
-        :param resource_name: Name of resource
-        :param resource_description: Description of resource
-        :param spec: Resource specification e.g format, compress, etc
+        Adds a resource to the Datapackage object. Supported resource types are "df", "remote" and "pdf".
+
+        :param resource: any, resource to be added to Datapackage
+
+        :param resource_type: str, type of resource. Supported types are "df", "remote" and "pdf".
+        "df" expects a pandas DataFrame
+        "remote" expects a valid url(str) to an already available resource and
+        "pdf" expects a bytes representation of a pdf file.
+
+        :param resource_name: str, name of resource, default = ""
+        Not applicable for remote resources.
+
+        :param resource_description: str, description of resource, default = ""
+        :param spec: dict, resource specification e.g hidden, fields, format, compress, etc, default = None
         :return: None
         """
 

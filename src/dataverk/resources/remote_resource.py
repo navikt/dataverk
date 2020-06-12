@@ -3,17 +3,14 @@ from dataverk.resources.base_resource import BaseResource
 
 
 class RemoteResource(BaseResource):
+    def __init__(self, resource: str, datapackage_path: str, resource_description: str,
+                 fmt: str, compress: bool, spec: dict = None):
+
+        super().__init__(resource, datapackage_path, resource_description, fmt, compress, spec)
+
     def formatted_resource_name(self):
-
-        parsed_url = url.parse_url(self._resource)
-
-        if not parsed_url.scheme == "https" and not parsed_url.scheme == "http":
-            raise ValueError(f"Remote resource needs to be a web address, scheme is {parsed_url.scheme}")
-
-        resource = parsed_url.path.split('/')[-1]
-        resource_name_and_format = resource.split('.', 1)
-        self._fmt = resource_name_and_format[1]
-        return resource_name_and_format[0]
+        formatted_resource_name, self._fmt = self._resource_name_and_type_from_url(self._resource)
+        return formatted_resource_name
 
     def _resource_path(self):
         return self._resource
@@ -26,3 +23,14 @@ class RemoteResource(BaseResource):
             'format': self._fmt,
             'spec': self._spec
         }
+
+    @staticmethod
+    def _resource_name_and_type_from_url(resource_url):
+        parsed_url = url.parse_url(resource_url)
+
+        if not parsed_url.scheme == "https" and not parsed_url.scheme == "http":
+            raise ValueError(f"Remote resource needs to be a web address, scheme is {parsed_url.scheme}")
+
+        resource = parsed_url.path.split('/')[-1]
+        resource_name_and_format = resource.split('.', 1)
+        return resource_name_and_format[0], resource_name_and_format[1]
