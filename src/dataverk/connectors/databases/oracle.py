@@ -16,13 +16,14 @@ class OracleConnector(DBBaseConnector):
         return self._read_sql_query_dask(query, where_values)
 
     def _read_sql_query_dask(self, sql, where_values):
-        dload = dask.delayed(self._load_df_part)
-        parts = [dload(sql, where) for where in where_values]
+        dload = dask.delayed(OracleConnector._load_df_part)
+        parts = [dload(sql, self._engine, where) for where in where_values]
         return dd.from_delayed(parts)
 
-    def _load_df_part(self, sql, where):
+    @staticmethod
+    def _load_df_part(sql, engine, where):
         partial_sql = f"{sql} {where}"
-        return pd.read_sql(partial_sql, self._engine)
+        return pd.read_sql(partial_sql, engine)
 
     def _connection_string(self):
         connection_string = self.settings["db_connection_strings"][self.source]
