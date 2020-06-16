@@ -131,16 +131,6 @@ class Datapackage:
 
         self._datapackage_metadata['resources'].append(formatted_resource)
 
-    # TODO: IMPLEMENT THIS METHOD
-    @staticmethod
-    def _verify_add_resource_input_types(df, dataset_name, dataset_description):
-        if not isinstance(df, pd.DataFrame):
-            raise TypeError(f'df must be of type pandas.Dataframe()')
-        if not isinstance(dataset_name, str):
-            raise TypeError(f'dataset_name must be of type string')
-        if not isinstance(dataset_description, str):
-            raise TypeError(f'dataset_description must be of type string')
-
     def add_view(self, name: str, resources: Sequence, title: str = "", description: str = "", attribution: str = "",
                  spec_type: str = "simple", spec: dict = None, type: str = "", group: str = "",
                  series: Sequence = list(), row_limit: int = 500, metadata: dict = None):
@@ -207,7 +197,7 @@ class Datapackage:
         elif StorageType(store) is StorageType.GCS:
             path = f'https://storage.googleapis.com/{bucket}/{dp_id}'
             store_path = f'gs://{bucket}/{dp_id}'
-        else: #default is local storage
+        else:  # default is local storage
             path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{dp_id}'
             store_path = f'{bucket}/{dp_id}'
 
