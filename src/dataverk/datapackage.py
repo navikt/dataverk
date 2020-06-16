@@ -1,6 +1,6 @@
 import copy
 from typing import Any
-import pandas as pd
+
 import datetime
 import uuid
 import hashlib
@@ -14,7 +14,7 @@ from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 from dataverk.utils import validators, file_functions
 from collections.abc import Sequence
 from dataverk.connectors.storage.storage_connector_factory import StorageType
-from dataverk.resources.factory_resources import get_resource_object
+from dataverk.resources.factory_resources import get_resource_object, ResourceType
 
 
 class Datapackage:
@@ -22,11 +22,11 @@ class Datapackage:
     Understands packaging of data resources and views on those resources for publication
     """
 
-    def __init__(self, metadata: dict, errors: bool = True):
+    def __init__(self, metadata: dict, validate: bool = True):
         self._resources = {}
         self.views = []
 
-        if errors:
+        if validate:
             self._validate_metadata(metadata)
 
         self._datapackage_metadata = self._create_datapackage(dict(metadata))
@@ -97,7 +97,7 @@ class Datapackage:
     def url(self):
         return self._datapackage_metadata.get("url")
 
-    def add_resource(self, resource: Any, resource_type: str, resource_name: str = "",
+    def add_resource(self, resource: Any, resource_type: str = ResourceType.DF.value, resource_name: str = "",
                      resource_description: str = "", spec: dict = None):
         """
         Adds a resource to the Datapackage object. Supported resource types are "df", "remote" and "pdf".
