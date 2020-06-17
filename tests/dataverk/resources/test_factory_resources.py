@@ -32,6 +32,5 @@ class TestMethodReturnValues(unittest.TestCase):
 
     def test_get_resource_object_other(self):
         with self.assertRaises(NotImplementedError):
-            resource_formatter = get_resource_object(resource_type=other_resource_type, resource="",
-                                                     resource_description="", resource_name="", spec={},
-                                                     datapackage_path="")
+            get_resource_object(resource_type=other_resource_type, resource="", resource_description="",
+                                resource_name="", spec={}, datapackage_path="")

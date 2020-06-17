@@ -1,6 +1,6 @@
 import copy
 from typing import Any
-import pandas as pd
+
 import datetime
 import uuid
 import hashlib
@@ -14,7 +14,7 @@ from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 from dataverk.utils import validators, file_functions
 from collections.abc import Sequence
 from dataverk.connectors.storage.storage_connector_factory import StorageType
-from dataverk.resources.factory_resources import get_resource_object
+from dataverk.resources.factory_resources import get_resource_object, ResourceType
 
 
 class Datapackage:
@@ -22,10 +22,13 @@ class Datapackage:
     Understands packaging of data resources and views on those resources for publication
     """
 
-    def __init__(self, metadata: dict):
+    def __init__(self, metadata: dict, validate: bool = True):
         self._resources = {}
         self.views = []
-        self._validate_metadata(metadata)
+
+        if validate:
+            self._validate_metadata(metadata)
+
         self._datapackage_metadata = self._create_datapackage(dict(metadata))
 
     def _create_datapackage(self, metadata):
@@ -94,14 +97,23 @@ class Datapackage:
     def url(self):
         return self._datapackage_metadata.get("url")
 
-    def add_resource(self, resource: Any, resource_type: str, resource_name: str = "",
+    def add_resource(self, resource: Any, resource_type: str = ResourceType.DF.value, resource_name: str = "",
                      resource_description: str = "", spec: dict = None):
         """
-        :param resource: Resource to be added to Datapackage
-        :param resource_type: Type of resource
-        :param resource_name: Name of resource
-        :param resource_description: Description of resource
-        :param spec: Resource specification e.g format, compress, etc
+        Adds a resource to the Datapackage object. Supported resource types are "df", "remote" and "pdf".
+
+        :param resource: any, resource to be added to Datapackage
+
+        :param resource_type: str, type of resource. Supported types are "df", "remote" and "pdf".
+        "df" expects a pandas DataFrame
+        "remote" expects a valid url(str) to an already available resource and
+        "pdf" expects a bytes representation of a pdf file.
+
+        :param resource_name: str, name of resource, default = ""
+        Not applicable for remote resources.
+
+        :param resource_description: str, description of resource, default = ""
+        :param spec: dict, resource specification e.g hidden, fields, format, compress, etc, default = None
         :return: None
         """
 
@@ -118,16 +130,6 @@ class Datapackage:
             self.resources[formatted_resource_name]['df'] = resource
 
         self._datapackage_metadata['resources'].append(formatted_resource)
-
-    # TODO: IMPLEMENT THIS METHOD
-    @staticmethod
-    def _verify_add_resource_input_types(df, dataset_name, dataset_description):
-        if not isinstance(df, pd.DataFrame):
-            raise TypeError(f'df must be of type pandas.Dataframe()')
-        if not isinstance(dataset_name, str):
-            raise TypeError(f'dataset_name must be of type string')
-        if not isinstance(dataset_description, str):
-            raise TypeError(f'dataset_description must be of type string')
 
     def add_view(self, name: str, resources: Sequence, title: str = "", description: str = "", attribution: str = "",
                  spec_type: str = "simple", spec: dict = None, type: str = "", group: str = "",
@@ -195,7 +197,7 @@ class Datapackage:
         elif StorageType(store) is StorageType.GCS:
             path = f'https://storage.googleapis.com/{bucket}/{dp_id}'
             store_path = f'gs://{bucket}/{dp_id}'
-        else: #default is local storage
+        else:  # default is local storage
             path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{dp_id}'
             store_path = f'{bucket}/{dp_id}'
 

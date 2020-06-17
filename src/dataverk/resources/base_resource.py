@@ -4,12 +4,11 @@ from typing import Any
 
 class BaseResource(ABC):
 
-    def __init__(self, resource: Any, datapackage_path: str,  resource_name: str, resource_description: str,
+    def __init__(self, resource: Any, datapackage_path: str, resource_description: str,
                  fmt: str, compress: bool, spec: dict = None):
 
         self._resource = resource
         self._datapackage_path = datapackage_path
-        self._resource_name = resource_name
         self._resource_description = resource_description
         self._fmt = fmt
         self._compress = compress
