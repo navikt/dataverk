@@ -1,13 +1,11 @@
 import copy
-from typing import Any
-
 import datetime
 import uuid
 import hashlib
 import re
 
+from typing import Any
 from os import environ
-
 
 from data_catalog_dcat_validator.models.dataset import DatasetModel
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
@@ -97,7 +95,7 @@ class Datapackage:
     def url(self):
         return self._datapackage_metadata.get("url")
 
-    def add_resource(self, resource: Any, resource_type: str = ResourceType.DF.value, resource_name: str = "",
+    def add_resource(self, resource: Any, resource_type: str =  ResourceType.DF.value, resource_name: str = "",
                      resource_description: str = "", spec: dict = None):
         """
         Adds a resource to the Datapackage object. Supported resource types are "df", "remote" and "pdf".
@@ -123,10 +121,10 @@ class Datapackage:
 
         formatted_resource_name = formatted_resource.get('name')
 
-        self.resources[formatted_resource_name] = formatted_resource
+        self.resources[formatted_resource_name] = copy.deepcopy(formatted_resource)
 
-        if resource_type == 'df':
-            self.datapackage_metadata['datasets'][formatted_resource_name] = resource_description
+        if resource_type == ResourceType.DF.value:
+            self._datapackage_metadata['datasets'][formatted_resource_name] = resource_description
             self.resources[formatted_resource_name]['df'] = resource
 
         self._datapackage_metadata['resources'].append(formatted_resource)
