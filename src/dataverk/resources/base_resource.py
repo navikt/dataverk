@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+from dataverk import Datapackage
+
 
 class BaseResource(ABC):
 
@@ -13,6 +15,7 @@ class BaseResource(ABC):
         self._fmt = fmt
         self._compress = compress
         self._spec = spec
+        self._schema = self._get_schema
 
     @property
     @abstractmethod
@@ -25,7 +28,7 @@ class BaseResource(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_schema(self):
+    def _get_schema(self):
         raise NotImplementedError()
 
     @staticmethod
@@ -45,3 +48,6 @@ class BaseResource(ABC):
             return 'application/pdf'
         else:
             return 'text/csv'
+
+    def add_to_datapackage(self, dp: Datapackage):
+        raise NotImplementedError()

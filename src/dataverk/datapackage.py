@@ -114,20 +114,10 @@ class Datapackage:
         :param spec: dict, resource specification e.g hidden, fields, format, compress, etc, default = None
         :return: None
         """
-
-        formatted_resource = get_resource_object(resource_type=resource_type, resource=resource,
-                                                 datapackage_path=self.path, resource_name=resource_name,
-                                                 resource_description=resource_description, spec=spec).get_schema()
-
-        formatted_resource_name = formatted_resource.get('name')
-
-        self.resources[formatted_resource_name] = copy.deepcopy(formatted_resource)
-
-        if resource_type == ResourceType.DF.value:
-            self._datapackage_metadata['datasets'][formatted_resource_name] = resource_description
-            self.resources[formatted_resource_name]['df'] = resource
-
-        self._datapackage_metadata['resources'].append(formatted_resource)
+        resource = get_resource_object(resource_type=resource_type, resource=resource,
+                                       datapackage_path=self.path, resource_name=resource_name,
+                                       resource_description=resource_description, spec=spec)
+        resource.add_to_datapackage(self)
 
     def add_view(self, name: str, resources: Sequence, title: str = "", description: str = "", attribution: str = "",
                  spec_type: str = "simple", spec: dict = None, type: str = "", group: str = "",

@@ -5,7 +5,6 @@ from dataverk.resources.base_resource import BaseResource
 class RemoteResource(BaseResource):
     def __init__(self, resource: str, datapackage_path: str, resource_description: str,
                  fmt: str, compress: bool, spec: dict = None):
-
         super().__init__(resource, datapackage_path, resource_description, fmt, compress, spec)
 
     def formatted_resource_name(self):
@@ -15,7 +14,7 @@ class RemoteResource(BaseResource):
     def _resource_path(self):
         return self._resource
 
-    def get_schema(self):
+    def _get_schema(self):
         return {
             'name': self.formatted_resource_name(),
             'description': self._resource_description,

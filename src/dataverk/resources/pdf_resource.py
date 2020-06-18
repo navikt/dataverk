@@ -6,10 +6,9 @@ from dataverk.resources.base_resource import BaseResource
 class PDFResource(BaseResource):
     def __init__(self, resource: bytes, datapackage_path: str, resource_name: str, resource_description: str,
                  fmt: str, compress: bool, spec: dict = None):
+        super().__init__(resource, datapackage_path, resource_description, fmt, compress, spec)
 
         self._resource_name = resource_name
-
-        super().__init__(resource, datapackage_path, resource_description, fmt, compress, spec)
 
     def formatted_resource_name(self):
         return file_functions.remove_whitespace(self._resource_name)
@@ -18,7 +17,7 @@ class PDFResource(BaseResource):
         return self._create_resource_path(self._datapackage_path, self.formatted_resource_name(), self._fmt,
                                           self._compress)
 
-    def get_schema(self):
+    def _get_schema(self):
         return {
             'name': self.formatted_resource_name(),
             'description': self._resource_description,
