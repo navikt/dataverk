@@ -2,7 +2,6 @@ import copy
 import io
 import pandas as pd
 
-from dataverk import Datapackage
 from dataverk.utils import file_functions
 from dataverk.resources.base_resource import BaseResource
 
@@ -54,7 +53,7 @@ class DataFrameResource(BaseResource):
             'spec': self._spec
         }
 
-    def add_to_datapackage(self, dp: Datapackage) -> None:
+    def add_to_datapackage(self, dp) -> None:
         """ Converts a pandas Dataframe object to csv and adds it to the datapackage
 
         :param dp: Datapackage object to append

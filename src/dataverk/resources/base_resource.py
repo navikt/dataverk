@@ -49,5 +49,5 @@ class BaseResource(ABC):
         else:
             return 'text/csv'
 
-    def add_to_datapackage(self, dp: Datapackage):
+    def add_to_datapackage(self, dp):
         raise NotImplementedError()
