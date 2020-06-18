@@ -20,23 +20,21 @@ def get_resource_object(resource_type: str, resource: Any, datapackage_path: str
         spec = {}
 
     if resource_type == ResourceType.DF.value:
-        fmt = spec.get('format', 'csv')
-        compress = spec.get('compress', True)
         return DataFrameResource(resource=resource, datapackage_path=datapackage_path,
                                  resource_name=resource_name,
                                  resource_description=resource_description,
-                                 fmt=fmt, compress=compress, spec=spec)
+                                 spec=spec)
 
     elif resource_type == ResourceType.REMOTE.value:
         return RemoteResource(resource=resource, datapackage_path=datapackage_path,
                               resource_description=resource_description,
-                              fmt="", compress=False, spec=spec)
+                              spec=spec)
 
     elif resource_type == ResourceType.PDF.value:
-        compress = spec.get('compress', False)
         return PDFResource(resource=resource, datapackage_path=datapackage_path,
-                           resource_name=resource_name, resource_description=resource_description, fmt="pdf",
-                           compress=compress, spec=spec)
+                           resource_name=resource_name,
+                           resource_description=resource_description,
+                           spec=spec)
     else:
         raise NotImplementedError(
             f"""Resource type {resource_type} is not supported.

@@ -27,7 +27,7 @@ class Datapackage:
         if validate:
             self._validate_metadata(metadata)
 
-        self._datapackage_metadata = self._create_datapackage(dict(metadata))
+        self.datapackage_metadata = self._create_datapackage(dict(metadata))
 
     def _create_datapackage(self, metadata):
         today = datetime.date.today().strftime('%Y-%m-%d')
@@ -72,30 +72,26 @@ class Datapackage:
         validator.error_report()
 
     @property
-    def datapackage_metadata(self):
-        return copy.deepcopy(self._datapackage_metadata)
-
-    @property
     def resources(self):
         return self._resources
 
     @property
     def dp_id(self):
-        return self._datapackage_metadata.get("id")
+        return self.datapackage_metadata.get("id")
 
     @property
     def project(self):
-        return self._datapackage_metadata.get("project")
+        return self.datapackage_metadata.get("project")
 
     @property
     def path(self):
-        return self._datapackage_metadata.get("path")
+        return self.datapackage_metadata.get("path")
 
     @property
     def url(self):
-        return self._datapackage_metadata.get("url")
+        return self.datapackage_metadata.get("url")
 
-    def add_resource(self, resource: Any, resource_type: str =  ResourceType.DF.value, resource_name: str = "",
+    def add_resource(self, resource: Any, resource_name: str = "", resource_type: str = ResourceType.DF.value,
                      resource_description: str = "", spec: dict = None):
         """
         Adds a resource to the Datapackage object. Supported resource types are "df", "remote" and "pdf".
@@ -157,7 +153,7 @@ class Datapackage:
                 'metadata': metadata
                 }
 
-        self._datapackage_metadata["views"].append(view)
+        self.datapackage_metadata["views"].append(view)
 
     @staticmethod
     def _generate_id(metadata):

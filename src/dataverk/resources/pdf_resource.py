@@ -1,14 +1,18 @@
-from dataverk.utils import file_functions
+import copy
 
+from dataverk.utils import file_functions
 from dataverk.resources.base_resource import BaseResource
 
 
 class PDFResource(BaseResource):
     def __init__(self, resource: bytes, datapackage_path: str, resource_name: str, resource_description: str,
-                 fmt: str, compress: bool, spec: dict = None):
-        super().__init__(resource, datapackage_path, resource_description, fmt, compress, spec)
+                 spec: dict = None):
+        super().__init__(resource, datapackage_path, resource_description, spec)
 
         self._resource_name = resource_name
+        self._compress = self._spec.get("compress", True)
+        self._fmt = spec.get('format', 'PDF')
+        self._schema = self._get_schema()
 
     def formatted_resource_name(self):
         return file_functions.remove_whitespace(self._resource_name)
@@ -26,3 +30,9 @@ class PDFResource(BaseResource):
             'mediatype': self._media_type(self._fmt),
             'spec': self._spec
         }
+
+    def add_to_datapackage(self, dp) -> None:
+        formatted_resource_name = self._schema.get('name')
+        dp.datapackage_metadata['resources'].append(self._schema)
+        dp.resources[formatted_resource_name] = copy.deepcopy(self._schema)
+        dp.resources[formatted_resource_name]["data"] = self._resource

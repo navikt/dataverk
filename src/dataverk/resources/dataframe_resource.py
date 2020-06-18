@@ -1,5 +1,5 @@
-import copy
 import io
+import copy
 import pandas as pd
 
 from dataverk.utils import file_functions
@@ -8,10 +8,13 @@ from dataverk.resources.base_resource import BaseResource
 
 class DataFrameResource(BaseResource):
     def __init__(self, resource: pd.DataFrame, datapackage_path: str, resource_name: str, resource_description: str,
-                 fmt: str, compress: bool, spec: dict = None):
-        super().__init__(resource, datapackage_path, resource_description, fmt, compress, spec)
+                 spec: dict = None):
+        super().__init__(resource, datapackage_path, resource_description, spec)
 
         self._resource_name = resource_name
+        self._compress = self._spec.get("compress", True)
+        self._fmt = spec.get('format', 'csv')
+        self._schema = self._get_schema()
 
     def formatted_resource_name(self):
         return file_functions.remove_whitespace(self._resource_name)
@@ -56,7 +59,7 @@ class DataFrameResource(BaseResource):
     def add_to_datapackage(self, dp) -> None:
         """ Converts a pandas Dataframe object to csv and adds it to the datapackage
 
-        :param dp: Datapackage object to append
+        :param dp: Datapackage object to append resources to
         :return: None
         """
         formatted_resource_name = self._schema.get('name')

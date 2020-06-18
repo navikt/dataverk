@@ -4,8 +4,9 @@ from dataverk.resources.base_resource import BaseResource
 
 class RemoteResource(BaseResource):
     def __init__(self, resource: str, datapackage_path: str, resource_description: str,
-                 fmt: str, compress: bool, spec: dict = None):
-        super().__init__(resource, datapackage_path, resource_description, fmt, compress, spec)
+                 spec: dict = None):
+        super().__init__(resource, datapackage_path, resource_description, spec)
+        self._schema = self._get_schema()
 
     def formatted_resource_name(self):
         formatted_resource_name, self._fmt = self._resource_name_and_type_from_url(self._resource)
@@ -33,3 +34,6 @@ class RemoteResource(BaseResource):
         resource = parsed_url.path.split('/')[-1]
         resource_name_and_format = resource.split('.', 1)
         return resource_name_and_format[0], resource_name_and_format[1]
+
+    def add_to_datapackage(self, dp) -> None:
+        dp.datapackage_metadata['resources'].append(self._schema)

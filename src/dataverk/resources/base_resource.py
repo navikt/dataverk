@@ -1,21 +1,16 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from dataverk import Datapackage
-
 
 class BaseResource(ABC):
 
     def __init__(self, resource: Any, datapackage_path: str, resource_description: str,
-                 fmt: str, compress: bool, spec: dict = None):
+                 spec: dict = None):
 
         self._resource = resource
         self._datapackage_path = datapackage_path
         self._resource_description = resource_description
-        self._fmt = fmt
-        self._compress = compress
         self._spec = spec
-        self._schema = self._get_schema
 
     @property
     @abstractmethod
