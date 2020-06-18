@@ -10,8 +10,8 @@ class PDFResource(BaseResource):
         super().__init__(resource, datapackage_path, resource_description, spec)
 
         self._resource_name = resource_name
-        self._compress = self._spec.get("compress", True)
-        self._fmt = spec.get('format', 'PDF')
+        self._compress = self._spec.get("compress", False)
+        self._fmt = spec.get('format', 'pdf')
         self._schema = self._get_schema()
 
     def formatted_resource_name(self):
