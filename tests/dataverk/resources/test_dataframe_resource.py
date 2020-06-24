@@ -39,7 +39,7 @@ class TestMethodReturnValues(unittest.TestCase):
     def setUp(self):
         self.resource_formatter = DataFrameResource(resource=df, resource_name=resource_name,
                                                     resource_description=resource_description, datapackage_path=path,
-                                                    fmt=fmt, compress=compress, spec=spec)
+                                                    spec=spec)
 
     def test__resource_path(self):
         actual_path = self.resource_formatter._resource_path()
@@ -52,6 +52,6 @@ class TestMethodReturnValues(unittest.TestCase):
         self.assertEqual(expected_formatted_name, actual_formatted_name)
 
     def test__get_schema(self):
-        actual_schema = self.resource_formatter.get_schema()
+        actual_schema = self.resource_formatter._get_schema()
         self.assertEqual(expected_schema, actual_schema)
 

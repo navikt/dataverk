@@ -2,6 +2,7 @@ import os
 import unittest
 from dataverk.datapackage import Datapackage
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
+from dataverk.utils import storage_paths
 
 valid_metadata = {
     'title': 'title',
@@ -64,7 +65,7 @@ class TestMethodReturnValues(unittest.TestCase):
         dp_id = "id123"
         os.environ["DATAVERK_API_ENDPOINT"] = api_endpoint
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = bucket_endpoint
-        path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
+        path, store_path = storage_paths.create_nais_paths(bucket, dp_id)
         del os.environ["DATAVERK_API_ENDPOINT"]
         del os.environ["DATAVERK_BUCKET_ENDPOINT"]
         self.assertEqual(path, f"{api_endpoint}/{bucket}/{dp_id}")
@@ -76,7 +77,7 @@ class TestMethodReturnValues(unittest.TestCase):
         dp_id = "id123"
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = bucket_endpoint
         with self.assertRaises(EnvironmentVariableNotSet):
-            path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
+            path, store_path = storage_paths.create_nais_paths(bucket, dp_id)
         del os.environ["DATAVERK_BUCKET_ENDPOINT"]
 
     def test__nais_specific_paths_invalid_bucket_not_set(self):
@@ -85,5 +86,5 @@ class TestMethodReturnValues(unittest.TestCase):
         dp_id = "id123"
         os.environ["DATAVERK_API_ENDPOINT"] = api_endpoint
         with self.assertRaises(EnvironmentVariableNotSet):
-            path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
+            path, store_path = storage_paths.create_nais_paths(bucket, dp_id)
         del os.environ["DATAVERK_API_ENDPOINT"]

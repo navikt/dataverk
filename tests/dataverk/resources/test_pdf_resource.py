@@ -3,13 +3,13 @@ import unittest
 
 from dataverk.resources.pdf_resource import PDFResource
 
-resource = "A pdf binary string"
+resource = b"A pdf binary string"
 resource_name_in = "pdf resource"
 resource_description = "A pdf resource"
 resource_fmt = "pdf"
 path = "https://some.bucket.storage.com"
 media_type = "application/pdf"
-spec = None
+spec = {}
 compress = False
 
 expected_resource_name = resource_name_in.replace(" ", "_")
@@ -28,7 +28,7 @@ class TestMethodReturnValues(unittest.TestCase):
     def setUp(self):
         self.resource_formatter = PDFResource(resource=resource, resource_name=resource_name_in,
                                               resource_description=resource_description, datapackage_path=path,
-                                              fmt="pdf", compress=compress, spec=spec)
+                                              spec=spec)
 
     def test__resource_path(self):
         actual_path = self.resource_formatter._resource_path()
@@ -41,5 +41,5 @@ class TestMethodReturnValues(unittest.TestCase):
         self.assertEqual(expected_formatted_name, actual_formatted_name)
 
     def test__get_schema(self):
-        actual_schema = self.resource_formatter.get_schema()
+        actual_schema = self.resource_formatter._get_schema()
         self.assertEqual(expected_schema, actual_schema)

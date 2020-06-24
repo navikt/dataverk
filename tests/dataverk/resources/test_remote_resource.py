@@ -35,10 +35,10 @@ class TestMethodReturnValues(unittest.TestCase):
     def setUp(self):
         self.resource_formatter = RemoteResource(resource=resource_url,
                                                  resource_description=resource_description, datapackage_path=path,
-                                                 fmt="", compress=compress, spec=spec)
+                                                 spec=spec)
 
     def test__get_schema(self):
-        actual_schema = self.resource_formatter.get_schema()
+        actual_schema = self.resource_formatter._get_schema()
         self.assertEqual(expected_schema, actual_schema)
 
     def test__resource_name_and_type_from_url(self):

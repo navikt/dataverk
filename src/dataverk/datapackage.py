@@ -1,61 +1,41 @@
-import copy
 import datetime
 import uuid
 import hashlib
 import re
 
 from typing import Any
-from os import environ
-
-from data_catalog_dcat_validator.models.dataset import DatasetModel
-from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
-from dataverk.utils import validators, file_functions
+from dataverk.abc.base import DataverkBase
+from dataverk.utils import validators, file_functions, storage_paths
 from collections.abc import Sequence
 from dataverk.connectors.storage.storage_connector_factory import StorageType
 from dataverk.resources.factory_resources import get_resource_object, ResourceType
 
 
-class Datapackage:
+class Datapackage(DataverkBase):
     """
     Understands packaging of data resources and views on those resources for publication
     """
 
     def __init__(self, metadata: dict, validate: bool = True):
+        super().__init__()
         self._resources = {}
-        self.views = []
+        self._bucket = self._get_bucket(metadata)
+        self._dp_id = self._get_dp_id(metadata)
+        self._title = self._get_dp_title(metadata)
 
         if validate:
-            self._validate_metadata(metadata)
+            validators.validate_metadata(metadata)
 
-        self.datapackage_metadata = self._create_datapackage(dict(metadata))
+        self.datapackage_metadata = self._create_datapackage(metadata)
 
-    def _create_datapackage(self, metadata):
+    def _create_datapackage(self, metadata: dict):
         today = datetime.date.today().strftime('%Y-%m-%d')
-
-        try:
-            bucket = metadata['bucket']
-        except KeyError:
-            raise AttributeError(f"bucket is required to be set in datapackage metadata")
-        else:
-            validators.validate_bucket_name(bucket)
-
-        try:
-            metadata['title']
-        except KeyError:
-            raise AttributeError(f"title is required to be set in datapackage metadata")
+        path, store_path = self._generate_paths(metadata)
 
         # set defaults for store and repo when not specified
         metadata['store'] = metadata.get('store', StorageType.LOCAL)
         metadata['repo'] = metadata.get('repo', metadata.get('github-repo', ''))
-
-        try:
-            dp_id = metadata['id']
-        except KeyError:
-            dp_id = self._generate_id(metadata)
-
-        metadata['id'] = dp_id
-        path, store_path = self._generate_paths(metadata)
-
+        metadata['id'] = self._dp_id
         metadata['store_path'] = store_path
         metadata['path'] = path
         metadata['updated'] = today
@@ -63,33 +43,16 @@ class Datapackage:
         metadata["views"] = []
         metadata["resources"] = []
         metadata["datasets"] = {}
+
         return metadata
 
-    @staticmethod
-    def _validate_metadata(metadata: dict):
-        validator = DatasetModel(metadata)
-        validator.validate()
-        validator.error_report()
+    @property
+    def dp_id(self):
+        return self._dp_id
 
     @property
     def resources(self):
         return self._resources
-
-    @property
-    def dp_id(self):
-        return self.datapackage_metadata.get("id")
-
-    @property
-    def project(self):
-        return self.datapackage_metadata.get("project")
-
-    @property
-    def path(self):
-        return self.datapackage_metadata.get("path")
-
-    @property
-    def url(self):
-        return self.datapackage_metadata.get("url")
 
     def add_resource(self, resource: Any, resource_name: str = "",
                      resource_description: str = "", resource_type: str = ResourceType.DF.value,
@@ -112,8 +75,10 @@ class Datapackage:
         :return: None
         """
         resource = get_resource_object(resource_type=resource_type, resource=resource,
-                                       datapackage_path=self.path, resource_name=resource_name,
+                                       datapackage_path=self.datapackage_metadata.get("path"),
+                                       resource_name=resource_name,
                                        resource_description=resource_description, spec=spec)
+
         resource.add_to_datapackage(self)
 
     def add_view(self, name: str, resources: Sequence, title: str = "", description: str = "", attribution: str = "",
@@ -156,52 +121,53 @@ class Datapackage:
 
         self.datapackage_metadata["views"].append(view)
 
-    @staticmethod
-    def _generate_id(metadata):
+    def _get_dp_title(self, metadata):
+        try:
+            return metadata['title']
+        except KeyError:
+            raise AttributeError(f"title is required to be set in datapackage metadata")
+
+    def _get_dp_id(self, metadata):
+        try:
+            return metadata['id']
+        except KeyError:
+            return self._generate_id(metadata)
+
+    def _get_bucket(self, metadata):
+        try:
+            bucket = metadata['bucket']
+        except KeyError:
+            raise AttributeError(f"Bucket is required to be set in datapackage metadata")
+        else:
+            validators.validate_bucket_name(bucket)
+            return bucket
+
+    def _generate_id(self, metadata):
         author = metadata.get("author", None)
         title = metadata.get("title", None)
-        bucket = metadata.get("bucket", None)
 
-        id_string = '-'.join(filter(None, (bucket, author, title)))
+        id_string = '-'.join(filter(None, (self._bucket, author, title)))
         if id_string:
             hash_object = hashlib.md5(id_string.encode())
             dp_id = hash_object.hexdigest()
-            return re.sub('[^0-9a-z]+', '-', dp_id.lower())
+            dp_id = re.sub('[^0-9a-z]+', '-', dp_id.lower())
         else:
-            return uuid.uuid4()
+            dp_id = uuid.uuid4()
 
-    @staticmethod
-    def _generate_paths(metadata):
-        store = metadata['store']
-        repo = metadata['repo']
-        bucket = metadata['bucket']
-        dp_id = metadata['id']
+        self.log.info(f"Datapackage id: {dp_id}")
+        return dp_id
+
+    def _generate_paths(self, metadata):
+        store = metadata.get('store')
 
         if StorageType(store) is StorageType.NAIS:
-            path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
+            path, store_path = storage_paths.create_nais_paths(self._bucket, self.dp_id)
         elif StorageType(store) is StorageType.GCS:
-            path = f'https://storage.googleapis.com/{bucket}/{dp_id}'
-            store_path = f'gs://{bucket}/{dp_id}'
-        else:  # default is local storage
-            path = f'https://raw.githubusercontent.com/{repo}/master/{bucket}/packages/{dp_id}'
-            store_path = f'{bucket}/{dp_id}'
-
-        return path, store_path
-
-    @staticmethod
-    def _nais_specific_paths(bucket, dp_id):
-        try:
-            api_endpoint = environ["DATAVERK_API_ENDPOINT"]
-        except KeyError as missing_env:
-            raise EnvironmentVariableNotSet(str(missing_env))
+            path, store_path = storage_paths.create_gcs_paths(self._bucket, self.dp_id)
+        elif StorageType(store) is StorageType.LOCAL:
+            path, store_path = storage_paths.create_local_paths(self._bucket, self.dp_id)
         else:
-            path = f'{api_endpoint}/{bucket}/{dp_id}'
-
-        try:
-            bucket_endpoint = environ["DATAVERK_BUCKET_ENDPOINT"]
-        except KeyError as missing_env:
-            raise EnvironmentVariableNotSet(str(missing_env))
-        else:
-            store_path = f'{bucket_endpoint}/{bucket}/{dp_id}'
+            raise NotImplementedError(f"""StorageType {store} is not supported.
+             Supported types are {[name.value for name in StorageType]}.""")
 
         return path, store_path

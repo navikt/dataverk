@@ -11,17 +11,17 @@ from dataverk.connectors.storage.storage_connector_factory import (
 
 class PackagePublisher(DataverkBase):
     def __init__(
-        self, settings_store: Mapping, env_store: Mapping, datapackage_metadata: Mapping
+        self, settings_store: Mapping, env_store: Mapping, dp
     ):
         super().__init__()
         self._settings_store = settings_store
         self._env_store = env_store
-        self._datapackage_metadata = datapackage_metadata
+        self._datapackage_metadata = dp.datapackage_metadata
+        self._resources = dp.resources
 
-    def publish(self, resources) -> None:
+    def publish(self) -> None:
         """ Publishes all resources in datapackage
 
-        :param resources: dict: resources added to the datapackage
         :return: None
         """
         bucket_type = self._datapackage_metadata.get("store")
@@ -46,7 +46,7 @@ class PackagePublisher(DataverkBase):
             storage_connector=storage_connector,
             datapackage_id=datapackage_id,
             datapackage_metadata=self._datapackage_metadata,
-            resources=resources,
+            resources=self._resources,
         )
 
     @staticmethod
