@@ -20,7 +20,7 @@ cx_Oracle==7.3.0
 protobuf==3.12.2
 sphinx-rtd-theme==0.4.3
 Sphinx==3.1.0
-nbsphinx==0.7.0
+nbsphinx==0.7.1
 kafka-python==2.0.1
 elasticsearch==7.7.1
 streamz==0.5.3
