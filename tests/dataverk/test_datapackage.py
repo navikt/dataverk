@@ -1,8 +1,8 @@
 import os
 import unittest
-import pandas as pd
 from dataverk.datapackage import Datapackage
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
+from dataverk.utils import storage_paths
 
 valid_metadata = {
     'title': 'title',
@@ -58,58 +58,6 @@ class TestMethodReturnValues(unittest.TestCase):
     def setUp(self):
         self.dp = Datapackage(valid_metadata)
 
-    def test__get_schema(self):
-        resource_name = "my-package"
-        resource_description = "desc"
-        fmt = "csv"
-        dsv_separator = ";"
-        compress = True
-        mediatype = "text/csv"
-        path = "https://some.bucket.storage.com"
-        spec = None
-        expected_schema = {
-            'name': resource_name,
-            'description': resource_description,
-            'path': f'{path}/resources/{resource_name}.{fmt}.gz',
-            'format': fmt,
-            'dsv_separator': dsv_separator,
-            'compressed': compress,
-            'mediatype': mediatype,
-            'schema': {'fields': [
-                {'name': 'col1', 'description': '', 'type': 'number'},
-                {'name': 'col2', 'description': '', 'type': 'number'}
-            ]},
-            'spec': spec
-        }
-        df = pd.DataFrame({'col1': [1, 2], 'col2': [3, 4]})
-        schema = self.dp._get_schema(df, path=path,
-                                     resource_name=resource_name, resource_description=resource_description,
-                                     format=fmt, compress=True, dsv_separator=";", spec=None)
-        self.assertEqual(expected_schema, schema)
-
-    def test__resource_name_and_type_from_url_zipped(self):
-        resource_name_in = "resource"
-        resource_fmt_in = "csv.gz"
-        resource_url = f"https://remote.storage.location.com/bucket/" \
-                       f"datapackage/resources/{resource_name_in}.{resource_fmt_in}"
-        resource_name, resource_fmt = Datapackage._resource_name_and_type_from_url(resource_url)
-        self.assertEqual(resource_name_in, resource_name)
-        self.assertEqual(resource_fmt_in, resource_fmt)
-
-    def test__resource_name_and_type_from_url(self):
-        resource_name_in = "resource"
-        resource_fmt_in = "csv"
-        resource_url = f"http://remote.storage.location.com/bucket/" \
-                       f"datapackage/resources/{resource_name_in}.{resource_fmt_in}"
-        resource_name, resource_fmt = Datapackage._resource_name_and_type_from_url(resource_url)
-        self.assertEqual(resource_name_in, resource_name)
-        self.assertEqual(resource_fmt_in, resource_fmt)
-
-    def test__resource_name_and_type_from_url_invalid(self):
-        resource_url = "/not/a/web/url/bucket/datapackage/resources/resource.csv.gz"
-        with self.assertRaises(ValueError):
-            Datapackage._resource_name_and_type_from_url(resource_url)
-
     def test__nais_specific_paths_valid(self):
         api_endpoint = "https://dataverk.no"
         bucket_endpoint = "https://dataverk.no"
@@ -117,7 +65,7 @@ class TestMethodReturnValues(unittest.TestCase):
         dp_id = "id123"
         os.environ["DATAVERK_API_ENDPOINT"] = api_endpoint
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = bucket_endpoint
-        path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
+        path, store_path = storage_paths.create_nais_paths(bucket, dp_id)
         del os.environ["DATAVERK_API_ENDPOINT"]
         del os.environ["DATAVERK_BUCKET_ENDPOINT"]
         self.assertEqual(path, f"{api_endpoint}/{bucket}/{dp_id}")
@@ -129,7 +77,7 @@ class TestMethodReturnValues(unittest.TestCase):
         dp_id = "id123"
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = bucket_endpoint
         with self.assertRaises(EnvironmentVariableNotSet):
-            path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
+            path, store_path = storage_paths.create_nais_paths(bucket, dp_id)
         del os.environ["DATAVERK_BUCKET_ENDPOINT"]
 
     def test__nais_specific_paths_invalid_bucket_not_set(self):
@@ -138,5 +86,5 @@ class TestMethodReturnValues(unittest.TestCase):
         dp_id = "id123"
         os.environ["DATAVERK_API_ENDPOINT"] = api_endpoint
         with self.assertRaises(EnvironmentVariableNotSet):
-            path, store_path = Datapackage._nais_specific_paths(bucket, dp_id)
+            path, store_path = storage_paths.create_nais_paths(bucket, dp_id)
         del os.environ["DATAVERK_API_ENDPOINT"]

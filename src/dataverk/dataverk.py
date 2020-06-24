@@ -5,7 +5,6 @@ from collections.abc import Sequence
 from dataverk.abc.base import DataverkBase
 from dataverk.utils import dataverk_doc_address
 from dataverk.exceptions import dataverk_exceptions
-from dataverk.datapackage import Datapackage
 from dataverk.context import EnvStore
 from dataverk.dataverk_context import DataverkContext
 from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector
@@ -120,13 +119,11 @@ class Dataverk(DataverkBase):
         with conn:
             return conn.persist_pandas_df(table, df=df, if_exists=if_exists, *args, **kwargs)
 
-    def publish(self, datapackage: Datapackage):
-        resources = datapackage.resources
-        metadata = datapackage.datapackage_metadata
+    def publish(self, datapackage):
 
         # Publish resources to buckets
-        package_publisher = PackagePublisher(datapackage_metadata=metadata, settings_store=self._context.settings, env_store={})
-        package_publisher.publish(resources=resources)
+        package_publisher = PackagePublisher(dp=datapackage, settings_store=self._context.settings, env_store={})
+        package_publisher.publish()
 
         # Publish metadata to elastic search
         try:
@@ -138,7 +135,7 @@ class Dataverk(DataverkBase):
                 See {dataverk_doc_address} for guidelines on how to setup the settings file."""
             )
         else:
-            eu = ElasticSearchUpdater(es_conn, metadata)
+            eu = ElasticSearchUpdater(es_conn, datapackage.datapackage_metadata)
             eu.publish()
 
     def _get_sql_query(self, sql):

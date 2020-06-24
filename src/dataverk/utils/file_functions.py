@@ -1,3 +1,5 @@
+import gzip
+import io
 import os
 import errno
 import json
@@ -75,3 +77,10 @@ def _remove_readonly(func, path, _):
     """Clear the readonly bit and reattempt the removal"""
     os.chmod(path, stat.S_IWRITE)
     func(path)
+
+
+def compress_content(data_buff):
+    gz_buff = io.BytesIO()
+    with gzip.GzipFile(fileobj=gz_buff, mode='w') as zipped_f:
+        zipped_f.write(bytes(data_buff.getvalue(), encoding="utf-8-sig"))
+    return gz_buff.getvalue()
