@@ -13,31 +13,45 @@ class ResourceType(Enum):
     PDF: str = "pdf"
 
 
-def get_resource_object(resource_type: str, resource: Any, datapackage_path: str, resource_name: str,
-                        resource_description: str, spec: dict):
+def get_resource_object(
+    resource_type: str,
+    resource: Any,
+    datapackage_path: str,
+    resource_name: str,
+    resource_description: str,
+    spec: dict,
+):
 
     if not spec:
         spec = {}
 
     if resource_type == ResourceType.DF.value:
-        fmt = spec.get('format', 'csv')
-        compress = spec.get('compress', True)
-        return DataFrameResource(resource=resource, datapackage_path=datapackage_path,
-                                 resource_name=resource_name,
-                                 resource_description=resource_description,
-                                 fmt=fmt, compress=compress, spec=spec)
+        return DataFrameResource(
+            resource=resource,
+            datapackage_path=datapackage_path,
+            resource_name=resource_name,
+            resource_description=resource_description,
+            spec=spec,
+        )
 
     elif resource_type == ResourceType.REMOTE.value:
-        return RemoteResource(resource=resource, datapackage_path=datapackage_path,
-                              resource_description=resource_description,
-                              fmt="", compress=False, spec=spec)
+        return RemoteResource(
+            resource=resource,
+            datapackage_path=datapackage_path,
+            resource_description=resource_description,
+            spec=spec,
+        )
 
     elif resource_type == ResourceType.PDF.value:
-        compress = spec.get('compress', False)
-        return PDFResource(resource=resource, datapackage_path=datapackage_path,
-                           resource_name=resource_name, resource_description=resource_description, fmt="pdf",
-                           compress=compress, spec=spec)
+        return PDFResource(
+            resource=resource,
+            datapackage_path=datapackage_path,
+            resource_name=resource_name,
+            resource_description=resource_description,
+            spec=spec,
+        )
     else:
         raise NotImplementedError(
             f"""Resource type {resource_type} is not supported.
-             Supported types are {[name.value for name in ResourceType]}.""")
+             Supported types are {[name.value for name in ResourceType]}."""
+        )
