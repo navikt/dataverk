@@ -18,7 +18,7 @@ requests==2.23.0
 pandas==1.0.4
 cx_Oracle==7.3.0
 protobuf==3.12.2
-sphinx-rtd-theme==0.4.3
+sphinx-rtd-theme==0.5.0
 Sphinx==3.1.0
 nbsphinx==0.7.0
 kafka-python==2.0.1
