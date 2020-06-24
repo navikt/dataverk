@@ -14,7 +14,7 @@ fire==0.3.1
 prometheus_client==0.8.0
 pyjstat==2.2.0
 psycopg2==2.8.5
-requests==2.23.0
+requests==2.24.0
 pandas==1.0.4
 cx_Oracle==7.3.0
 protobuf==3.12.2
