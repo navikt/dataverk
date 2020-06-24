@@ -3,9 +3,13 @@ from typing import Any
 
 
 class BaseResource(ABC):
-
-    def __init__(self, resource: Any, datapackage_path: str, resource_description: str,
-                 spec: dict = None):
+    def __init__(
+        self,
+        resource: Any,
+        datapackage_path: str,
+        resource_description: str,
+        spec: dict = None,
+    ):
 
         self._resource = resource
         self._datapackage_path = datapackage_path
@@ -27,22 +31,24 @@ class BaseResource(ABC):
         raise NotImplementedError()
 
     @staticmethod
-    def _create_resource_path(datapackage_path: str, formatted_resource_name: str, fmt: str, compress: bool):
+    def _create_resource_path(
+        datapackage_path: str, formatted_resource_name: str, fmt: str, compress: bool
+    ):
         if compress:
-            return f'{datapackage_path}/resources/{formatted_resource_name}.{fmt}.gz'
+            return f"{datapackage_path}/resources/{formatted_resource_name}.{fmt}.gz"
         else:
-            return f'{datapackage_path}/resources/{formatted_resource_name}.{fmt}'
+            return f"{datapackage_path}/resources/{formatted_resource_name}.{fmt}"
 
     @staticmethod
     def _media_type(fmt: str):
-        if fmt == 'csv':
-            return 'text/csv'
-        elif fmt == 'json':
-            return 'application/json'
-        elif fmt == 'pdf':
-            return 'application/pdf'
+        if fmt == "csv":
+            return "text/csv"
+        elif fmt == "json":
+            return "application/json"
+        elif fmt == "pdf":
+            return "application/pdf"
         else:
-            return 'text/csv'
+            return "text/csv"
 
     def add_to_datapackage(self, dp):
         raise NotImplementedError()

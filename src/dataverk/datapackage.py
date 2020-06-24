@@ -91,8 +91,9 @@ class Datapackage:
     def url(self):
         return self.datapackage_metadata.get("url")
 
-    def add_resource(self, resource: Any, resource_name: str = "", resource_type: str = ResourceType.DF.value,
-                     resource_description: str = "", spec: dict = None):
+    def add_resource(self, resource: Any, resource_name: str = "",
+                     resource_description: str = "", resource_type: str = ResourceType.DF.value,
+                     spec: dict = None):
         """
         Adds a resource to the Datapackage object. Supported resource types are "df", "remote" and "pdf".
 
