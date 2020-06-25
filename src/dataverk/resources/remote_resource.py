@@ -46,3 +46,4 @@ class RemoteResource(BaseResource):
 
     def add_to_datapackage(self, dp) -> None:
         dp.datapackage_metadata["resources"].append(self._schema)
+        return self._schema.get("path")

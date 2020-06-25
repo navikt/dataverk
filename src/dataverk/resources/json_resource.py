@@ -1,10 +1,9 @@
-import copy
-
 from dataverk.utils import file_functions
+
 from dataverk.resources.base_resource import BaseResource
 
 
-class PDFResource(BaseResource):
+class JSONResource(BaseResource):
     def __init__(
         self,
         resource: bytes,
@@ -16,8 +15,7 @@ class PDFResource(BaseResource):
         super().__init__(resource, datapackage_path, resource_description, spec)
 
         self._resource_name = resource_name
-        self._compress = self._spec.get("compress", False)
-        self._fmt = self._spec.get("format", "pdf")
+        self._fmt = self._spec.get("format", "json")
         self._schema = self._get_schema()
 
     def formatted_resource_name(self):
@@ -28,7 +26,7 @@ class PDFResource(BaseResource):
             self._datapackage_path,
             self.formatted_resource_name(),
             self._fmt,
-            self._compress,
+            False
         )
 
     def _get_schema(self):
@@ -41,9 +39,8 @@ class PDFResource(BaseResource):
             "spec": self._spec,
         }
 
-    def add_to_datapackage(self, dp) -> None:
+    def add_to_datapackage(self, dp) -> str:
         formatted_resource_name = self._schema.get("name")
-        dp.datapackage_metadata["resources"].append(self._schema)
-        dp.resources[formatted_resource_name] = copy.deepcopy(self._schema)
+        dp.resources[formatted_resource_name] = self._schema
         dp.resources[formatted_resource_name]["data"] = self._resource
         return self._schema.get("path")
