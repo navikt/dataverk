@@ -42,6 +42,11 @@ class PDFResource(BaseResource):
         }
 
     def add_to_datapackage(self, dp) -> None:
+        """ Adds a pdf resource to the datapackage
+
+        :param dp: Datapackage object to append resources to
+        :return: path: str: Path to resource
+        """
         formatted_resource_name = self._schema.get("name")
         dp.datapackage_metadata["resources"].append(self._schema)
         dp.resources[formatted_resource_name] = copy.deepcopy(self._schema)

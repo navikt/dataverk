@@ -40,6 +40,11 @@ class JSONResource(BaseResource):
         }
 
     def add_to_datapackage(self, dp) -> str:
+        """ Adds a json object to the datapackage
+
+        :param dp: Datapackage object to append resources to
+        :return: path: str: Path to resource
+        """
         formatted_resource_name = self._schema.get("name")
         dp.resources[formatted_resource_name] = self._schema
         dp.resources[formatted_resource_name]["data"] = self._resource

@@ -5,7 +5,7 @@ import re
 
 from typing import Any
 from dataverk.abc.base import DataverkBase
-from dataverk.utils import validators, file_functions, storage_paths
+from dataverk.utils import validators, storage_paths
 from collections.abc import Sequence
 from dataverk.connectors.storage.storage_connector_factory import StorageType
 from dataverk.resources.factory_resources import get_resource_object, ResourceType

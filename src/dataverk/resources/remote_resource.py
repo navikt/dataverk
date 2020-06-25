@@ -45,5 +45,10 @@ class RemoteResource(BaseResource):
         return resource_name_and_format[0], resource_name_and_format[1]
 
     def add_to_datapackage(self, dp) -> None:
+        """ Adds a remote resource to the datapackage
+
+        :param dp: Datapackage object to append resources to
+        :return: path: str: Path to resource
+        """
         dp.datapackage_metadata["resources"].append(self._schema)
         return self._schema.get("path")
