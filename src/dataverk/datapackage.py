@@ -9,6 +9,7 @@ from dataverk.utils import validators, file_functions, storage_paths
 from collections.abc import Sequence
 from dataverk.connectors.storage.storage_connector_factory import StorageType
 from dataverk.resources.factory_resources import get_resource_object, ResourceType
+from dataverk.views.view_factory import get_view_object
 
 
 class Datapackage(DataverkBase):
@@ -101,25 +102,11 @@ class Datapackage(DataverkBase):
         :param metadata:
         :return: None
         """
-        if spec is None:
-            spec = {"type": type,
-                    "group": group,
-                    "series": series}
+        view = get_view_object(name=name, resources=resources, description=description, attribution=attribution,
+                               spec_type=spec_type, spec=spec, type=type, group=group,
+                               series=series, row_limit=row_limit, metadata=metadata)
 
-        view = {'name': file_functions.remove_whitespace(name),
-                'title': title,
-                'description': description,
-                'attribution': attribution,
-                'resources': resources,
-                'specType': spec_type,
-                'spec': spec,
-                'transform': {
-                    "limit": row_limit
-                },
-                'metadata': metadata
-                }
-
-        self.datapackage_metadata["views"].append(view)
+        view.add_to_datapackage(self)
 
     def _get_dp_title(self, metadata):
         try:
