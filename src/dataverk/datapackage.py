@@ -57,7 +57,7 @@ class Datapackage(DataverkBase):
 
     def add_resource(self, resource: Any, resource_name: str = "",
                      resource_description: str = "", resource_type: str = ResourceType.DF.value,
-                     spec: dict = None):
+                     spec: dict = None) -> str:
         """
         Adds a resource to the Datapackage object. Supported resource types are "df", "remote" and "pdf".
 
@@ -73,14 +73,14 @@ class Datapackage(DataverkBase):
 
         :param resource_description: str, description of resource, default = ""
         :param spec: dict, resource specification e.g hidden, fields, format, compress, etc, default = None
-        :return: None
+        :return: path: str: resource path
         """
         resource = get_resource_object(resource_type=resource_type, resource=resource,
                                        datapackage_path=self.datapackage_metadata.get("path"),
                                        resource_name=resource_name,
                                        resource_description=resource_description, spec=spec)
 
-        resource.add_to_datapackage(self)
+        return resource.add_to_datapackage(self)
 
     def add_view(self, name: str, resources: Sequence, title: str = "", description: str = "", attribution: str = "",
                  spec_type: str = "simple", spec: dict = None, type: str = "", group: str = "",
