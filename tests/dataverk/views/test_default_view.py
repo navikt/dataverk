@@ -10,7 +10,7 @@ BUCKET_NAME = "bucket-name"
 VISUALIZATION_NAME = "viz"
 
 
-class TestRemoteSpecView(unittest.TestCase):
+class TestDefaultView(unittest.TestCase):
 
     def setUp(self):
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = "https://bucket-endpoint.no"
