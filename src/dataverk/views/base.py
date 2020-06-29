@@ -12,12 +12,20 @@ class BaseView:
         self._description = description
         self._attribution = attribution
         self._spec_type = spec_type
-        self._spec = spec
         self._type = type
         self._group = group
         self._series = series
         self._row_limit = row_limit
         self._metadata = metadata
+
+        if spec is None:
+            self._spec = {
+                "type": type,
+                "group": group,
+                "series": series
+            }
+        else:
+            self._spec = spec
 
     def add_to_datapackage(self, dp):
         raise NotImplementedError()

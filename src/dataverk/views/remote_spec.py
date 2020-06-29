@@ -3,7 +3,7 @@ from dataverk.utils import file_functions
 from dataverk.views.base import BaseView
 
 
-class VegaView(BaseView):
+class RemoteSpecView(BaseView):
 
     def __init__(self, name: str, resources: Sequence, title: str = "", description: str = "", attribution: str = "",
                  spec_type: str = "simple", spec: dict = None, type: str = "", group: str = "",

@@ -12,13 +12,6 @@ class DefaultView(BaseView):
                          spec_type=spec_type, spec=spec, type=type, group=group,
                          series=series, row_limit=row_limit, metadata=metadata)
 
-        if spec is None:
-            self._spec = {
-                "type": type,
-                "group": group,
-                "series": series
-            }
-
     def add_to_datapackage(self, dp):
         dp.datapackage_metadata["views"].append({
             'name': file_functions.remove_whitespace(self._name),
