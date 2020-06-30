@@ -14,12 +14,12 @@ class RemoteSpecView(BaseView):
 
     def add_to_datapackage(self, dp):
         resource_path = dp.add_resource(self._spec,
-                                        resource_name=file_functions.remove_whitespace(self._name),
+                                        resource_name=file_functions.url_encode(self._name),
                                         resource_description=self._name,
                                         resource_type="json",
                                         spec={'hidden': True})
         dp.datapackage_metadata["views"].append({
-            'name': file_functions.remove_whitespace(self._name),
+            'name': file_functions.url_encode(self._name),
             'title': self._title,
             'description': self._description,
             'attribution': self._attribution,
