@@ -66,11 +66,11 @@ class DataFrameResource(BaseResource):
             "spec": self._spec,
         }
 
-    def add_to_datapackage(self, dp) -> None:
+    def add_to_datapackage(self, dp) -> str:
         """ Converts a pandas Dataframe object to csv and adds it to the datapackage
 
         :param dp: Datapackage object to append resources to
-        :return: None
+        :return: path: str: Path to resource
         """
         formatted_resource_name = self._schema.get("name")
         dsv_separator = self._schema.get("dsv_separator")
@@ -89,3 +89,4 @@ class DataFrameResource(BaseResource):
             dp.resources[formatted_resource_name]["format"] += ".gz"
         else:
             dp.resources[formatted_resource_name]["data"] = data_buff.getvalue()
+        return self._schema.get("path")
