@@ -1,12 +1,12 @@
 import gzip
 import io
 import os
-import errno
 import json
 import pathlib
 import shutil
 import stat
 import requests
+from urllib import parse
 from pathlib import Path
 from urllib3.exceptions import LocationParseError
 from urllib3.util import url
@@ -50,8 +50,9 @@ def json_to_dict(path: Path):
     return json.loads(file_string)
 
 
-def remove_whitespace(filename):
-    return filename.replace(' ', '_')
+def url_encode(filename):
+    filename_wo_spaces = filename.replace(' ', '_')
+    return parse.quote(filename_wo_spaces)
 
 
 def _json_validate_params(file_path: Path):
