@@ -18,10 +18,10 @@ def get_view_object(name: str, resources: Sequence, title: str = "", description
                     series: Sequence = list(), row_limit: int = 500, metadata: dict = None):
 
     if RemoteSpecTypes.has_spec_type(spec_type):
-        return RemoteSpecView(name=name, resources=resources, description=description, attribution=attribution,
+        return RemoteSpecView(name=name, resources=resources, title=title, description=description, attribution=attribution,
                               spec_type=spec_type, spec=spec, type=type, group=group,
                               series=series, row_limit=row_limit, metadata=metadata)
     else:
-        return DefaultView(name=name, resources=resources, description=description, attribution=attribution,
+        return DefaultView(name=name, resources=resources, title=title, description=description, attribution=attribution,
                            spec_type=spec_type, spec=spec, type=type, group=group,
                            series=series, row_limit=row_limit, metadata=metadata)
