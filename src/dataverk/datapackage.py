@@ -82,7 +82,7 @@ class Datapackage(DataverkBase):
 
         return resource.add_to_datapackage(self)
 
-    def add_view(self, name: str, resources: Sequence, title: str = "", description: str = "", attribution: str = "",
+    def add_view(self, name: str = None, resources: Sequence = None, title: str = "", description: str = "", attribution: str = "",
                  spec_type: str = "simple", spec: dict = None, type: str = "", group: str = "",
                  series: Sequence = list(), row_limit: int = 500, metadata: dict = None):
         """
@@ -102,7 +102,7 @@ class Datapackage(DataverkBase):
         :param metadata:
         :return: None
         """
-        view = get_view_object(name=name, resources=resources, description=description, attribution=attribution,
+        view = get_view_object(name=name, resources=resources, title=title, description=description, attribution=attribution,
                                spec_type=spec_type, spec=spec, type=type, group=group,
                                series=series, row_limit=row_limit, metadata=metadata)
 

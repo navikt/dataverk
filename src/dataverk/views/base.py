@@ -6,7 +6,6 @@ class BaseView:
     def __init__(self, name: str, resources: Sequence, title: str = "", description: str = "", attribution: str = "",
                  spec_type: str = "simple", spec: dict = None, type: str = "", group: str = "",
                  series: Sequence = list(), row_limit: int = 500, metadata: dict = None):
-        self._resources = resources
         self._title = title
         self._description = description
         self._attribution = attribution
@@ -17,7 +16,12 @@ class BaseView:
         self._row_limit = row_limit
         self._metadata = metadata
 
-        if name is None or len(name) is 0:
+        if not resources:
+            self._resources = []
+        else:
+            self._resources = resources
+
+        if not name or len(name) is 0:
             self._name = title
         else:
             self._name = name
