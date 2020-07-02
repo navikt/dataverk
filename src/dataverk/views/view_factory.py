@@ -16,15 +16,15 @@ def get_view_object(name: str, resources: Sequence, title: str = "", description
                     spec_type: str = "simple", spec: dict = None, type: str = "", group: str = "",
                     series: Sequence = list(), row_limit: int = 500, metadata: dict = None):
 
-    if spec_type == RemoteSpecTypes.PLOTLY:
+    if spec_type == RemoteSpecTypes.PLOTLY.value:
         return JsonSpecView(name=name, resources=resources, title=title, description=description, attribution=attribution,
                             spec_type=spec_type, spec=spec, type=type, group=group,
                             series=series, row_limit=row_limit, metadata=metadata)
-    elif spec_type == RemoteSpecTypes.VEGA:
+    elif spec_type == RemoteSpecTypes.VEGA.value:
         return JsonSpecView(name=name, resources=resources, title=title, description=description, attribution=attribution,
                             spec_type=spec_type, spec=spec, type=type, group=group,
                             series=series, row_limit=row_limit, metadata=metadata)
-    elif spec_type == RemoteSpecTypes.DATATABLE:
+    elif spec_type == RemoteSpecTypes.DATATABLE.value:
         return DataTableSpecView(name=name, resources=resources, title=title, description=description,
                                  attribution=attribution,
                                  spec_type=spec_type, spec=spec, type=type, group=group,

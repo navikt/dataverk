@@ -11,6 +11,9 @@ class DataTableSpecView(RemoteSpecView):
                          spec_type=spec_type, spec=spec, type=type, group=group,
                          series=series, row_limit=row_limit, metadata=metadata)
 
+        if not metadata:
+            self._metadata = {}
+
     def _add_resource(self, dp) -> str:
         return dp.add_resource(self._spec,
                                resource_name=self._name,
