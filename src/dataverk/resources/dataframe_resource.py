@@ -55,7 +55,7 @@ class DataFrameResource(BaseResource):
         mediatype = self._media_type(self._fmt)
 
         return {
-            "name": self.formatted_resource_name(),
+            "name": self._resource_name,
             "description": self._resource_description,
             "path": self._resource_path(),
             "format": self._fmt,
@@ -72,10 +72,9 @@ class DataFrameResource(BaseResource):
         :param dp: Datapackage object to append resources to
         :return: path: str: Path to resource
         """
-        formatted_resource_name = self._schema.get("name")
         dsv_separator = self._schema.get("dsv_separator")
         dp.datapackage_metadata["resources"].append(self._schema)
-        dp.resources[formatted_resource_name] = copy.deepcopy(self._schema)
+        dp.resources[self._resource_name] = copy.deepcopy(self._schema)
 
         data_buff = io.StringIO()
         self._resource.to_csv(
@@ -83,10 +82,10 @@ class DataFrameResource(BaseResource):
         )
 
         if self._compress:
-            dp.resources[formatted_resource_name][
+            dp.resources[self._resource_name][
                 "data"
             ] = file_functions.compress_content(data_buff)
-            dp.resources[formatted_resource_name]["format"] += ".gz"
+            dp.resources[self._resource_name]["format"] += ".gz"
         else:
-            dp.resources[formatted_resource_name]["data"] = data_buff.getvalue()
+            dp.resources[self._resource_name]["data"] = data_buff.getvalue()
         return self._schema.get("path")
