@@ -7,6 +7,7 @@ from dataverk.views.remote_spec import RemoteSpecView
 class RemoteSpecTypes(Enum):
     VEGA: str = "vega"
     PLOTLY: str = "plotly"
+    DATATABLE: str = "datatable"
 
     @classmethod
     def has_spec_type(cls, spec_type: str):
