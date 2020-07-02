@@ -21,7 +21,7 @@ class PDFResource(BaseResource):
         self._schema = self._get_schema()
 
     def formatted_resource_name(self):
-        return file_functions.url_encode(self._resource_name)
+        return self._resource_name.replace(" ", "_")
 
     def _resource_path(self):
         return self._create_resource_path(
