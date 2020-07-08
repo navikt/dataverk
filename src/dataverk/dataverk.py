@@ -16,8 +16,9 @@ from dataverk.utils.anonymization import anonymize_replace
 
 
 class Dataverk(DataverkBase):
-
-    def __init__(self, resource_path: str=".", env_file: str='.env', auth_token: str=None):
+    def __init__(
+        self, resource_path: str = ".", env_file: str = ".env", auth_token: str = None
+    ):
         super().__init__()
         env_store = EnvStore.safe_create(env_file)
         self._context = DataverkContext(env_store, resource_path, auth_token)
@@ -26,7 +27,15 @@ class Dataverk(DataverkBase):
     def context(self):
         return self._context
 
-    def read_sql(self, source: str, sql: str, connector: str='Oracle', verbose_output: bool=False, *args, **kwargs) -> pd.DataFrame:
+    def read_sql(
+        self,
+        source: str,
+        sql: str,
+        connector: str = "Oracle",
+        verbose_output: bool = False,
+        *args,
+        **kwargs,
+    ) -> pd.DataFrame:
         """ Read pandas dataframe from SQL database
 
         :param source: str: database source reference
@@ -35,25 +44,73 @@ class Dataverk(DataverkBase):
         :param verbose_output: bool: flag for verbose output option
         :return: pd.Dataframe: Dataframe with result
         """
-        conn = db_connector_factory.get_db_connector(settings_store=self.context.settings, source=source)
+        conn = db_connector_factory.get_db_connector(
+            settings_store=self.context.settings, source=source
+        )
         query = self._get_sql_query(sql=sql)
 
         with conn:
-            return conn.get_pandas_df(query=query, verbose_output=verbose_output, *args, **kwargs)
+            return conn.get_pandas_df(
+                query=query, verbose_output=verbose_output, *args, **kwargs
+            )
 
-    def read_kafka_message_fields(self, topics: Sequence, fetch_mode: str = "from_beginning") -> pd.DataFrame:
+    def execute_sql(
+        self,
+        source: str,
+        sql: str,
+        connector: str = "Oracle",
+        verbose_output: bool = False,
+        *args,
+        **kwargs,
+    ) -> None:
+        """ Execute a sql statement, procedure or function
+
+        :param source: str: database source reference
+        :param sql: str: sql query or file with sql query
+        :param connector: str: Database connector (default oracle)
+        :param verbose_output: bool: flag for verbose output option
+        :return: None
+        """
+
+        conn = db_connector_factory.get_db_connector(
+            settings_store=self.context.settings, source=source
+        )
+        query = self._get_sql_query(sql=sql)
+
+        with conn:
+            conn.execute_sql(
+                query=query, verbose_output=verbose_output, *args, **kwargs
+            )
+
+    def read_kafka_message_fields(
+        self, topics: Sequence, fetch_mode: str = "from_beginning"
+    ) -> pd.DataFrame:
         """ Read single kafka message from topic and return list of message fields
 
         :param topics: Sequence of topics to subscribe to
         :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset), default last_committed_offset
         :return: list: fields in kafka message
         """
-        consumer = kafka.get_kafka_consumer(settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
-        conn = KafkaConnector(consumer=consumer, settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
+        consumer = kafka.get_kafka_consumer(
+            settings=self.context.settings, topics=topics, fetch_mode=fetch_mode
+        )
+        conn = KafkaConnector(
+            consumer=consumer,
+            settings=self.context.settings,
+            topics=topics,
+            fetch_mode=fetch_mode,
+        )
 
         return conn.get_message_fields()
 
-    def read_kafka(self, topics: Sequence, strategy=None, fields=None, fetch_mode: str = "from_beginning", max_mesgs: int=math.inf) -> pd.DataFrame:
+    def read_kafka(
+        self,
+        topics: Sequence,
+        strategy=None,
+        fields=None,
+        fetch_mode: str = "from_beginning",
+        max_mesgs: int = math.inf,
+    ) -> pd.DataFrame:
         """ Read kafka topics and return pandas dataframe
 
         :param strategy: function or lambda passed to the kafka consumer for aggregating data on the fly
@@ -63,8 +120,15 @@ class Dataverk(DataverkBase):
         :param fetch_mode: str describing fetch mode (from_beginning, last_committed_offset), default last_committed_offset
         :return: pandas.Dataframe
         """
-        consumer = kafka.get_kafka_consumer(settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
-        conn = KafkaConnector(consumer=consumer, settings=self.context.settings, topics=topics, fetch_mode=fetch_mode)
+        consumer = kafka.get_kafka_consumer(
+            settings=self.context.settings, topics=topics, fetch_mode=fetch_mode
+        )
+        conn = KafkaConnector(
+            consumer=consumer,
+            settings=self.context.settings,
+            topics=topics,
+            fetch_mode=fetch_mode,
+        )
 
         return conn.get_pandas_df(strategy=strategy, fields=fields, max_mesgs=max_mesgs)
 
@@ -78,8 +142,15 @@ class Dataverk(DataverkBase):
         conn = JSONStatConnector()
         return conn.get_pandas_df(url, params=params)
 
-    def anonymize(self, df, eval_column, anonymize_columns=None, evaluator=lambda x: x < 4, replace_by="*",
-                  anonymize_eval=True):
+    def anonymize(
+        self,
+        df,
+        eval_column,
+        anonymize_columns=None,
+        evaluator=lambda x: x < 4,
+        replace_by="*",
+        anonymize_eval=True,
+    ):
         """ Replace values in columns when condition in evaluator is satisfied
 
         :param df: pandas DataFrame
@@ -101,11 +172,25 @@ class Dataverk(DataverkBase):
 
         :return: anonymized pandas DataFrame
         """
-        return anonymize_replace(df=df, eval_column=eval_column, anonymize_columns=anonymize_columns,
-                                 evaluator=evaluator, replace_by=replace_by,
-                                 anonymize_eval=anonymize_eval)
+        return anonymize_replace(
+            df=df,
+            eval_column=eval_column,
+            anonymize_columns=anonymize_columns,
+            evaluator=evaluator,
+            replace_by=replace_by,
+            anonymize_eval=anonymize_eval,
+        )
 
-    def to_sql(self, df: pd.DataFrame, table: str, sink: str, connector: str='Oracle', if_exists: str='append', *args, **kwargs):
+    def to_sql(
+        self,
+        df: pd.DataFrame,
+        table: str,
+        sink: str,
+        connector: str = "Oracle",
+        if_exists: str = "append",
+        *args,
+        **kwargs,
+    ):
         """ Write records in dataframe to a SQL database table
 
         :param df: pd.Dataframe: Dataframe to write
@@ -114,15 +199,21 @@ class Dataverk(DataverkBase):
         :param connector: str: Connector type (default: Oracle)
         :param if_exists: str: Action if table already exists in database (default: replace)
         """
-        conn = db_connector_factory.get_db_connector(settings_store=self._context.settings, source=sink)
+        conn = db_connector_factory.get_db_connector(
+            settings_store=self._context.settings, source=sink
+        )
 
         with conn:
-            return conn.persist_pandas_df(table, df=df, if_exists=if_exists, *args, **kwargs)
+            return conn.persist_pandas_df(
+                table, df=df, if_exists=if_exists, *args, **kwargs
+            )
 
     def publish(self, datapackage):
 
         # Publish resources to buckets
-        package_publisher = PackagePublisher(dp=datapackage, settings_store=self._context.settings, env_store={})
+        package_publisher = PackagePublisher(
+            dp=datapackage, settings_store=self._context.settings, env_store={}
+        )
         package_publisher.publish()
 
         # Publish metadata to elastic search
@@ -146,4 +237,4 @@ class Dataverk(DataverkBase):
 
     @staticmethod
     def _is_sql_file(source):
-        return '.sql' in source
+        return ".sql" in source

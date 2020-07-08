@@ -56,6 +56,20 @@ class DBBaseConnector(DataverkBase):
             f"Persisted {len(df)} records to table {table} in {end_time - start_time} seconds"
         )
 
+    def execute_sql(self, query: str, verbose_output: bool = False, *args, **kwargs):
+        start_time = time.time()
+        try:
+            self._engine.execute(query)
+        except SQLAlchemyError as error:
+            self.log.error(f"{error}")
+            raise SQLAlchemyError(f"{error}")
+
+        end_time = time.time()
+
+        self.log.info(f"Executed query in {end_time -start_time} seconds.")
+        if verbose_output:
+            self.log.info(f"Query: {query}")
+
     def _create_engine(self) -> engine.Engine:
         db = self._connection_string()
         return engine.create_engine(db)
