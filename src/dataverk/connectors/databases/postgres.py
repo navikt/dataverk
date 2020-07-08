@@ -65,6 +65,28 @@ class PostgresConnector(DBBaseConnector):
             f"Persisted {len(df)} records to table {table} in {end_time - start_time} seconds"
         )
 
+    def execute_sql(self, query: str, verbose_output: bool = False, *args, **kwargs):
+        start_time = time.time()
+        self.log.info(
+            f"Executing sql query in database: {self.source}"
+        )
+
+        try:
+            self._set_role()
+            self._engine.execute(query)
+        except OperationalError:
+            self.error_strategy.handle_error(self)
+            self._set_role()
+            self._engine.execute(query)
+        except SQLAlchemyError as error:
+            self.log.error(f"{error}")
+            raise SQLAlchemyError(f"{error}")
+
+        end_time = time.time()
+        self.log.info(f"Executed query in {end_time - start_time} seconds.")
+        if verbose_output:
+            self.log.info(f"Query: {query}")
+
     def _get_role_name(self) -> str:
         try:
             vault_path = self.settings["db_vault_path"][self.source]

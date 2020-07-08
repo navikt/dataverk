@@ -58,6 +58,10 @@ class DBBaseConnector(DataverkBase):
 
     def execute_sql(self, query: str, verbose_output: bool = False, *args, **kwargs):
         start_time = time.time()
+        self.log.info(
+            f"Executing sql query in database: {self.source}"
+        )
+
         try:
             self._engine.execute(query)
         except SQLAlchemyError as error:
