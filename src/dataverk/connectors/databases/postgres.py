@@ -39,7 +39,7 @@ class PostgresConnector(DBBaseConnector):
         end_time = time.time()
         self.log.info(f"{len(df)} records returned in {end_time - start_time} seconds.")
         if verbose_output:
-            self.log(f"Query: {query}")
+            self.log.info(f"Query: {query}")
 
         return df
 
