@@ -20,4 +20,4 @@ jobs:
           pip3 install .
           pip3 install pytest
       - name: Run unittests
-        run: pytest --no-print-logs
+        run: pytest
