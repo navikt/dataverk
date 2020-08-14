@@ -114,7 +114,11 @@ class KafkaConnector(DataverkBase):
             schema_res = self._get_schema_from_registry(message=message)
             schema = schema_res.json()["schema"]
         except (AttributeError, KeyError):
-            return json.loads(message.value.decode('utf8'))
+            try:
+                res = json.loads(message.value.decode('utf8'))
+            except (JSONDecodeError, UnicodeDecodeError):
+                res = {}
+            return res
         else:
             return self._decode_avro_message(schema=schema, message=message)
 
