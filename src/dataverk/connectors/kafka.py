@@ -116,7 +116,7 @@ class KafkaConnector(DataverkBase):
         except (AttributeError, KeyError):
             try:
                 res = json.loads(message.value.decode('utf8'))
-            except (JSONDecodeError, UnicodeDecodeError):
+            except (json.JSONDecodeError, UnicodeDecodeError):
                 res = {}
             return res
         else:
