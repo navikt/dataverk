@@ -19,7 +19,12 @@ class DataverkContext:
         return self._settings_store
 
     def _load_settings(self):
-        return json.loads(file_functions.get_package_resource("settings.json", self._resource_path, self._http_headers))
+        try:
+            return json.loads(file_functions.get_package_resource("settings.json",
+                                                                  self._resource_path,
+                                                                  self._http_headers))
+        except FileNotFoundError:
+            return {}
 
     def _load_and_apply_secrets(self):
         self._settings_store = self._apply_secrets(self._env_store, self._settings_store)
