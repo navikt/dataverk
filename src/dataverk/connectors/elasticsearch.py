@@ -1,4 +1,5 @@
 import requests
+import os
 
 from dataverk.abc.base import DataverkBase
 from collections.abc import Mapping
@@ -36,9 +37,17 @@ class ElasticsearchConnector(DataverkBase):
 
     def _get_es_address(self, settings: Mapping, host):
         try:
+            address = os.environ["DATAVERK_ES_HOST"]
+        except KeyError:
+            address = self._get_es_address_from_settings(settings, host)
+
+        return address
+
+    def _get_es_address_from_settings(self, settings: Mapping, host):
+        try:
             address = settings["index_connections"][host]
         except KeyError as err:
             self.log.warning(f"No ES index specified: {err}")
-            raise dataverk_exceptions.IncompleteSettingsObject(f'Connection settings are not available for the host: {host}')
+            raise dataverk_exceptions.IncompleteSettingsObject(f"{err}")
         else:
             return address
