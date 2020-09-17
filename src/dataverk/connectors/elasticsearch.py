@@ -48,6 +48,6 @@ class ElasticsearchConnector(DataverkBase):
             address = settings["index_connections"][host]
         except KeyError as err:
             self.log.warning(f"No ES index specified: {err}")
-            raise dataverk_exceptions.IncompleteSettingsObject(f'Connection settings are not available for the host: {host}')
+            raise dataverk_exceptions.IncompleteSettingsObject(f"{err}")
         else:
             return address

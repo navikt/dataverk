@@ -5,7 +5,7 @@ import os
 
 
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
-from dataverk.exceptions.dataverk_exceptions import IncompleteSettingsObject
+from dataverk.exceptions import dataverk_exceptions
 
 INDEX = "https://my.es.index.com"
 
@@ -36,12 +36,12 @@ class Base(TestCase):
         address = es._get_es_address({}, HOST)
         actual_address = INDEX
         self.assertEqual(actual_address, address)
-        os.environ.pop(ENVIRON_KEY)
+        del os.environ[ENVIRON_KEY]
 
-    def test__get_address_no_setting_env(self):
-        es = ElasticsearchConnector({}, HOST)
-        with self.assertRaises(IncompleteSettingsObject):
-            address = es._get_es_address({}, HOST)
+    def test__get_address_no_settings_no_env(self):
+        with self.assertRaises(dataverk_exceptions.IncompleteSettingsObject):
+            es = ElasticsearchConnector({})
+
 
 
 class MethodsReturnValues(Base):
