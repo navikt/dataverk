@@ -1,6 +1,6 @@
 data-catalog-dcat-validator==0.0.5
 dataverk-vault==0.1.8
-google-api-core==1.22.2
+google-api-core==1.23.0
 google-cloud-bigquery==1.27.2
 google-auth==1.21.1
 google-cloud-core==1.4.1
