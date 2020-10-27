@@ -18,7 +18,3 @@ class TestFileFunctions(unittest.TestCase):
         for test_case in test_cases:
             output = url_encode(test_case["input"])
             self.assertEqual(test_case["expected_output"], output)
-
-# def url_encode(filename):
-#     filename_wo_spaces = filename.replace(' ', '_').replace('/', '_').replace(',', '_')
-#     return parse.quote(filename_wo_spaces)
