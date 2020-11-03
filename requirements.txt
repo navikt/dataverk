@@ -23,4 +23,4 @@ Sphinx==3.2.1
 nbsphinx==0.8.0
 kafka-python==2.0.2
 elasticsearch==7.9.1
-streamz==0.6.0
+streamz==0.6.1
