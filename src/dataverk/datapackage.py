@@ -17,7 +17,7 @@ class Datapackage(DataverkBase):
     Understands packaging of data resources and views on those resources for publication
     """
 
-    def __init__(self, metadata: dict, validate: bool = True):
+    def __init__(self, metadata: dict, validate: bool = False):
         super().__init__()
         self._resources = {}
         self._bucket = self._get_bucket(metadata)
