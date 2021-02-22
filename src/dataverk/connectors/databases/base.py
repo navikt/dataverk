@@ -26,11 +26,7 @@ class DBBaseConnector(DataverkBase):
         start_time = time.time()
         self.log.info(f"Reading from database: {self.source}")
 
-        try:
-            df = pd.read_sql(query, self._engine, *args, **kwargs)
-        except SQLAlchemyError as error:
-            self.log.error(f"{error}")
-            raise SQLAlchemyError(f"{error}")
+        df = pd.read_sql(query, self._engine, *args, **kwargs)
 
         end_time = time.time()
         self.log.info(f"{len(df)} records returned in {end_time - start_time} seconds.")
@@ -45,11 +41,7 @@ class DBBaseConnector(DataverkBase):
             f"Persisting {len(df)} records to table: {table} in database: {self.source}"
         )
 
-        try:
-            df.to_sql(name=table, con=self._engine, *args, **kwargs)
-        except SQLAlchemyError as error:
-            self.log.error(f"{error}")
-            raise SQLAlchemyError(f"{error}")
+        df.to_sql(name=table, con=self._engine, *args, **kwargs)
 
         end_time = time.time()
         self.log.info(
@@ -62,11 +54,7 @@ class DBBaseConnector(DataverkBase):
             f"Executing sql query in database: {self.source}"
         )
 
-        try:
-            self._engine.execute(query)
-        except SQLAlchemyError as error:
-            self.log.error(f"{error}")
-            raise SQLAlchemyError(f"{error}")
+        self._engine.execute(query)
 
         end_time = time.time()
 
