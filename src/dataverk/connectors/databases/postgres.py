@@ -32,9 +32,6 @@ class PostgresConnector(DBBaseConnector):
         except OperationalError:
             self.error_strategy.handle_error(self)
             df = pd.read_sql_query(query, self._engine, *args, **kwargs)
-        except SQLAlchemyError as error:
-            self.log.error(f"{error}")
-            raise SQLAlchemyError(f"{error}")
 
         end_time = time.time()
         self.log.info(f"{len(df)} records returned in {end_time - start_time} seconds.")
@@ -56,9 +53,6 @@ class PostgresConnector(DBBaseConnector):
             self.error_strategy.handle_error(self)
             self._set_role()
             df.to_sql(table, self._engine, *args, **kwargs)
-        except SQLAlchemyError as error:
-            self.log.error(f"{error}")
-            raise SQLAlchemyError(f"{error}")
 
         end_time = time.time()
         self.log.info(
@@ -78,9 +72,6 @@ class PostgresConnector(DBBaseConnector):
             self.error_strategy.handle_error(self)
             self._set_role()
             self._engine.execute(query)
-        except SQLAlchemyError as error:
-            self.log.error(f"{error}")
-            raise SQLAlchemyError(f"{error}")
 
         end_time = time.time()
         self.log.info(f"Executed query in {end_time - start_time} seconds.")
