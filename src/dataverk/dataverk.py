@@ -210,6 +210,12 @@ class Dataverk(DataverkBase):
 
     def publish(self, datapackage):
 
+        # Try to get JSON representation in case datapackage is not a dict
+        try:
+            datapackage = datapackage.toJSON()     
+        except:
+            pass
+
         # Publish resources to buckets
         package_publisher = PackagePublisher(
             dp=datapackage, settings_store=self._context.settings, env_store={}
