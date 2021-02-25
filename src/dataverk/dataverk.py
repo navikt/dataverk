@@ -13,6 +13,7 @@ from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from dataverk.package_publisher import PackagePublisher
 from dataverk.utils.anonymization import anonymize_replace
+from dataverk.datapackage import Datapackage
 
 
 class Dataverk(DataverkBase):
@@ -211,10 +212,15 @@ class Dataverk(DataverkBase):
     def publish(self, datapackage):
 
         # Try to get JSON representation in case datapackage is not a dict
-        try:
-            datapackage = datapackage.toJSON()     
+        try: 
+            if getattr(datapackage, "toJSON", None):
+                toJSON = getattr(datapackage, "toJSON")
+                if callable(toJSON):
+                    datapackage = Datapackage(datapackage.toJSON())
         except:
             pass
+
+        print(datapackage)            
 
         # Publish resources to buckets
         package_publisher = PackagePublisher(

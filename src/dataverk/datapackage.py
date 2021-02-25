@@ -36,14 +36,14 @@ class Datapackage(DataverkBase):
         # set defaults for store and repo when not specified
         metadata['store'] = metadata.get('store', StorageType.LOCAL)
         metadata['repo'] = metadata.get('repo', metadata.get('github-repo', ''))
-        metadata['id'] = self._dp_id
+        metadata['id'] = metadata.get('id', self._dp_id)
         metadata['store_path'] = store_path
         metadata['path'] = path
-        metadata['updated'] = today
-        metadata['version'] = "0.0.1"
-        metadata["views"] = []
-        metadata["resources"] = []
-        metadata["datasets"] = {}
+        metadata['updated'] = metadata.get('updated', today)
+        metadata['version'] = metadata.get('version', '0.0.1')
+        metadata["views"] = metadata.get('views', [])
+        metadata["resources"] = metadata.get('resources', [])
+        metadata["datasets"] = metadata.get('datasets', {})
 
         return metadata
 
