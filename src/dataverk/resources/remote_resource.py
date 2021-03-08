@@ -15,12 +15,12 @@ class RemoteResource(BaseResource):
 
     def formatted_resource_name(self):
         formatted_resource_name, self._fmt = self._resource_name_and_type_from_url(
-            self._resource
+            self._resource_data
         )
         return formatted_resource_name
 
     def _resource_path(self):
-        return self._resource
+        return self._resource_data
 
     def _get_schema(self):
         return {

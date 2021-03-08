@@ -21,7 +21,7 @@ class Datapackage(DataverkBase):
 
     def __init__(self, metadata: dict, validate: bool = False):
         super().__init__()
-        self._resources = {}
+        self._resources = []
         self._bucket = self._get_bucket(metadata)
         self._dp_id = self._get_dp_id(metadata)
         self._title = self._get_dp_title(metadata)

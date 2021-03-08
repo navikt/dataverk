@@ -11,7 +11,7 @@ class BaseResource(ABC):
         spec: dict = None,
     ):
 
-        self._resource = resource
+        self._resource_data = resource
         self._datapackage_path = datapackage_path
         self._resource_description = resource_description
         self._spec = spec

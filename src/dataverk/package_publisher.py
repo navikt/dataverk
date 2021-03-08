@@ -71,10 +71,10 @@ class PackagePublisher(DataverkBase):
         datapackage_metadata: Mapping,
         resources: dict,
     ) -> None:
-        for filename, resource in resources.items():
+        for resource in resources:
             storage_connector.write(
                 data=resource.get("data"),
-                destination_blob_name=f"{datapackage_id}/{filename}",
+                destination_blob_name=f"{datapackage_id}/{resource.get('name')}",
                 metadata=datapackage_metadata,
                 fmt=resource.get("format"),
             )
