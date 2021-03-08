@@ -1,3 +1,10 @@
+import os
+
+
+def is_nav_environment():
+    return all(env in os.environ.keys() for env in ["DATAVERK_API_ENDPOINT", "DATAVERK_BUCKET_ENDPOINT"])
+
+
 def get_schema(df, path, dataset_name, format, dsv_separator):
     fields = []
 
@@ -25,5 +32,3 @@ def get_schema(df, path, dataset_name, format, dsv_separator):
         'mediatype': mediatype,
         'schema': {'fields': fields}
     }
-
-

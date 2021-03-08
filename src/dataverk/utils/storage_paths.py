@@ -3,20 +3,25 @@ import os
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 
 
-def create_nais_paths(bucket, dp_id) -> tuple:
+def _get_nav_bucket_for_path():
+    try:
+        return os.environ["DATAVERK_BUCKET_SHORT"]
+    except KeyError:
+        return os.environ["DATAVERK_BUCKET"]
+
+
+def create_nav_paths(dp_id) -> tuple:
     try:
         api_endpoint = os.environ["DATAVERK_API_ENDPOINT"]
+        path = f'{api_endpoint}/{_get_nav_bucket_for_path()}/{dp_id}'
     except KeyError as missing_env:
         raise EnvironmentVariableNotSet(str(missing_env))
-    else:
-        path = f'{api_endpoint}/{bucket}/{dp_id}'
 
     try:
         bucket_endpoint = os.environ["DATAVERK_BUCKET_ENDPOINT"]
+        store_path = f'{bucket_endpoint}/{_get_nav_bucket_for_path()}/{dp_id}'
     except KeyError as missing_env:
         raise EnvironmentVariableNotSet(str(missing_env))
-    else:
-        store_path = f'{bucket_endpoint}/{bucket}/{dp_id}'
 
     return path, store_path
 

@@ -30,7 +30,6 @@ class GoogleStorageConnector(BucketStorageBase):
         try:
             name = f"{destination_blob_name}.{fmt}"
             blob = self.bucket.blob(name)
-            self._set_blob_metadata(blob=blob, fmt=fmt, metadata=metadata)
             blob.upload_from_string(data)
         except gcloud_exceptions.GoogleCloudError as error:
             self.log.error(f"Error writing file {name} to google storage: {error}")
@@ -81,8 +80,8 @@ class GoogleStorageConnector(BucketStorageBase):
     def _get_gcp_credentials(self, settings):
         try:
             info = settings["bucket_storage"]["gcs"]["credentials"]
-        except KeyError as missing:
-            raise dataverk_exceptions.IncompleteSettingsObject(f"{missing}")
+        except KeyError:
+            return None
         else:
             info = self.parse_gcp_credentials(info)
             scope = "https://www.googleapis.com/auth/cloud-platform"
@@ -93,9 +92,7 @@ class GoogleStorageConnector(BucketStorageBase):
 
     def _get_bucket(self, storage_client, bucket_name):
         try:
-            bucket = storage_client.get_bucket(bucket_name)
-            bucket.acl.reload()
-            return bucket
+            return storage_client.get_bucket(bucket_name)
         except gcloud_exceptions.NotFound:
             raise dataverk_exceptions.StorageBucketDoesNotExist(bucket_name)
 

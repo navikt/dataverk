@@ -19,10 +19,9 @@ class TestRemoteSpecViews(unittest.TestCase):
     def setUp(self):
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = "https://bucket-endpoint.no"
         os.environ["DATAVERK_API_ENDPOINT"] = "https://api-endpoint.no"
+        os.environ["DATAVERK_BUCKET"] = BUCKET_NAME
         self.dp = Datapackage({
-            "title": DP_NAME,
-            "store": "nais",
-            "bucket": BUCKET_NAME
+            "title": DP_NAME
         })
 
     def tearDown(self):
