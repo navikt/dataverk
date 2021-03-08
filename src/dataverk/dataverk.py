@@ -1,4 +1,5 @@
 import math
+import deetly
 import pandas as pd
 
 from collections.abc import Sequence
@@ -210,11 +211,8 @@ class Dataverk(DataverkBase):
 
     def publish(self, datapackage):
 
-        # Try to get JSON representation in case datapackage is not a dict
-        try:
-            datapackage = datapackage.toJSON()     
-        except:
-            pass
+        if isinstance(datapackage, deetly.datapackage.Datapackage):
+            datapackage.datapackage_metadata = datapackage.toJSON()
 
         # Publish resources to buckets
         package_publisher = PackagePublisher(
