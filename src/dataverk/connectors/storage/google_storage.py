@@ -81,7 +81,7 @@ class GoogleStorageConnector(BucketStorageBase):
     def _get_gcp_credentials(self, settings):
         try:
             info = settings["bucket_storage"]["gcs"]["credentials"]
-        except KeyError as missing:
+        except KeyError:
             return None
         else:
             info = self.parse_gcp_credentials(info)

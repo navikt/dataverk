@@ -1,4 +1,5 @@
 import datetime
+import os
 import uuid
 import hashlib
 import re
@@ -9,6 +10,7 @@ from dataverk.utils import validators, storage_paths
 from collections.abc import Sequence
 from dataverk.connectors.storage.storage_connector_factory import StorageType
 from dataverk.resources.factory_resources import get_resource_object, ResourceType
+from dataverk.utils.metadata_utils import is_nav_environment
 from dataverk.views.view_factory import get_view_object
 
 
@@ -31,10 +33,14 @@ class Datapackage(DataverkBase):
 
     def _create_datapackage(self, metadata: dict):
         today = datetime.date.today().strftime('%Y-%m-%d')
-        path, store_path = self._generate_paths(metadata)
 
-        # set defaults for store and repo when not specified
-        metadata['store'] = metadata.get('store', StorageType.LOCAL)
+        if is_nav_environment():
+            metadata['store'] = os.getenv("DATAVERK_STORAGE_SINK", "nais")
+            path, store_path = storage_paths.create_nav_paths(self.dp_id)
+        else:
+            metadata['store'] = metadata.get('store', StorageType.LOCAL)
+            path, store_path = self._generate_paths(metadata)
+
         metadata['repo'] = metadata.get('repo', metadata.get('github-repo', ''))
         metadata['id'] = self._dp_id
         metadata['store_path'] = store_path
@@ -43,7 +49,6 @@ class Datapackage(DataverkBase):
         metadata['version'] = "0.0.1"
         metadata["views"] = []
         metadata["resources"] = []
-        metadata["datasets"] = {}
 
         return metadata
 
@@ -122,9 +127,10 @@ class Datapackage(DataverkBase):
 
     def _get_bucket(self, metadata):
         try:
-            bucket = metadata['bucket']
+            bucket = os.getenv("DATAVERK_BUCKET") if os.getenv("DATAVERK_BUCKET") else metadata['bucket']
         except KeyError:
-            raise AttributeError(f"Bucket is required to be set in datapackage metadata")
+            raise AttributeError(f"Bucket is not set in datapackage metadata "
+                                 f"nor as the DATAVERK_BUCKET environment variable")
         else:
             validators.validate_bucket_name(bucket)
             return bucket
@@ -147,9 +153,7 @@ class Datapackage(DataverkBase):
     def _generate_paths(self, metadata):
         store = metadata.get('store')
 
-        if StorageType(store) is StorageType.NAIS:
-            path, store_path = storage_paths.create_nais_paths(self._bucket, self.dp_id)
-        elif StorageType(store) is StorageType.GCS:
+        if StorageType(store) is StorageType.GCS:
             path, store_path = storage_paths.create_gcs_paths(self._bucket, self.dp_id)
         elif StorageType(store) is StorageType.LOCAL:
             path, store_path = storage_paths.create_local_paths(self._bucket, self.dp_id)
