@@ -36,7 +36,7 @@ class TestDefaultView(unittest.TestCase):
 
         default_view.add_to_datapackage(self.dp)
 
-        self.assertFalse(VISUALIZATION_NAME in self.dp.resources.keys())
+        self.assertFalse(VISUALIZATION_NAME in [resource["name"] for resource in self.dp.resources])
         self.assertFalse("url" in self.dp.datapackage_metadata["views"][0]["spec"].keys())
         for spec_key in ["data", "layout"]:
             with self.subTest(msg="Testing spec keys", _input=spec_key):
