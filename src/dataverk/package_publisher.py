@@ -29,7 +29,8 @@ class PackagePublisher(DataverkBase):
 
         :return: None
         """
-        bucket_type = self._datapackage_metadata.get("store")
+        bucket_type = os.getenv("DATAVERK_STORAGE_SINK") if os.getenv("DATAVERK_STORAGE_SINK") else \
+            self._datapackage_metadata.get('store', StorageType.LOCAL)
         datapackage_id = self._datapackage_metadata.get("id")
         storage_connector = get_storage_connector(
             storage_type=StorageType(bucket_type),
