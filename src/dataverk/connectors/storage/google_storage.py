@@ -30,7 +30,6 @@ class GoogleStorageConnector(BucketStorageBase):
         try:
             name = f"{destination_blob_name}.{fmt}"
             blob = self.bucket.blob(name)
-            #self._set_blob_metadata(blob=blob, fmt=fmt, metadata=metadata)
             blob.upload_from_string(data)
         except gcloud_exceptions.GoogleCloudError as error:
             self.log.error(f"Error writing file {name} to google storage: {error}")
