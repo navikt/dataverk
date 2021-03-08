@@ -74,7 +74,7 @@ class PackagePublisher(DataverkBase):
         for filename, resource in resources.items():
             storage_connector.write(
                 data=resource.get("data"),
-                destination_blob_name=f"{datapackage_id}/resources/{filename}",
+                destination_blob_name=f"{datapackage_id}/{filename}",
                 metadata=datapackage_metadata,
                 fmt=resource.get("format"),
             )
