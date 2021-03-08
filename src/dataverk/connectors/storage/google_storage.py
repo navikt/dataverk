@@ -82,7 +82,7 @@ class GoogleStorageConnector(BucketStorageBase):
         try:
             info = settings["bucket_storage"]["gcs"]["credentials"]
         except KeyError as missing:
-            raise dataverk_exceptions.IncompleteSettingsObject(f"{missing}")
+            return None
         else:
             info = self.parse_gcp_credentials(info)
             scope = "https://www.googleapis.com/auth/cloud-platform"
