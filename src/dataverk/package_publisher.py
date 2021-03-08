@@ -30,13 +30,13 @@ class PackagePublisher(DataverkBase):
         datapackage_id = self._datapackage_metadata.get("id")
         storage_connector = get_storage_connector(
             storage_type=StorageType(bucket_type),
-            bucket_name=self._datapackage_metadata.get("bucket"),
+            bucket_name=self._bucket,
             settings=self._settings_store,
         )
 
         self.log.info(
             f"Publishing datapackage {self._datapackage_metadata.get('title')} "
-            f"to bucket {self._datapackage_metadata.get('bucket')}"
+            f"to bucket {self._bucket}"
         )
 
         PackagePublisher._upload_datapackage_metadata(
