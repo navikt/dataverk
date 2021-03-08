@@ -57,6 +57,10 @@ class Datapackage(DataverkBase):
         return self._dp_id
 
     @property
+    def bucket(self):
+        return self._bucket
+
+    @property
     def resources(self):
         return self._resources
 
