@@ -51,9 +51,9 @@ class TestGoogleStorageConnector(unittest.TestCase):
 
     @mock.patch("google.cloud.storage.Client", side_effect=MockGoogleClient)
     @mock.patch("google.oauth2.service_account.Credentials", side_effect=MockGoogleCredentials)
-    def test_instantiation_invalid_settings_object(self, mock_client, mock_creds):
-        with self.assertRaises(dataverk_exceptions.IncompleteSettingsObject):
-            storage_conn = GoogleStorageConnector(GCS_BUCKET_NAME, {})
+    def test_instantiation_valid_empty_settings(self, mock_client, mock_creds):
+        storage_conn = GoogleStorageConnector(GCS_BUCKET_NAME, {})
+        self.assertIsInstance(storage_conn, GoogleStorageConnector)
 
     @mock.patch("google.cloud.storage.Client", side_effect=MockGoogleClient)
     @mock.patch("google.oauth2.service_account.Credentials", side_effect=MockGoogleCredentials)

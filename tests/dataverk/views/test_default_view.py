@@ -15,15 +15,15 @@ class TestDefaultView(unittest.TestCase):
     def setUp(self):
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = "https://bucket-endpoint.no"
         os.environ["DATAVERK_API_ENDPOINT"] = "https://api-endpoint.no"
+        os.environ["DATAVERK_BUCKET"] = BUCKET_NAME
         self.dp = Datapackage({
-            "title": DP_NAME,
-            "store": "nais",
-            "bucket": BUCKET_NAME
+            "title": DP_NAME
         })
 
     def tearDown(self):
         del os.environ["DATAVERK_BUCKET_ENDPOINT"]
         del os.environ["DATAVERK_API_ENDPOINT"]
+        del os.environ["DATAVERK_BUCKET"]
 
     def test_add_to_datapackage(self):
         default_view = DefaultView(
