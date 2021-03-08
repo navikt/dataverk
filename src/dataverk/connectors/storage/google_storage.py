@@ -93,8 +93,7 @@ class GoogleStorageConnector(BucketStorageBase):
 
     def _get_bucket(self, storage_client, bucket_name):
         try:
-            bucket = storage_client.get_bucket(bucket_name)
-            return bucket
+            return storage_client.get_bucket(bucket_name)
         except gcloud_exceptions.NotFound:
             raise dataverk_exceptions.StorageBucketDoesNotExist(bucket_name)
 
