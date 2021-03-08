@@ -17,7 +17,10 @@ class PackagePublisher(DataverkBase):
         super().__init__()
         self._settings_store = settings_store
         self._env_store = env_store
-        self._bucket = os.getenv("DATAVERK_BUCKET", dp.bucket)
+        try:
+            self._bucket = os.environ["DATAVERK_BUCKET"]
+        except KeyError:
+            self._bucket = dp.bucket
         self._datapackage_metadata = dp.datapackage_metadata
         self._resources = dp.resources
 
