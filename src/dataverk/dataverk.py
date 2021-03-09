@@ -14,6 +14,7 @@ from dataverk.elastic_search_updater import ElasticSearchUpdater
 from dataverk.connectors.elasticsearch import ElasticsearchConnector
 from dataverk.package_publisher import PackagePublisher
 from dataverk.utils.anonymization import anonymize_replace
+from dataverk.utils.metadata_utils import is_nav_environment, set_nav_config
 
 
 class Dataverk(DataverkBase):
@@ -213,6 +214,9 @@ class Dataverk(DataverkBase):
 
         if isinstance(datapackage, deetly.datapackage.Datapackage):
             datapackage.datapackage_metadata = datapackage.toJSON()
+
+        if is_nav_environment():
+            set_nav_config(datapackage.datapackage_metadata)
 
         # Publish resources to buckets
         package_publisher = PackagePublisher(

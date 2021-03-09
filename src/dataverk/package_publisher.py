@@ -17,10 +17,6 @@ class PackagePublisher(DataverkBase):
         super().__init__()
         self._settings_store = settings_store
         self._env_store = env_store
-        try:
-            self._bucket = os.environ["DATAVERK_BUCKET"]
-        except KeyError:
-            self._bucket = dp.bucket
         self._datapackage_metadata = dp.datapackage_metadata
         self._resources = dp.resources
 
@@ -29,18 +25,17 @@ class PackagePublisher(DataverkBase):
 
         :return: None
         """
-        bucket_type = os.getenv("DATAVERK_STORAGE_SINK") if os.getenv("DATAVERK_STORAGE_SINK") else \
-            self._datapackage_metadata.get('store', StorageType.LOCAL)
+        bucket_type = self._datapackage_metadata.get('store', StorageType.LOCAL)
         datapackage_id = self._datapackage_metadata.get("id")
         storage_connector = get_storage_connector(
             storage_type=StorageType(bucket_type),
-            bucket_name=self._bucket,
+            bucket_name=self._datapackage_metadata["bucket"],
             settings=self._settings_store,
         )
 
         self.log.info(
             f"Publishing datapackage {self._datapackage_metadata.get('title')} "
-            f"to bucket {self._bucket}"
+            f"to bucket {self._datapackage_metadata['bucket']}"
         )
 
         PackagePublisher._upload_datapackage_metadata(

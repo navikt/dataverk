@@ -21,15 +21,15 @@ class ElasticSearchUpdater(DataverkBase):
 
         try:
             dp = self.datapackage_json
-            id = dp["id"]
+            dp_id = dp["id"]
             title = dp.get('title', 'title missing')
             desc = dp.get('description', 'description missing')
             js = {
-                "id": id,
+                "id": dp_id,
                 "versionInfo": dp.get("versionInfo", "0.0.1"),
                 "versionNotes": dp.get("versionNotes", []),
-                "type": dp.get("type", ""),
-                "format": dp.get("format", ""),
+                "type": dp.get("type", "datapackage"),
+                "format": dp.get("format", "datapackage"),
                 "suggest": title + ' ' + desc,
                 "description": desc,
                 "title": title,
@@ -75,12 +75,7 @@ class ElasticSearchUpdater(DataverkBase):
             js['resource_names'] = resource_names
             js['resource_descriptions'] = resource_descriptions
 
-            self._es_index.write(id, js)
+            self._es_index.write(dp_id, js)
         except urllib3.exceptions.LocationValueError as err:
             self.log.error(f"write to elastic search failed, host_uri could not be resolved")
             raise urllib3.exceptions.LocationValueError(err)
-
-
-
-
-

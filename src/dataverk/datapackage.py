@@ -36,7 +36,7 @@ class Datapackage(DataverkBase):
 
         if is_nav_environment():
             metadata['store'] = os.getenv("DATAVERK_STORAGE_SINK", "nais")
-            path, store_path = storage_paths.create_nav_paths(self.dp_id)
+            path, store_path = storage_paths.create_nav_paths(self.dp_id, metadata)
         else:
             metadata['store'] = metadata.get('store', StorageType.LOCAL)
             path, store_path = self._generate_paths(metadata)
