@@ -41,6 +41,7 @@ class TestClassInstanciation(unittest.TestCase):
 
     def test_instanciation_invalid_bucket_not_set(self):
         metadata = valid_metadata.copy()
+        del metadata["bucket"]
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = "https://test.com/some/path"
         os.environ["DATAVERK_API_ENDPOINT"] = "https://test.com/some/path"
         with self.assertRaises(AttributeError):
