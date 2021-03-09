@@ -36,7 +36,7 @@ class DataFrameResource(BaseResource):
     def _get_schema(self):
         fields = []
 
-        for name, dtype in zip(self._resource.columns, self._resource.dtypes):
+        for name, dtype in zip(self._resource_data.columns, self._resource_data.dtypes):
             if str(dtype) == "object":
                 dtype = "string"
             else:
@@ -74,18 +74,18 @@ class DataFrameResource(BaseResource):
         """
         dsv_separator = self._schema.get("dsv_separator")
         dp.datapackage_metadata["resources"].append(self._schema)
-        dp.resources[self.formatted_resource_name()] = copy.deepcopy(self._schema)
+        resource = copy.deepcopy(self._schema)
 
         data_buff = io.StringIO()
-        self._resource.to_csv(
+        self._resource_data.to_csv(
             data_buff, sep=dsv_separator, index=False, encoding="utf-8-sig"
         )
 
         if self._compress:
-            dp.resources[self.formatted_resource_name()][
-                "data"
-            ] = file_functions.compress_content(data_buff)
-            dp.resources[self.formatted_resource_name()]["format"] += ".gz"
+            resource["data"] = file_functions.compress_content(data_buff)
+            resource["format"] += ".gz"
         else:
-            dp.resources[self.formatted_resource_name()]["data"] = data_buff.getvalue()
-        return self._schema.get("path")
+            resource["data"] = data_buff.getvalue()
+
+        dp.resources.append(resource)
+        return resource.get("path")

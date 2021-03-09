@@ -45,6 +45,7 @@ class JSONResource(BaseResource):
         :param dp: Datapackage object to append resources to
         :return: path: str: Path to resource
         """
-        dp.resources[self.formatted_resource_name()] = self._schema
-        dp.resources[self.formatted_resource_name()]["data"] = self._resource
-        return self._schema.get("path")
+        resource = self._schema
+        resource["data"] = self._resource_data
+        dp.resources.append(resource)
+        return resource.get("path")

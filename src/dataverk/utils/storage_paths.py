@@ -3,23 +3,29 @@ import os
 from dataverk.exceptions.dataverk_exceptions import EnvironmentVariableNotSet
 
 
-def _get_nav_bucket_for_path():
-    try:
+def get_nav_bucket_for_path(metadata: dict) -> str:
+    if os.getenv("DATAVERK_BUCKET_SHORT"):
         return os.environ["DATAVERK_BUCKET_SHORT"]
-    except KeyError:
+    elif os.getenv("DATAVERK_BUCKET"):
         return os.environ["DATAVERK_BUCKET"]
+    elif metadata.get("bucket"):
+        return metadata["bucket"]
+    else:
+        raise AttributeError(f"Bucket is not set in datapackage metadata "
+                             f"nor as the DATAVERK_BUCKET or DATAVERK_BUCKET_SHORT environment variables")
 
 
-def create_nav_paths(dp_id) -> tuple:
+def create_nav_paths(dp_id: str, metadata: dict) -> tuple:
+    bucket = get_nav_bucket_for_path(metadata)
     try:
         api_endpoint = os.environ["DATAVERK_API_ENDPOINT"]
-        path = f'{api_endpoint}/{_get_nav_bucket_for_path()}/{dp_id}'
+        path = f'{api_endpoint}/{bucket}/{dp_id}'
     except KeyError as missing_env:
         raise EnvironmentVariableNotSet(str(missing_env))
 
     try:
         bucket_endpoint = os.environ["DATAVERK_BUCKET_ENDPOINT"]
-        store_path = f'{bucket_endpoint}/{_get_nav_bucket_for_path()}/{dp_id}'
+        store_path = f'{bucket_endpoint}/{bucket}/{dp_id}'
     except KeyError as missing_env:
         raise EnvironmentVariableNotSet(str(missing_env))
 

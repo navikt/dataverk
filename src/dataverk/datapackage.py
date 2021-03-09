@@ -21,7 +21,7 @@ class Datapackage(DataverkBase):
 
     def __init__(self, metadata: dict, validate: bool = False):
         super().__init__()
-        self._resources = {}
+        self._resources = []
         self._bucket = self._get_bucket(metadata)
         self._dp_id = self._get_dp_id(metadata)
         self._title = self._get_dp_title(metadata)
@@ -36,7 +36,7 @@ class Datapackage(DataverkBase):
 
         if is_nav_environment():
             metadata['store'] = os.getenv("DATAVERK_STORAGE_SINK", "nais")
-            path, store_path = storage_paths.create_nav_paths(self.dp_id)
+            path, store_path = storage_paths.create_nav_paths(self.dp_id, metadata)
         else:
             metadata['store'] = metadata.get('store', StorageType.LOCAL)
             path, store_path = self._generate_paths(metadata)

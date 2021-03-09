@@ -1,6 +1,5 @@
 import copy
 
-from dataverk.utils import file_functions
 from dataverk.resources.base_resource import BaseResource
 
 
@@ -47,8 +46,8 @@ class PDFResource(BaseResource):
         :param dp: Datapackage object to append resources to
         :return: path: str: Path to resource
         """
-        formatted_resource_name = self._schema.get("name")
         dp.datapackage_metadata["resources"].append(self._schema)
-        dp.resources[formatted_resource_name] = copy.deepcopy(self._schema)
-        dp.resources[formatted_resource_name]["data"] = self._resource
-        return self._schema.get("path")
+        resource = copy.deepcopy(self._schema)
+        resource["data"] = self._resource_data
+        dp.resources.append(resource)
+        return resource.get("path")

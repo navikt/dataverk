@@ -40,8 +40,8 @@ class TestRemoteSpecViews(unittest.TestCase):
 
         remote_spec_view.add_to_datapackage(self.dp)
 
-        self.assertTrue(VISUALIZATION_NAME in self.dp.resources.keys())
-        self.assertTrue(self.dp.resources[VISUALIZATION_NAME]["path"], expt_resource_path)
+        self.assertTrue(VISUALIZATION_NAME in [resource["name"] for resource in self.dp.resources])
+        self.assertTrue(self.dp.resources[0]["path"], expt_resource_path)
 
         self.assertTrue(len(self.dp.datapackage_metadata["views"][0]["spec"].keys()) == 1)
         self.assertTrue(self.dp.datapackage_metadata["views"][0]["spec"]["url"], expt_resource_path)
@@ -58,8 +58,8 @@ class TestRemoteSpecViews(unittest.TestCase):
 
         remote_spec_view.add_to_datapackage(self.dp)
 
-        self.assertTrue(DATATABLE_VIZ_NAME in self.dp.resources.keys())
-        self.assertTrue(self.dp.resources[DATATABLE_VIZ_NAME]["path"], expt_resource_path)
+        self.assertTrue(DATATABLE_VIZ_NAME in [resource["name"] for resource in self.dp.resources])
+        self.assertTrue(self.dp.resources[0]["path"], expt_resource_path)
 
         self.assertTrue(len(self.dp.datapackage_metadata["views"][0]["spec"].keys()) == 1)
         self.assertTrue(self.dp.datapackage_metadata["views"][0]["spec"]["url"], expt_resource_path)
