@@ -39,19 +39,12 @@ class TestClassInstanciation(unittest.TestCase):
         self.assertIsInstance(dp, Datapackage)
         self.assertEqual(expected_id, dp.dp_id)
 
-    def test_instanciation_invalid_bucket_env_not_set(self):
+    def test_instanciation_invalid_bucket_not_set(self):
         metadata = valid_metadata.copy()
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = "https://test.com/some/path"
         os.environ["DATAVERK_API_ENDPOINT"] = "https://test.com/some/path"
-        with self.assertRaises(EnvironmentVariableNotSet):
-            dp = Datapackage(metadata)
-
-    def test_instanciation_invalid_bucket_not_set(self):
-        invalid_metadata = valid_metadata.copy()
-        del invalid_metadata['bucket']
-
         with self.assertRaises(AttributeError):
-            dp = Datapackage(invalid_metadata)
+            dp = Datapackage(metadata)
 
     def test_instanciation_invalid_title_not_set(self):
         invalid_metadata = valid_metadata.copy()
@@ -82,7 +75,19 @@ class TestMethodReturnValues(unittest.TestCase):
         os.environ["DATAVERK_API_ENDPOINT"] = api_endpoint
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = bucket_endpoint
         os.environ["DATAVERK_BUCKET"] = bucket
-        path, store_path = storage_paths.create_nav_paths(dp_id)
+        path, store_path = storage_paths.create_nav_paths(dp_id, {})
+        self.assertEqual(path, f"{api_endpoint}/{bucket}/{dp_id}")
+        self.assertEqual(store_path, f"{bucket_endpoint}/{bucket}/{dp_id}")
+
+    def test__nais_specific_paths_valid_bucket_in_metadata(self):
+        api_endpoint = "https://dataverk.no"
+        bucket_endpoint = "https://dataverk.no"
+        bucket = "bucket"
+        dp_id = "id123"
+        os.environ["DATAVERK_API_ENDPOINT"] = api_endpoint
+        os.environ["DATAVERK_BUCKET_ENDPOINT"] = bucket_endpoint
+        os.environ["DATAVERK_BUCKET"] = bucket
+        path, store_path = storage_paths.create_nav_paths(dp_id, {"bucket": bucket})
         self.assertEqual(path, f"{api_endpoint}/{bucket}/{dp_id}")
         self.assertEqual(store_path, f"{bucket_endpoint}/{bucket}/{dp_id}")
 
@@ -96,7 +101,7 @@ class TestMethodReturnValues(unittest.TestCase):
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = bucket_endpoint
         os.environ["DATAVERK_BUCKET"] = bucket
         os.environ["DATAVERK_BUCKET_SHORT"] = bucket_short
-        path, store_path = storage_paths.create_nav_paths(dp_id)
+        path, store_path = storage_paths.create_nav_paths(dp_id, {})
         self.assertEqual(path, f"{api_endpoint}/{bucket_short}/{dp_id}")
         self.assertEqual(store_path, f"{bucket_endpoint}/{bucket_short}/{dp_id}")
 
@@ -107,14 +112,12 @@ class TestMethodReturnValues(unittest.TestCase):
         os.environ["DATAVERK_BUCKET"] = bucket
         os.environ["DATAVERK_BUCKET_ENDPOINT"] = bucket_endpoint
         with self.assertRaises(EnvironmentVariableNotSet):
-            path, store_path = storage_paths.create_nav_paths(dp_id)
+            path, store_path = storage_paths.create_nav_paths(dp_id, {})
 
     def test__nais_specific_paths_invalid_bucket_not_set(self):
         api_endpoint = "https://dataverk.no"
-        bucket = "bucket"
         dp_id = "id123"
-        os.environ["DATAVERK_BUCKET"] = bucket
+        os.environ["DATAVERK_BUCKET_ENDPOINT"] = api_endpoint
         os.environ["DATAVERK_API_ENDPOINT"] = api_endpoint
-        with self.assertRaises(EnvironmentVariableNotSet):
-            path, store_path = storage_paths.create_nav_paths(dp_id)
-        del os.environ["DATAVERK_API_ENDPOINT"]
+        with self.assertRaises(AttributeError):
+            path, store_path = storage_paths.create_nav_paths(dp_id, {})
