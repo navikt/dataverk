@@ -59,7 +59,7 @@ class ElasticSearchUpdater(DataverkBase):
             "publisher": self.datapackage_json.get("publisher",
                                 {'name': 'Arbeids- og velferdsetaten (NAV)', 'publisher_url': 'https://www.nav.no'}),
             "creator": self.datapackage_json.get("creator", {'name': 'NAV kunnskapsavdelingen', 'email': 'statistikk@nav.no'}),
-            "contactPoint": self.datapackage_json.get("contactPoint", {}),
+            "contactPoint": self.datapackage_json.get("contactPoint", []),
             "spatial": self.datapackage_json.get("spatial", []),
             "url": f"{self.datapackage_json.get('path', '')}/datapackage.json",
             "uri": f"{self.datapackage_json.get('uri', '')}",
