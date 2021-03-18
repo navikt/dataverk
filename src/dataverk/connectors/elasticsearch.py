@@ -27,6 +27,7 @@ class ElasticsearchConnector(DataverkBase):
             res.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.log.error(f"Unable to update ES index: {str(err)}""")
+            self.log.error(f"{res.json()}")
             raise requests.exceptions.HTTPError(err)
         except requests.exceptions.RequestException as err:
             self.log.error(f"ES index connection error: {str(err)}")

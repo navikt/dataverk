@@ -13,11 +13,11 @@ def is_nav_environment():
 def set_nav_config(datapackage_metadata: dict):
     datapackage_metadata["store"] = os.getenv("DATAVERK_STORAGE_SINK", datapackage_metadata.get('store', StorageType.LOCAL))
 
-    if "bucket" not in datapackage_metadata.keys():
-        try:
-            datapackage_metadata["bucket"] = os.environ["DATAVERK_BUCKET"]
-        except KeyError as missing:
-            raise EnvironmentVariableNotSet(str(missing))
+    try:
+        datapackage_metadata["bucket"] = os.getenv("DATAVERK_BUCKET") if os.getenv("DATAVERK_BUCKET") else datapackage_metadata["bucket"]
+    except KeyError:
+        raise AttributeError(f"Bucket is not set in datapackage metadata "
+                             f"nor as the DATAVERK_BUCKET environment variable")
 
     datapackage_metadata["path"] = f"{os.environ['DATAVERK_API_ENDPOINT']}/" \
                                    f"{get_nav_bucket_for_path(datapackage_metadata)}/" \
