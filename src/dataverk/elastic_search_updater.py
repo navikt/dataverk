@@ -74,14 +74,14 @@ class ElasticSearchUpdater(DataverkBase):
 
         return dp_id, js
 
-    def publish(self):
+    def publish(self, es_api_token: str):
         """ Updates ES index with metadata for the datapackage
 
         :return: None
         """
         dp_id, js = self._create_es_doc()
         try:
-            self._es_index.write(dp_id, js)
+            self._es_index.write(dp_id, js, auth_token=es_api_token)
         except urllib3.exceptions.LocationValueError as err:
             self.log.error(f"write to elastic search failed, host_uri could not be resolved")
             raise urllib3.exceptions.LocationValueError(err)
