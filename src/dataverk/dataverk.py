@@ -219,7 +219,8 @@ class Dataverk(DataverkBase):
 
         if is_nav_environment():
             set_nav_config(datapackage.datapackage_metadata)
-            es_api_token = os.getenv("DATAVERK_ES_TOKEN")
+
+        es_api_token = os.getenv("DATAVERK_ES_TOKEN")
 
         # Publish resources to buckets
         package_publisher = PackagePublisher(
