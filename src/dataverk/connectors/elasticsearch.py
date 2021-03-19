@@ -15,19 +15,24 @@ class ElasticsearchConnector(DataverkBase):
 
         self._es_address = self._get_es_address(settings, host)
 
-    def write(self, dp_id: str, doc: Mapping):
+    def write(self, dp_id: str, doc: Mapping, auth_token: str = None):
         """ Add or update document in es index
 
         :param dp_id: str: document id
         :param doc: dict: document
+        :param auth_token: authorization token for es api
         :return:
         """
+        headers = {"Content-Type": "application/json"}
+        if auth_token:
+            headers["Authorization"] = f"bearer {auth_token}"
+
         try:
-            res = requests.post(self._es_address, json=doc, headers={"Content-Type": "application/json"})
+            res = requests.post(self._es_address, json=doc, headers=headers)
             res.raise_for_status()
         except requests.exceptions.HTTPError as err:
             self.log.error(f"Unable to update ES index: {str(err)}""")
-            self.log.error(f"{res.json()}")
+            self.log.error(f"{res.text}")
             raise requests.exceptions.HTTPError(err)
         except requests.exceptions.RequestException as err:
             self.log.error(f"ES index connection error: {str(err)}")

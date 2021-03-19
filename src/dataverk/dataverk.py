@@ -1,4 +1,6 @@
 import math
+import os
+
 import deetly
 import pandas as pd
 
@@ -218,6 +220,8 @@ class Dataverk(DataverkBase):
         if is_nav_environment():
             set_nav_config(datapackage.datapackage_metadata)
 
+        es_api_token = os.getenv("DATAVERK_ES_TOKEN")
+
         # Publish resources to buckets
         package_publisher = PackagePublisher(
             dp=datapackage, settings_store=self._context.settings, env_store={}
@@ -235,7 +239,7 @@ class Dataverk(DataverkBase):
             )
         else:
             eu = ElasticSearchUpdater(es_conn, datapackage.datapackage_metadata)
-            eu.publish()
+            eu.publish(es_api_token)
 
     def _get_sql_query(self, sql):
         if self._is_sql_file(sql):
