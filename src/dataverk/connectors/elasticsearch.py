@@ -5,6 +5,7 @@ from dataverk.abc.base import DataverkBase
 from collections.abc import Mapping
 
 from dataverk.exceptions import dataverk_exceptions
+from dataverk.exceptions.dataverk_exceptions import ElasticSearchApiError
 
 
 class ElasticsearchConnector(DataverkBase):
@@ -33,7 +34,7 @@ class ElasticsearchConnector(DataverkBase):
         except requests.exceptions.HTTPError as err:
             self.log.error(f"Unable to update ES index: {str(err)}""")
             self.log.error(f"{res.text}")
-            raise requests.exceptions.HTTPError(err)
+            raise ElasticSearchApiError(str(err), res.text)
         except requests.exceptions.RequestException as err:
             self.log.error(f"ES index connection error: {str(err)}")
             raise requests.exceptions.RequestException(err)

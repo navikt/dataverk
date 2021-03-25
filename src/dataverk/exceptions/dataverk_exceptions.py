@@ -29,3 +29,16 @@ class StorageBucketDoesNotExist(Exception):
 
     def __str__(self):
         return f"""{self._bucket_name} does not exist"""
+
+
+class ElasticSearchApiError(Exception):
+
+    def __init__(self, error_message: str, details: dict):
+        self._error_message = error_message
+        self._details = details
+
+    def __str__(self):
+        return f"""{self._error_message}
+        
+        {self._details}
+        """
