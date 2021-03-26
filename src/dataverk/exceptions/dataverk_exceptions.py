@@ -1,3 +1,4 @@
+import json
 from dataverk.utils import dataverk_doc_address
 
 
@@ -33,12 +34,26 @@ class StorageBucketDoesNotExist(Exception):
 
 class ElasticSearchApiError(Exception):
 
-    def __init__(self, error_message: str, details: dict):
+    def __init__(self, error_message: str, details):
         self._error_message = error_message
-        self._details = details
+        self._details = []
+
+        if isinstance(json.loads(details)["detail"], list):
+            for param in json.loads(details)["detail"]:
+                self._details.append(self._format_error(param))
+
+    @staticmethod
+    def _format_error(param: dict):
+        try:
+            return f"{param['loc'][1]}: {param['msg']}"
+        except (KeyError, IndexError):
+            return json.dumps(param)
 
     def __str__(self):
-        return f"""{self._error_message}
-        
-        {self._details}
-        """
+        error_str = self._error_message + "\n\n"
+
+        error_str += "Affected metadata fields:"
+        for detail in self._details:
+            error_str += "\n" + detail
+
+        return error_str
