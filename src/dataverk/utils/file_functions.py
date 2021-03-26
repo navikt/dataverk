@@ -50,10 +50,9 @@ def json_to_dict(path: Path):
     return json.loads(file_string)
 
 
-def format_filename(filename):
-    filename_wo_spaces = filename.replace(' ', '_').replace('/', '_').replace(',', '_')\
-        .replace('(', '_').replace(')', '_')
-    return filename_wo_spaces
+def url_encode(filename):
+    filename_wo_spaces = filename.replace(' ', '_').replace('/', '_').replace(',', '_')
+    return parse.quote(filename_wo_spaces)
 
 
 def _json_validate_params(file_path: Path):

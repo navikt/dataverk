@@ -1,11 +1,11 @@
 import unittest
 
-from dataverk.utils.file_functions import format_filename
+from dataverk.utils.file_functions import url_encode
 
 
 class TestFileFunctions(unittest.TestCase):
 
-    def test_format_filename(self):
+    def test_url_encode(self):
         test_cases = [
             {"input": "Title with spaces",
              "expected_output": "Title_with_spaces"},
@@ -16,5 +16,5 @@ class TestFileFunctions(unittest.TestCase):
         ]
 
         for test_case in test_cases:
-            output = format_filename(test_case["input"])
+            output = url_encode(test_case["input"])
             self.assertEqual(test_case["expected_output"], output)

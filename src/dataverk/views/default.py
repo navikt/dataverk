@@ -14,7 +14,7 @@ class DefaultView(BaseView):
 
     def add_to_datapackage(self, dp):
         dp.datapackage_metadata["views"].append({
-            'name': file_functions.format_filename(self._name),
+            'name': file_functions.url_encode(self._name),
             'title': self._title,
             'description': self._description,
             'attribution': self._attribution,

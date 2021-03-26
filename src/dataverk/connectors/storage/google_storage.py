@@ -6,6 +6,7 @@ from google.cloud import storage
 from google.cloud import exceptions as gcloud_exceptions
 from google.oauth2 import service_account
 from pathlib import Path
+from urllib.parse import unquote
 from dataverk.connectors.storage.utils import blob_metadata
 from dataverk.exceptions import dataverk_exceptions
 from dataverk.connectors.storage.bucket_storage_base import BucketStorageBase
@@ -29,7 +30,7 @@ class GoogleStorageConnector(BucketStorageBase):
         """Write string to a bucket."""
         try:
             name = f"{destination_blob_name}.{fmt}"
-            blob = self.bucket.blob(name)
+            blob = self.bucket.blob(unquote(name))
             blob.upload_from_string(data)
         except gcloud_exceptions.GoogleCloudError as error:
             self.log.error(f"Error writing file {name} to google storage: {error}")

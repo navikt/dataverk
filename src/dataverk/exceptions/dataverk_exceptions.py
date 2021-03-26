@@ -41,6 +41,8 @@ class ElasticSearchApiError(Exception):
         if isinstance(json.loads(details)["detail"], list):
             for param in json.loads(details)["detail"]:
                 self._details.append(self._format_error(param))
+        else:
+            self._details.append(details)
 
     @staticmethod
     def _format_error(param: dict):
