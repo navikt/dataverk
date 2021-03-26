@@ -19,7 +19,7 @@ class JSONResource(BaseResource):
         self._schema = self._get_schema()
 
     def formatted_resource_name(self):
-        return file_functions.format_filename(self._resource_name)
+        return file_functions.url_encode(self._resource_name)
 
     def _resource_path(self):
         return self._create_resource_path(
