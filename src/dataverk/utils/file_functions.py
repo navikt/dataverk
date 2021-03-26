@@ -50,7 +50,7 @@ def json_to_dict(path: Path):
     return json.loads(file_string)
 
 
-def url_encode(filename):
+def format_filename(filename):
     filename_wo_spaces = filename.replace(' ', '_').replace('/', '_').replace(',', '_')\
         .replace('(', '_').replace(')', '_')
     return filename_wo_spaces

@@ -1,7 +1,4 @@
 import json
-import os
-
-from urllib import parse
 
 from typing import Mapping
 from dataverk.abc.base import DataverkBase
