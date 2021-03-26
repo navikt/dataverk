@@ -54,7 +54,7 @@ class ElasticSearchUpdater(DataverkBase):
             "keyword": self.datapackage_json.get("keywords", []),
             "term": self.datapackage_json.get("term", []),
             "theme": self.datapackage_json.get("theme", []),
-            "accessRights": self.datapackage_json.get("accessRights", ['non-public']),
+            "accessRights": self.datapackage_json.get("accessRights", 'internal').lower(),
             "accessRightsComment": self.datapackage_json.get("accessRightsComment", ""),
             "publisher": self.datapackage_json.get("publisher",
                                 {'name': 'Arbeids- og velferdsetaten (NAV)', 'publisher_url': 'https://www.nav.no'}),

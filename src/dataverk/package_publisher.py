@@ -1,5 +1,4 @@
 import json
-import os
 
 from typing import Mapping
 from dataverk.abc.base import DataverkBase
