@@ -1,10 +1,10 @@
 data-catalog-dcat-validator>=0.0.5
 dataverk-vault>=0.1.9
-dataverk-gsm>=0.0.1
-deetly>=0.0.15
+dataverk-gsm>=0.0.2
+deetly>=0.0.21
 google-auth>=1.27.1
 google-cloud-storage>=1.36.1
-avro-python3>=1.10.0
+avro-python3==1.9.2.1
 SQLAlchemy>=1.3.20
 pyjstat>=2.2.0
 psycopg2>=2.8.6
