@@ -8,12 +8,6 @@ def is_nav_environment():
     return "DATAVERK_HOST" in os.environ.keys()
 
 
-def set_nav_config(datapackage_metadata: dict):
-    datapackage_metadata["store"] = os.getenv("DATAVERK_STORAGE_SINK", datapackage_metadata.get('store', StorageType.LOCAL.value))
-
-    datapackage_metadata["path"] = f"/api/{datapackage_metadata['id']}"
-
-
 def get_schema(df: pd.DataFrame, path: str, dataset_name: str, format: str, dsv_separator: str):
     fields = []
 

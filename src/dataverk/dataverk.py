@@ -1,22 +1,15 @@
 import math
-import os
 
-import deetly
 import pandas as pd
 
 from collections.abc import Sequence
+from dataverk_publisher import publish_datapackage
 from dataverk.abc.base import DataverkBase
-from dataverk.utils import dataverk_doc_address
-from dataverk.exceptions import dataverk_exceptions
 from dataverk.context import EnvStore
 from dataverk.dataverk_context import DataverkContext
 from dataverk.connectors import KafkaConnector, kafka, JSONStatConnector
 from dataverk.connectors.databases import db_connector_factory
-from dataverk.elastic_search_updater import ElasticSearchUpdater
-from dataverk.connectors.elasticsearch import ElasticsearchConnector
-from dataverk.package_publisher import PackagePublisher
 from dataverk.utils.anonymization import anonymize_replace
-from dataverk.utils.metadata_utils import is_nav_environment, set_nav_config
 
 
 class Dataverk(DataverkBase):
@@ -212,34 +205,9 @@ class Dataverk(DataverkBase):
                 table, df=df, if_exists=if_exists, *args, **kwargs
             )
 
-    def publish(self, datapackage):
-
-        if isinstance(datapackage, deetly.datapackage.Datapackage):
-            datapackage.datapackage_metadata = datapackage.toJSON()
-
-        if is_nav_environment():
-            set_nav_config(datapackage.datapackage_metadata)
-
-        es_api_token = os.getenv("DATAVERK_ES_TOKEN")
-
-        # Publish resources to buckets
-        package_publisher = PackagePublisher(
-            dp=datapackage, settings_store=self._context.settings, env_store={}
-        )
-        package_publisher.publish()
-
-        # Publish metadata to elastic search
-        try:
-            es_conn = ElasticsearchConnector(self._context.settings)
-        except dataverk_exceptions.IncompleteSettingsObject:
-            self.log.warning(
-                f"""Could not publish metadata to elastic search index.
-                ES index not specified in settings object.
-                See {dataverk_doc_address} for guidelines on how to setup the settings file."""
-            )
-        else:
-            eu = ElasticSearchUpdater(es_conn, datapackage.datapackage_metadata)
-            eu.publish(es_api_token)
+    @staticmethod
+    def publish(datapackage):
+        publish_datapackage(datapackage)
 
     def _get_sql_query(self, sql):
         if self._is_sql_file(sql):
