@@ -16,20 +16,9 @@ def get_nav_bucket_for_path(metadata: dict) -> str:
 
 
 def create_nav_paths(dp_id: str, metadata: dict) -> tuple:
-    bucket = get_nav_bucket_for_path(metadata)
-    try:
-        api_endpoint = os.environ["DATAVERK_API_ENDPOINT"]
-        path = f'{api_endpoint}/{bucket}/{dp_id}'
-    except KeyError as missing_env:
-        raise EnvironmentVariableNotSet(str(missing_env))
+    path = f'/api/{dp_id}'
 
-    try:
-        bucket_endpoint = os.environ["DATAVERK_BUCKET_ENDPOINT"]
-        store_path = f'{bucket_endpoint}/{bucket}/{dp_id}'
-    except KeyError as missing_env:
-        raise EnvironmentVariableNotSet(str(missing_env))
-
-    return path, store_path
+    return path, f"/{dp_id}"
 
 
 def create_gcs_paths(bucket, dp_id) -> tuple:

@@ -32,12 +32,12 @@ class BaseResource(ABC):
 
     @staticmethod
     def _create_resource_path(
-        datapackage_path: str, formatted_resource_name: str, fmt: str, compress: bool
+        formatted_resource_name: str, fmt: str, compress: bool
     ):
         if compress:
-            return f"{datapackage_path}/resources/{formatted_resource_name}.{fmt}.gz"
+            return f"{formatted_resource_name}.{fmt}.gz"
         else:
-            return f"{datapackage_path}/resources/{formatted_resource_name}.{fmt}"
+            return f"{formatted_resource_name}.{fmt}"
 
     @staticmethod
     def _media_type(fmt: str):
