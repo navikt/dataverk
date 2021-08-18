@@ -23,7 +23,6 @@ class JSONResource(BaseResource):
 
     def _resource_path(self):
         return self._create_resource_path(
-            self._datapackage_path,
             self.formatted_resource_name(),
             self._fmt,
             False
