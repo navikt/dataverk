@@ -207,6 +207,10 @@ class Dataverk(DataverkBase):
 
     @staticmethod
     def publish(datapackage):
+        """ Publish datapackage to data catalog
+
+        :param datapackage: Datapackage or deetly.datapackage.Datapackage
+        """
         publish_datapackage(datapackage)
 
     def _get_sql_query(self, sql):
