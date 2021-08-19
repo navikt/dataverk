@@ -4,10 +4,21 @@ from dataverk.utils.file_functions import remove_special_characters
 
 
 class BaseView:
-
-    def __init__(self, name: str, resources: Sequence, title: str = "", description: str = "", attribution: str = "",
-                 spec_type: str = "simple", spec: dict = None, type: str = "", group: str = "",
-                 series: Sequence = list(), row_limit: int = 500, metadata: dict = None):
+    def __init__(
+        self,
+        name: str,
+        resources: Sequence,
+        title: str = "",
+        description: str = "",
+        attribution: str = "",
+        spec_type: str = "simple",
+        spec: dict = None,
+        type: str = "",
+        group: str = "",
+        series: Sequence = list(),
+        row_limit: int = 500,
+        metadata: dict = None,
+    ):
         self._title = title
         self._description = description
         self._attribution = attribution
@@ -21,7 +32,11 @@ class BaseView:
         if not resources:
             self._resources = []
         else:
-            self._resources = [remove_special_characters(resource) for resource in resources]
+            self._resources = (
+                [remove_special_characters(resource) for resource in resources]
+                if isinstance(resources, list)
+                else remove_special_characters(resources)
+            )
 
         if not name or len(name) is 0:
             self._name = title
@@ -29,11 +44,7 @@ class BaseView:
             self._name = name
 
         if spec is None:
-            self._spec = {
-                "type": type,
-                "group": group,
-                "series": series
-            }
+            self._spec = {"type": type, "group": group, "series": series}
         else:
             self._spec = spec
 
