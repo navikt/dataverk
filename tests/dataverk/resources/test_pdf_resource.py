@@ -16,7 +16,7 @@ expected_resource_name = resource_name_in.replace(" ", "_")
 expected_schema = {
             'name': expected_resource_name,
             'description': resource_description,
-            'path': f'{path}/resources/{expected_resource_name}.{resource_fmt}',
+            'path': f'{expected_resource_name}.{resource_fmt}',
             'format': resource_fmt,
             'mediatype': media_type,
             'spec': spec

@@ -35,8 +35,7 @@ class Datapackage(DataverkBase):
         today = datetime.date.today().strftime('%Y-%m-%d')
 
         if is_nav_environment():
-            metadata['store'] = os.getenv("DATAVERK_STORAGE_SINK", "nais")
-            path, store_path = storage_paths.create_nav_paths(self.dp_id, metadata)
+            path, store_path = storage_paths.create_nav_paths(self.dp_id)
         else:
             metadata['store'] = metadata.get('store', StorageType.LOCAL)
             path, store_path = self._generate_paths(metadata)
@@ -128,16 +127,6 @@ class Datapackage(DataverkBase):
             return metadata['id']
         except KeyError:
             return self._generate_id(metadata)
-
-    def _get_bucket(self, metadata):
-        try:
-            bucket = os.getenv("DATAVERK_BUCKET") if os.getenv("DATAVERK_BUCKET") else metadata['bucket']
-        except KeyError:
-            raise AttributeError(f"Bucket is not set in datapackage metadata "
-                                 f"nor as the DATAVERK_BUCKET environment variable")
-        else:
-            validators.validate_bucket_name(bucket)
-            return bucket
 
     def _generate_id(self, metadata):
         author = metadata.get("author", None)

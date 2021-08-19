@@ -1,6 +1,7 @@
 import io
 import copy
 import pandas as pd
+from dataverk.utils.file_functions import url_encode
 
 from dataverk.utils import file_functions
 from dataverk.resources.base_resource import BaseResource
@@ -23,11 +24,10 @@ class DataFrameResource(BaseResource):
         self._schema = self._get_schema()
 
     def formatted_resource_name(self):
-        return self._resource_name.replace(" ", "_")
+        return url_encode(self._resource_name)
 
     def _resource_path(self):
         return self._create_resource_path(
-            self._datapackage_path,
             self.formatted_resource_name(),
             self._fmt,
             self._compress,

@@ -1,7 +1,7 @@
 data-catalog-dcat-validator>=0.0.5
 dataverk-vault>=0.1.9
 dataverk-gsm>=0.0.2
-deetly>=0.0.24
+dataverk-publisher>=0.0.4
 google-auth>=1.26.1
 google-cloud-storage>=1.36.1
 avro-python3==1.9.2.1

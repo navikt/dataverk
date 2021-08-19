@@ -20,7 +20,7 @@ expected_resource_name = resource_name.replace(" ", "_")
 expected_schema = {
     'name': expected_resource_name,
     'description': resource_description,
-    'path': f'{path}/resources/{expected_resource_name}.{fmt}.gz',
+    'path': f'{expected_resource_name}.{fmt}.gz',
     'format': fmt,
     'dsv_separator': dsv_separator,
     'compressed': compress,
