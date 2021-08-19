@@ -10,9 +10,11 @@ class TestFileFunctions(unittest.TestCase):
             {"input": "Title with spaces",
              "expected_output": "Title_with_spaces"},
             {"input": "Title with spaces and /slashes/",
-             "expected_output": "Title_with_spaces_and__slashes_"},
+             "expected_output": "Title_with_spaces_and_slashes"},
             {"input": "Title with spaces and /slashes/ and comma, at the end.",
-             "expected_output": "Title_with_spaces_and__slashes__and_comma__at_the_end."},
+             "expected_output": "Title_with_spaces_and_slashes_and_comma_at_the_end"},
+            {"input": "Title with @£#$¤€%&{}[]() and 123456789.",
+             "expected_output": "Title_with__and_123456789"}
         ]
 
         for test_case in test_cases:
