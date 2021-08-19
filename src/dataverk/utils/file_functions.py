@@ -6,7 +6,8 @@ import pathlib
 import shutil
 import stat
 import requests
-from urllib import parse
+import re
+
 from pathlib import Path
 from urllib3.exceptions import LocationParseError
 from urllib3.util import url
@@ -51,8 +52,9 @@ def json_to_dict(path: Path):
 
 
 def url_encode(filename):
-    filename_wo_spaces = filename.replace(' ', '_').replace('/', '_').replace(',', '_')
-    return parse.quote(filename_wo_spaces)
+    pattern = "[^a-zA-Z0-9æøåÆØÅ_]"
+    filename_wo_spaces = filename.replace(' ', '_')
+    return re.sub(pattern, "", filename_wo_spaces)
 
 
 def _json_validate_params(file_path: Path):
