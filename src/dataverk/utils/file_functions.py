@@ -52,7 +52,7 @@ def json_to_dict(path: Path):
 
 
 def url_encode(filename):
-    pattern = "[^a-zA-Z0-9æøåÆØÅ_]"
+    pattern = "[^a-zA-Z0-9æøåÆØÅ_-]"
     filename_wo_spaces = filename.replace(' ', '_')
     return re.sub(pattern, "", filename_wo_spaces)
 
