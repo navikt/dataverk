@@ -51,7 +51,7 @@ def json_to_dict(path: Path):
     return json.loads(file_string)
 
 
-def url_encode(filename):
+def remove_special_characters(filename):
     pattern = "[^a-zA-Z0-9æøåÆØÅ_-]"
     filename_wo_spaces = filename.replace(' ', '_')
     return re.sub(pattern, "", filename_wo_spaces)

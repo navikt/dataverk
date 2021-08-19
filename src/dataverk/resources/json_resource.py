@@ -1,4 +1,4 @@
-from dataverk.utils.file_functions import url_encode
+from dataverk.utils.file_functions import remove_special_characters
 
 from dataverk.utils import file_functions
 
@@ -21,7 +21,7 @@ class JSONResource(BaseResource):
         self._schema = self._get_schema()
 
     def formatted_resource_name(self):
-        return url_encode(self._resource_name)
+        return remove_special_characters(self._resource_name)
 
     def _resource_path(self):
         return self._create_resource_path(

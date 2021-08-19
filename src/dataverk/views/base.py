@@ -1,6 +1,6 @@
 from typing import Sequence
 
-from dataverk.utils.file_functions import url_encode
+from dataverk.utils.file_functions import remove_special_characters
 
 
 class BaseView:
@@ -21,7 +21,7 @@ class BaseView:
         if not resources:
             self._resources = []
         else:
-            self._resources = [url_encode(resource) for resource in resources]
+            self._resources = [remove_special_characters(resource) for resource in resources]
 
         if not name or len(name) is 0:
             self._name = title
