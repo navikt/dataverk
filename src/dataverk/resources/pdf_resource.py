@@ -33,7 +33,7 @@ class PDFResource(BaseResource):
 
     def _get_schema(self):
         return {
-            "name": self.formatted_resource_name(),
+            "name": self._resource_name,
             "description": self._resource_description,
             "path": self._resource_path(),
             "format": self._fmt,

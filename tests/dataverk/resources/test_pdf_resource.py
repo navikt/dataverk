@@ -14,7 +14,7 @@ compress = False
 
 expected_resource_name = resource_name_in.replace(" ", "_")
 expected_schema = {
-            'name': expected_resource_name,
+            'name': resource_name_in,
             'description': resource_description,
             'path': f'{expected_resource_name}.{resource_fmt}',
             'format': resource_fmt,
@@ -37,8 +37,7 @@ class TestMethodReturnValues(unittest.TestCase):
 
     def test__formatted_resource_name(self):
         actual_formatted_name = self.resource_formatter.formatted_resource_name()
-        expected_formatted_name = expected_schema.get('name')
-        self.assertEqual(expected_formatted_name, actual_formatted_name)
+        self.assertEqual(expected_resource_name, actual_formatted_name)
 
     def test__get_schema(self):
         actual_schema = self.resource_formatter._get_schema()
