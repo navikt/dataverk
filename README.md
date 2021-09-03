@@ -8,4 +8,5 @@ pip install dataverk
 
 ## Docs
 [About](https://docs.knada.io/dataverk/README)
-[Usage](https://docs.knada.io/dele-innsikt/datapakker)
+
+[Usage](https://docs.knada.io/dele-innsikt/datapakker/#creating-datapackages-with-notebooks)
