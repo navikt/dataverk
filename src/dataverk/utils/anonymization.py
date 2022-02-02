@@ -1,5 +1,5 @@
 import json
-from collections import Sequence, Mapping
+from collections.abc import Sequence, Mapping
 from os import environ
 
 import pandas as pd
