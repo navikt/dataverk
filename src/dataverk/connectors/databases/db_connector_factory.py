@@ -1,4 +1,4 @@
-from collections import Mapping
+from collections.abc import Mapping
 from enum import Enum
 from urllib3.util import parse_url
 from dataverk.connectors.databases.base import DBBaseConnector
